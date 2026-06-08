@@ -1,0 +1,54 @@
+{
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 26,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "base",
+			"hidden": true,
+			"generator": "Ninja",
+			"cacheVariables": {
+				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+				"CMAKE_C_COMPILER": "gcc",
+				"CMAKE_C_FLAGS": "-march=native -mtune=native -pipe",
+				"INTERN_C_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Wimplicit -Wimplicit-function-declaration -Wimplicit-int -Wincompatible-pointer-types -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnested-externs -Wnonnull -Wnull-dereference -Wold-style-definition -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wpointer-to-int-cast -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wstrict-prototypes -Wswitch -Wswitch-default -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings"
+			}
+		},
+		{
+			"name": "debug",
+			"inherits": "base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_C_FLAGS_DEBUG": "-DDESCENT_DEBUG -g -Og -fsanitize=undefined"
+			}
+		},
+		{
+			"name": "release",
+			"inherits": "base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Release",
+				"CMAKE_C_FLAGS_RELEASE": "-O2 -fomit-frame-pointer -flto",
+				"CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
+			}
+		},
+		{
+			"name": "release-debug",
+			"inherits": "base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
+				"CMAKE_C_FLAGS_RELWITHDEBINFO": "-g -O2 -flto"
+			}
+		},
+		{
+			"name": "release-size",
+			"inherits": "base",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "MinSizeRel",
+				"CMAKE_C_FLAGS_MINSIZEREL": "-Os -flto"
+			}
+		}
+	]
+}

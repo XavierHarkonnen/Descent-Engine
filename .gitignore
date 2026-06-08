@@ -1,0 +1,23 @@
+# Whitelist
+*
+
+# Directories
+!src/
+!src/**
+!lib/
+!lib/**
+!test/
+!test/**
+!extern/
+!extern/**
+!include/
+!include/**
+!extern/
+!extern/**
+
+# Files
+!.gitignore
+!CMakeLists.txt
+!CMakePresets.json
+!README.md
+!LICENSE.md
