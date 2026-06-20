@@ -368,10 +368,12 @@ u64 rengine_create_input_tables(struct rengine_context *context) {
 
 
 void rengine_destroy_input_tables(struct rengine_context *context) {
-	glfwSetScrollCallback(context->window.window, NULL);
-	glfwSetCursorPosCallback(context->window.window, NULL);
-	glfwSetMouseButtonCallback(context->window.window, NULL);
-	glfwSetKeyCallback(context->window.window, NULL);
+	if (context->window.window) {
+		glfwSetScrollCallback(context->window.window, NULL);
+		glfwSetCursorPosCallback(context->window.window, NULL);
+		glfwSetMouseButtonCallback(context->window.window, NULL);
+		glfwSetKeyCallback(context->window.window, NULL);
+	}
 
 	glfwPollEvents();
 

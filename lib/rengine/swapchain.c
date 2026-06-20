@@ -10,8 +10,6 @@
 
 #include "context.h"
 
-#include <stdio.h>
-
 
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -155,7 +153,7 @@ u64 rengine_create_swapchain(struct rengine_context *context) {
 		return RENGINE_ERROR_MEMORY;
 
 	context->swapchain.views = malloc(context->swapchain.image_count * sizeof(*context->swapchain.views));
-	if (!context->swapchain.images)
+	if (!context->swapchain.views)
 		return RENGINE_ERROR_MEMORY;
 	
 	if (vkGetSwapchainImagesKHR(context->device.device, context->swapchain.swapchain, &context->swapchain.image_count, context->swapchain.images))
@@ -191,8 +189,13 @@ void rengine_destroy_swapchain(struct rengine_context *context) {
 
 	if (context->swapchain.images)
 		free(context->swapchain.images);
-	
-	for (u64 i = 0; i < context->swapchain.image_count; ++i) {
-		vkDestroyImageView(context->device.device, context->swapchain.views[i], NULL);
+
+	if (context->swapchain.views) {
+		for (u64 i = 0; i < context->swapchain.image_count; ++i) {
+			vkDestroyImageView(context->device.device, context->swapchain.views[i], NULL);
+		}
+
+		context->swapchain.views = NULL;
 	}
+	
 }

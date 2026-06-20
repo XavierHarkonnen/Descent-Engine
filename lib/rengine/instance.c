@@ -130,6 +130,7 @@ u64 rengine_create_instance(struct rengine_context *context) {
 	if (!glfwInit())
 		return RENGINE_ERROR_BACKEND;
 
+
 	const char **extensions;
 	u32 extension_count;
 	create_instance_extensions(context, &extensions, &extension_count);

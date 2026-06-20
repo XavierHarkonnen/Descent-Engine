@@ -33,10 +33,6 @@ int main() {
 		return -1;
 	}
 
-	//while (!glfwWindowShouldClose(context->window)) {
-	//	glfwPollEvents();
-	//}
-
 	result = rengine_terminate();
 	if (result) {
 		printf("TERMINATE ERROR: %s\n", rengine_result_string(result));
