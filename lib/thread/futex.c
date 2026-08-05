@@ -15,7 +15,7 @@
 
 #define _GNU_SOURCE
 
-#include <descent/system.h>
+#include <descent/thread/futex.h>
 
 #include <errno.h>
 #include <linux/futex.h>
@@ -23,16 +23,16 @@
 #include <time.h>
 #include <unistd.h>
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
-#include "time.h"
+#include <intern/time.h>
 
 bool futex_wait(u32 *futex, u32 expected, u64 duration) {
 	if (!futex) return false;
 
 	struct timespec ts = timespec_from_duration(duration);
 	struct timespec *tsp = &ts;
-	if (duration != 0)
+	if (duration == 0)
 		tsp = NULL;
 
 	long result = syscall(SYS_futex, futex, FUTEX_WAIT_PRIVATE, expected, tsp, NULL, 0);

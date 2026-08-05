@@ -24,7 +24,7 @@
 
 #include <descent/rengine.h>
 #include <descent/metadata.h>
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 #include "context.h"
 

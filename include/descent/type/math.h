@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_TYPES_MATH_H
-#define DESCENT_TYPES_MATH_H
+#ifndef DESCENT_TYPE_MATH_H
+#define DESCENT_TYPE_MATH_H
 
-#include <descent/types/bits.h>
-#include <descent/types/core.h>
+#include <descent/type/bits.h>
+#include <descent/type/core.h>
 
 static inline u8   log2_8  (u8   x) { return 7   - (u8)   clz_8  (x); }
 static inline u16  log2_16 (u16  x) { return 15  - (u16)  clz_16 (x); }

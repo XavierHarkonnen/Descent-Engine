@@ -16,7 +16,7 @@
 #ifndef DESCENT_RANDOM
 #define DESCENT_RANDOM
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 // Seeds the thread's random number generator
 void random_seed(u64);

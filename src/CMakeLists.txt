@@ -9,11 +9,14 @@ target_include_directories(${EXECUTABLE_NAME} PRIVATE
 )
 
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE
-	descent-rengine
 	descent-assert
+	descent-ecs
 	descent-random
+	descent-rcode
+	descent-rengine
 	descent-system
-	glfw
+	descent-thread
+	descent-time
 )
 
 target_compile_options(${EXECUTABLE_NAME} PRIVATE

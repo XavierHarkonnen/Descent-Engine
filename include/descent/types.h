@@ -16,9 +16,9 @@
 #ifndef DESCENT_TYPES_H
 #define DESCENT_TYPES_H
 
-#include <descent/types/core.h>
-#include <descent/types/bits.h>
-#include <descent/types/math.h>
+#include <descent/type/core.h>
+#include <descent/type/bits.h>
+#include <descent/type/math.h>
 
 // Bit reversal
 // Bit extraction/deposit

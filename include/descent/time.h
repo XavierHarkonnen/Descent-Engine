@@ -16,22 +16,10 @@
 #ifndef DESCENT_SYSTEM_TIME_H
 #define DESCENT_SYSTEM_TIME_H
 
-#include <time.h>
+#include <descent/type/core.h>
 
-#include <descent/types/core.h>
+u64 time_now(void);
 
-#define NANOSECONDS_PER_SECOND 1000000000
-
-static inline u64 duration_from_timespec(struct timespec ts) {
-	return (u64) ts.tv_nsec + (u64) ts.tv_sec * NANOSECONDS_PER_SECOND;
-}
-
-static inline struct timespec timespec_from_duration(u64 duration) {
-	struct timespec ts = {
-		.tv_sec = (time_t) duration / NANOSECONDS_PER_SECOND,
-		.tv_nsec = (long) duration % NANOSECONDS_PER_SECOND
-	};
-	return ts;
-}
+u64 time_sleep(u64 duration);
 
 #endif

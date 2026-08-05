@@ -8,6 +8,8 @@ set(CMAKE_C_EXTENSIONS ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(DESCENT_BUILD_TESTS "Build Descent test programs" OFF)
+
 # Require out-of-source builds
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 	message(FATAL_ERROR "In-source build not allowed!")
@@ -25,8 +27,17 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
 # Separate internal C flags
 separate_arguments(INTERN_C_FLAGS)
 
+add_compile_options(
+	-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=
+)
+
 # Subdirectories
 add_subdirectory(extern)
 add_subdirectory(lib)
 add_subdirectory(src)
 
+# Tests
+if(DESCENT_BUILD_TESTS)
+	enable_testing()
+	add_subdirectory(tests)
+endif()

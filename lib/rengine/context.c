@@ -17,9 +17,9 @@
 
 #include <stddef.h>
 
-#include <descent/atomic.h>
-#include <descent/system.h>
-#include <descent/types/core.h>
+#include <descent/thread/atomic.h>
+#include <descent/thread/core.h>
+#include <descent/type/core.h>
 
 #include "context.h"
 #include "debug.h"
@@ -47,7 +47,7 @@ static void rengine_cleanup(void) {
 }
 
 u64 rengine_initialize(const struct rengine_create_info *info) {
-	if (!is_main_thread())
+	if (thread_id() != THREAD_ID_MAIN)
 		return RENGINE_ERROR_THREAD;
 
 	if (atomic_load(&context.initialized))
@@ -86,8 +86,8 @@ u64 rengine_initialize(const struct rengine_create_info *info) {
 	}
 }
 
-u64 rengine_terminate(void) {
-	if (!is_main_thread())
+u64 rengine_sys_terminate(void) {
+	if (thread_id() != THREAD_ID_MAIN)
 		return RENGINE_ERROR_THREAD;
 
 	if (!atomic_load(&context.initialized))

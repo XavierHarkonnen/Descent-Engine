@@ -13,31 +13,15 @@
  * limitations under the License.
  */
 
-#define _GNU_SOURCE
+#ifndef DESCENT_THREAD_FUTEX_H
+#define DESCENT_THREAD_FUTEX_H
 
-#include <descent/system.h>
+#include <descent/type/core.h>
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <time.h>
-#include <unistd.h>
+bool futex_wait(u32 *key, u32 expected, u64 duration);
 
-#include <descent/types/core.h>
+bool futex_wake_single(u32 *key);
 
-static pid_t main_thread;
+bool futex_wake_all(u32 *key);
 
-__attribute__((constructor))
-static void init (void) {
-	main_thread = gettid();
-
-	struct timespec ts;
-	if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-		const char message[] = "ERROR: Platform does not support CLOCK_MONOTONIC";
-		write(STDERR_FILENO, message, sizeof(message) - 1);
-		_Exit(EXIT_FAILURE);
-	}
-}
-
-bool is_main_thread(void) {
-	return gettid() == main_thread;
-}
+#endif

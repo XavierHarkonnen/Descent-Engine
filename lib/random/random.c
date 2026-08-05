@@ -17,10 +17,10 @@
 
 #include <math.h>
 
-#include <descent/assert.h>
-#include <descent/types/bits.h>
-#include <descent/types/core.h>
-#include <descent/types/math.h>
+#include <descent/sys.h>
+#include <descent/type/bits.h>
+#include <descent/type/core.h>
+#include <descent/type/math.h>
 
 static _Thread_local u64 state = 0;
 
@@ -90,7 +90,7 @@ u64 random_u64(void) {
 }
 
 u64 random_u64_range(u64 min, u64 max) {
-	descent_assert(min < max, "Minimum must be less than maximum");
+	sys_assert(min < max, "Minimum must be less than maximum");
 
 	u64 range = max - min - 1;
 	if (range == 0) return min;
@@ -109,7 +109,7 @@ i64 random_i64(void) {
 }
 
 i64 random_i64_range(i64 min, i64 max) {
-	descent_assert(min < max, "Minimum must be less than maximum");
+	sys_assert(min < max, "Minimum must be less than maximum");
 
 	u64 range = ((u64) max - (u64) min) - 1;
 	if (range == 0) return min;
@@ -128,7 +128,7 @@ u128 random_u128(void) {
 }
 
 u128 random_u128_range(u128 min, u128 max) {
-	descent_assert(min < max, "Minimum must be less than maximum");
+	sys_assert(min < max, "Minimum must be less than maximum");
 
 	u128 range = max - min - 1;
 	if (range == 0) return min;
@@ -147,7 +147,7 @@ i128 random_i128(void) {
 }
 
 i128 random_i128_range(i128 min, i128 max) {
-	descent_assert(min < max, "Minimum must be less than maximum");
+	sys_assert(min < max, "Minimum must be less than maximum");
 
 	u128 range = ((u128) max - (u128) min) - 1;
 	if (range == 0) return min;
@@ -172,7 +172,7 @@ f32 random_f32(void) {
 }
 
 f32 random_f32_range(f32 min, f32 max) {
-	descent_assert(min < max, "Minimum must be less than maximum");
+	sys_assert(min < max, "Minimum must be less than maximum");
 	return min + (max - min) * random_f32();
 }
 
@@ -233,7 +233,7 @@ f64 random_f64(void) {
 }
 
 f64 random_f64_range(f64 min, f64 max) {
-	descent_assert(min < max, "Minimum must be less than maximum");
+	sys_assert(min < max, "Minimum must be less than maximum");
 	return min + (max - min) * random_f64();
 }
 

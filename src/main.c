@@ -15,9 +15,10 @@
 
 #include <stdio.h>
 
+#include <descent/ecs.h>
 #include <descent/rengine.h>
 #include <descent/metadata.h>
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 int main() {
 	struct rengine_create_info info = {0};
@@ -27,13 +28,15 @@ int main() {
 	info.width = 800;
 	info.height = 600;
 
+	ecs_create_archetype(1);
+
 	u64 result = rengine_initialize(&info);
 	if (result) {
 		printf("INITIALIZE ERROR: %s\n", rengine_result_string(result));
 		return -1;
 	}
 
-	result = rengine_terminate();
+	result = rengine_sys_terminate();
 	if (result) {
 		printf("TERMINATE ERROR: %s\n", rengine_result_string(result));
 		return -1;

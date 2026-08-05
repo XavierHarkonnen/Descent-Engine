@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_TYPES_CORE_H
-#define DESCENT_TYPES_CORE_H
+#ifndef DESCENT_TYPE_CORE_H
+#define DESCENT_TYPE_CORE_H
 
 #include <descent/build.h>
 

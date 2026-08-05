@@ -49,8 +49,8 @@ and rebuild it only if explicitly requested, if we are sure that our system will
 all the declared passes.
 */
 
-#include <descent/types/core.h>
-#include <descent/types/uuid.h>
+#include <descent/type/core.h>
+#include <descent/type/uuid.h>
 
 enum {
 	RENGINE_SUCCESS = 0,
@@ -290,7 +290,7 @@ const char *rengine_result_string(u64 result);
 u64 rengine_initialize(const struct rengine_create_info *create_info);
 // Reentrancy-safe
 // Main thread only
-u64 rengine_terminate(void);
+u64 rengine_sys_terminate(void);
 struct rengine_capabilities *rengine_capabilities(void);
 
 /* 

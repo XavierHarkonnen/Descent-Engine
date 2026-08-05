@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include <vulkan/vulkan_core.h>
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 #include "context.h"
 #include "descent/rengine.h"

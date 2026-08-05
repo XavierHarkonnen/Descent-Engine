@@ -13,28 +13,7 @@
  * limitations under the License.
  */
 
-#define _GNU_SOURCE
+#ifndef DESCENT_THREAD_QUTEX_H
+#define DESCENT_THREAD_QUTEX_H
 
-#include <descent/system.h>
-
-#include <time.h>
-
-#include <descent/types/core.h>
-
-#include "time.h"
-
-u64 time_now(void) {
-	struct timespec ts = {0};
-	clock_gettime(CLOCK_MONOTONIC, &ts);
-
-	return duration_from_timespec(ts);
-}
-
-u64 time_sleep(u64 duration) {
-	struct timespec ts = timespec_from_duration(duration);
-	struct timespec rts;
-	if (nanosleep(&ts, &rts))
-		return duration_from_timespec(rts);
-
-	return 0;
-}
+#endif

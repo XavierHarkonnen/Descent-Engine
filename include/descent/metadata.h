@@ -16,8 +16,7 @@
 #ifndef DESCENT_METADATA_H
 #define DESCENT_METADATA_H
 
-#include <descent/build.h>
-#include <descent/types.h>
+#include <descent/utils.h>
 
 #define ENGINE_NAME "Descent Engine"
 
@@ -26,14 +25,17 @@
 #define ENGINE_VERSION_MINOR   1
 #define ENGINE_VERSION_PATCH   0
 
-#define MAKE_VERSION(variant, major, minor, patch) \
-	((((u32)(variant)) << 29U) | (((u32)(major)) << 22U) | (((u32)(minor)) << 12U) | ((u32)(patch)))
-
 #define ENGINE_VERSION MAKE_VERSION(ENGINE_VERSION_VARIANT, ENGINE_VERSION_MAJOR, ENGINE_VERSION_MINOR, ENGINE_VERSION_PATCH)
 
-_Static_assert(ENGINE_VERSION_VARIANT <= 7,    "BUILD_VERSION_VARIANT must not exceed 7 (3 bits)");
-_Static_assert(ENGINE_VERSION_MAJOR   <= 31,   "BUILD_VERSION_MAJOR must not exceed 31 (5 bits)");
-_Static_assert(ENGINE_VERSION_MINOR   <= 1023, "BUILD_VERSION_MINOR must not exceed 1023 (10 bits)");
-_Static_assert(ENGINE_VERSION_PATCH   <= 4095, "BUILD_VERSION_PATCH must not exceed 4095 (12 bits)");
+_Static_assert(ENGINE_VERSION_VARIANT <= 7,    "ENGINE_VERSION_VARIANT must not exceed 7 (3 bits)");
+_Static_assert(ENGINE_VERSION_MAJOR   <= 127,  "ENGINE_VERSION_MAJOR must not exceed 127 (7 bits)");
+_Static_assert(ENGINE_VERSION_MINOR   <= 1023, "ENGINE_VERSION_MINOR must not exceed 1023 (10 bits)");
+_Static_assert(ENGINE_VERSION_PATCH   <= 4095, "ENGINE_VERSION_PATCH must not exceed 4095 (12 bits)");
+
+#if ENGINE_VERSION_VARIANT == 0
+#define ENGINE_ID "descent-engine-" STRINGIFY(ENGINE_VERSION_MAJOR) "." STRINGIFY(ENGINE_VERSION_MINOR) "." STRINGIFY(ENGINE_VERSION_PATCH)
+#else
+#define ENGINE_ID "descent-engine-" STRINGIFY(ENGINE_VERSION_MAJOR) "." STRINGIFY(ENGINE_VERSION_MINOR) "." STRINGIFY(ENGINE_VERSION_PATCH) "-v" STRINGIFY(ENGINE_VERSION_VARIANT)
+#endif
 
 #endif

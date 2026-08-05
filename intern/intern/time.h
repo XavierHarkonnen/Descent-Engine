@@ -13,28 +13,25 @@
  * limitations under the License.
  */
 
-#include <descent/assert.h>
+#ifndef DESCENT_INTERN_TIME_H
+#define DESCENT_INTERN_TIME_H
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <time.h>
 
-_Noreturn void descent_assert_fail(
-	const char *expression,
-	const char *message,
-	const char *file,
-	unsigned int line,
-	const char *function
-) {
-	fprintf(
-		stderr,
-		"program: %s:%u %s: %s (assertion '%s' failed)\n",
-		file ? file : "[no file]",
-		line,
-		function ? function : "[no function]",
-		message ? message : "[no message]",
-		expression ? expression : "[no expression]"
-	);
+#include <descent/type/core.h>
 
-	fflush(stderr);
-	abort();
+#define NANOSECONDS_PER_SECOND 1000000000
+
+static inline u64 duration_from_timespec(struct timespec ts) {
+	return (u64) ts.tv_nsec + (u64) ts.tv_sec * NANOSECONDS_PER_SECOND;
 }
+
+static inline struct timespec timespec_from_duration(u64 duration) {
+	struct timespec ts = {
+		.tv_sec = (time_t) duration / NANOSECONDS_PER_SECOND,
+		.tv_nsec = (long) duration % NANOSECONDS_PER_SECOND
+	};
+	return ts;
+}
+
+#endif

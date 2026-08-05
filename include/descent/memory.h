@@ -16,7 +16,7 @@
 #ifndef DESCENT_MEMORY_H
 #define DESCENT_MEMORY_H
 
-#include <descent/build.h>
+#include <descent/type/core.h>
 
 // Global arena
 // Per-thread arena
@@ -24,5 +24,19 @@
 // Scratch allocator
 // scratch_allocate();
 // scratch_free();
+
+enum mem_prot {
+	MEM_NONE,
+	MEM_READ,
+	MEM_EDIT,
+};
+
+u64 mem_alloc_granularity(void);
+
+void *mem_alloc(u64 *size, enum mem_prot prot);
+
+bool mem_protect(void *alloc, u64 size, enum mem_prot prot);
+
+bool mem_free(void *alloc, u64 size);
 
 #endif

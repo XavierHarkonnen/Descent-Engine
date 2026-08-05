@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 #include "context.h"
 

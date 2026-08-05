@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 #include "context.h"
 

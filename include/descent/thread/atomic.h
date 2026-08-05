@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_ATOMIC_H
-#define DESCENT_ATOMIC_H
+#ifndef DESCENT_THREAD_ATOMIC_H
+#define DESCENT_THREAD_ATOMIC_H
 
-#include <descent/build.h>
 #include <descent/types.h>
 
 enum {
@@ -37,7 +36,7 @@ enum {
 #define atomic_exchange(ptr, val) atomic_exchange_ex(ptr, val, ATOMIC_ACQ_REL)
 
 #define atomic_compare_exchange_ex(ptr, expected, desired, success_order, failure_order) __atomic_compare_exchange_n(ptr, expected, desired, false, success_order, failure_order)
-#define atomic_compare_exchange(ptr, expected, desired) atomic_compare_exchange_ex(ptr, expected, desired, ATOMIC_ACQ_REL, ATOMIC_ACQUIRE)
+#define atomic_compare_exchange(ptr, expected, desired) atomic_compare_exchange_ex(ptr, expected, desired, ATOMIC_ACQ_REL, ATOMIC_RELAXED)
 
 
 #define atomic_add_fetch_ex(ptr, val, order) __atomic_add_fetch(ptr, val, order)

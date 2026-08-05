@@ -4,9 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <descent/atomic.h>
+#include <descent/thread/atomic.h>
 #include <descent/rengine.h>
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 #include "context.h"
 

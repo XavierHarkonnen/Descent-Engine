@@ -22,9 +22,9 @@
 #include <string.h>
 
 #include <descent/rengine.h>
-#include <descent/types/core.h>
-#include <descent/types/bits.h>
-#include <descent/types/math.h>
+#include <descent/type/core.h>
+#include <descent/type/bits.h>
+#include <descent/type/math.h>
 
 #include "context.h"
 

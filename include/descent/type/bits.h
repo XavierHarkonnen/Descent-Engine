@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_TYPES_BITS_H
-#define DESCENT_TYPES_BITS_H
+#ifndef DESCENT_TYPE_BITS_H
+#define DESCENT_TYPE_BITS_H
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 static inline u64 clz_8  (u8   x) { return (u64) __builtin_clzg(x, 8  ); }
 static inline u64 clz_16 (u16  x) { return (u64) __builtin_clzg(x, 16 ); }

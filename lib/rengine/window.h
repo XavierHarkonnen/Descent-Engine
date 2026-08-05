@@ -4,7 +4,7 @@
 #include <vulkan/vulkan_core.h>
 #include <GLFW/glfw3.h>
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 
 struct window {

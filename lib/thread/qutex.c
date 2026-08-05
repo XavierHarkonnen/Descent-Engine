@@ -13,21 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_ASSERT_H
-#define DESCENT_ASSERT_H
+#include <descent/types.h>
 
-#if defined(DESCENT_DEBUG)
-#define descent_assert(expression, message) ((expression) ? (void)0 : descent_assert_fail(#expression, message, __FILE__, __LINE__, __func__))
-#else
-#define descent_assert(expression, message) ((void)0)
-#endif
+// MCS-based mutex
 
-_Noreturn void descent_assert_fail(
-	const char *expression,
-	const char *message,
-	const char *file,
-	unsigned int line,
-	const char *function
-);
-
-#endif
+struct qutex {
+	u32 state;
+};

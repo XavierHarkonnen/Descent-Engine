@@ -12,6 +12,8 @@
 !extern/**
 !include/
 !include/**
+!intern/
+!intern/**
 !extern/
 !extern/**
 

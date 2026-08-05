@@ -13,24 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_SYSTEM_H
-#define DESCENT_SYSTEM_H
+#ifndef DESCENT_SYS_H
+#define DESCENT_SYS_H
 
-#include <descent/build.h>
-#include <descent/types.h>
+#include <descent/utils.h>
 
-bool is_main_thread(void);
+__attribute__((cold, noreturn))
+void sys_fatal(const char *message, const char *file, const char *line);
+#define sys_fatal(message) sys_fatal(message, __FILE__, STRINGIFY(__LINE__))
 
-u64 time_now(void);
-
-u64 time_sleep(u64 duration);
-
-bool futex_wait(u32 *key, u32 expected, u64 duration);
-
-// bool futex_waitv(u32 **key, u64 count, u32 *expected);
-
-bool futex_wake_single(u32 *key);
-
-bool futex_wake_all(u32 *key);
+#if defined(DESCENT_DEBUG)
+__attribute__((cold, noreturn))
+void sys_assert(const char *expression, const char *message, const char *file, const char *line);
+#define sys_assert(expression, message) ((expression) ? (void)0 : sys_assert(STRINGIFY(expression), message, __FILE__, STRINGIFY(__LINE__)))
+#else
+#define sys_assert(expression, message) ((void)0)
+#endif
 
 #endif

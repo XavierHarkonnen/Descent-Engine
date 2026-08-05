@@ -16,7 +16,7 @@
 #ifndef DESCENT_BUILD_H
 #define DESCENT_BUILD_H
 
-#if !defined(__clang__) && !defined(__GNUC__)
+#if !defined(__clang__)
 #error "Descent Engine does not support this compiler!"
 #endif
 
@@ -32,7 +32,7 @@
 #error "Descent Engine only supports x86-64!"
 #endif
 
-#if (-1 & 3) != 3
+#if (-1 != ~0) || ((-1 & 3) != 3)
 #error "Descent Engine requires two's complement representation for negative integers"
 #endif
 

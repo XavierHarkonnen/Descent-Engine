@@ -18,7 +18,7 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include <descent/types/core.h>
+#include <descent/type/core.h>
 
 
 #define MAX_QUEUES_GRAPHICS 1
