@@ -12,9 +12,10 @@
 			"generator": "Ninja",
 			"cacheVariables": {
 				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-				"CMAKE_C_COMPILER": "gcc",
-				"CMAKE_C_FLAGS": "-march=native -mtune=native -pipe",
-				"INTERN_C_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Wimplicit -Wimplicit-function-declaration -Wimplicit-int -Wincompatible-pointer-types -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnested-externs -Wnonnull -Wnull-dereference -Wold-style-definition -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wpointer-to-int-cast -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wstrict-prototypes -Wswitch -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings"
+				"CMAKE_C_COMPILER": "clang",
+				"CMAKE_CXX_COMPILER": "clang++",
+				"CMAKE_CXX_FLAGS": "-march=native -mtune=native -pipe",
+				"INTERN_CXX_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnonnull -Wnull-dereference -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wswitch -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings"
 			}
 		},
 		{
@@ -22,7 +23,7 @@
 			"inherits": "base",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
-				"CMAKE_C_FLAGS_DEBUG": "-DDESCENT_DEBUG -g -Og -fsanitize=undefined"
+				"CMAKE_CXX_FLAGS_DEBUG": "-DDESCENT_DEBUG -g -Og -fsanitize=undefined"
 			}
 		},
 		{
@@ -30,7 +31,7 @@
 			"inherits": "base",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Release",
-				"CMAKE_C_FLAGS_RELEASE": "-O2 -fomit-frame-pointer -flto",
+				"CMAKE_CXX_FLAGS_RELEASE": "-O2 -fomit-frame-pointer -flto",
 				"CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON"
 			}
 		},
@@ -39,7 +40,7 @@
 			"inherits": "base",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
-				"CMAKE_C_FLAGS_RELWITHDEBINFO": "-g -O2 -flto"
+				"CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-g -O2 -flto"
 			}
 		},
 		{
@@ -47,7 +48,7 @@
 			"inherits": "base",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "MinSizeRel",
-				"CMAKE_C_FLAGS_MINSIZEREL": "-Os -flto"
+				"CMAKE_CXX_FLAGS_MINSIZEREL": "-Os -flto"
 			}
 		}
 	]

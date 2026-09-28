@@ -1,7 +1,7 @@
 set(LIBRARY_NAME "descent-time")
 
 add_library(${LIBRARY_NAME}
-	time.c
+	time.cpp
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC
@@ -10,8 +10,9 @@ target_include_directories(${LIBRARY_NAME} PUBLIC
 )
 
 target_link_libraries(${LIBRARY_NAME} PUBLIC
+	descent-system
 )
 
 target_compile_options(${LIBRARY_NAME} PRIVATE
-	${INTERN_C_FLAGS}
+	${INTERN_CXX_FLAGS}
 )

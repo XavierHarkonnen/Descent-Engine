@@ -1,7 +1,7 @@
 set(EXECUTABLE_NAME "granbarrow")
 
 add_executable(${EXECUTABLE_NAME}
-	main.c
+	main.cpp
 )
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE
@@ -9,11 +9,7 @@ target_include_directories(${EXECUTABLE_NAME} PRIVATE
 )
 
 target_link_libraries(${EXECUTABLE_NAME} PRIVATE
-	descent-assert
-	descent-ecs
-	descent-random
-	descent-rcode
-	descent-rengine
+	descent-memory
 	descent-system
 	descent-thread
 	descent-time

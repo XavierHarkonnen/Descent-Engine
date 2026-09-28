@@ -1,9 +1,8 @@
 set(LIBRARY_NAME "descent-thread")
 
 add_library(${LIBRARY_NAME}
-	core.c
-	futex.c
-	qutex.c
+	futex.cpp
+	task.cpp
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC
@@ -12,8 +11,10 @@ target_include_directories(${LIBRARY_NAME} PUBLIC
 )
 
 target_link_libraries(${LIBRARY_NAME} PUBLIC
+	descent-system
+	descent-memory
 )
 
 target_compile_options(${LIBRARY_NAME} PRIVATE
-	${INTERN_C_FLAGS}
+	${INTERN_CXX_FLAGS}
 )

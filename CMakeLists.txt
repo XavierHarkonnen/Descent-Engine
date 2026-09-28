@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.23)
+cmake_minimum_required(VERSION 3.26)
 
-project(descent-engine LANGUAGES C)
+project(descent-engine LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -25,14 +25,14 @@ find_package(Vulkan REQUIRED)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
 
 # Separate internal C flags
-separate_arguments(INTERN_C_FLAGS)
+separate_arguments(INTERN_CXX_FLAGS)
 
 add_compile_options(
 	-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=
 )
 
 # Subdirectories
-add_subdirectory(extern)
+#add_subdirectory(extern)
 add_subdirectory(lib)
 add_subdirectory(src)
 
