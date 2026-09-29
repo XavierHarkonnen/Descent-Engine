@@ -69,7 +69,7 @@ public:
 	}
 
 	void release() {
-		decrement();
+		[[maybe_unused]] u32 unfinished = decrement();
 
 		sys_assert(unfinished + 1 != 0, "Attempted to release an uninitialized root");
 	}

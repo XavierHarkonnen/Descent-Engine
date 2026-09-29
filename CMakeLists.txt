@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(descent-engine LANGUAGES C CXX)
+project(descent-engine LANGUAGES CXX)
 
-set(CMAKE_C_STANDARD 11)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -39,5 +39,5 @@ add_subdirectory(src)
 # Tests
 if(DESCENT_BUILD_TESTS)
 	enable_testing()
-	add_subdirectory(tests)
+	add_subdirectory(test)
 endif()

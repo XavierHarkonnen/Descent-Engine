@@ -65,8 +65,7 @@ private:
 public:
 	Region() : _data(nullptr) {}
 
-	Region(Region &&other) {
-		_data = other._data;
+	Region(Region &&other) : _data(other._data) {
 		other._data = nullptr;
 	};
 
@@ -74,7 +73,7 @@ public:
 		Region::release();
 	}
 
-	Region &operator=(Region &&other) noexcept {
+	Region &operator=(Region &&other) {
 		if (this != &other) {
 			Region::release();
 

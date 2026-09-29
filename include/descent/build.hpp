@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_BUILD_H
-#define DESCENT_BUILD_H
+#ifndef DESCENT_BUILD_HPP
+#define DESCENT_BUILD_HPP
 
 #if !defined(__clang__)
 #error "Descent Engine does not support this compiler!"
 #endif
 
-#if !defined(__STDC_VERSION__) || __STDC_VERSION__ < 201112L
-#error "Descent Engine requires C11 or newer!"
+#if !defined(__cplusplus) || __cplusplus < 201703L
+#error "Descent Engine requires C++11 or newer!"
 #endif
 
 #if !defined(__linux__) || defined(__ANDROID__)

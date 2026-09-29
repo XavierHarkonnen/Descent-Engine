@@ -17,13 +17,16 @@
 
 #include <descent/thread/atomic.hpp>
 #include <descent/thread/task.hpp>
+#include <descent/thread/thread.hpp>
 #include <descent/time.hpp>
 
 #include <descent/random.hpp>
 
+#include <pthread.h>
+
 using namespace descent;
 
-constexpr u64 CHILDREN = 16;
+constexpr u64 CHILDREN = 18;
 constexpr u64 FRAMES = 3;
 
 struct context {
@@ -68,6 +71,12 @@ void work1(thread::task::Handle handle, void *arg) {
 			context.failed.fetch_add(1, thread::atomic::Order::RELAXED);
 			context.orphaned.fetch_add(CHILDREN + CHILDREN * CHILDREN, thread::atomic::Order::RELAXED);
 		}
+}
+
+void dedicated(void *) {
+	time::sleep(1000000000);
+	puts("Hello, world!");
+	pthread_detach(pthread_self());
 }
 
 int main() {
@@ -125,5 +134,16 @@ int main() {
 	printf("Deficit  : %f%%\n", expected > maximum ? f32(expected - maximum) / f32(expected) * 100.f : 0.f);
 	printf("Failure  : %f%%\n", f32(failed + orphaned + lost) / f32(expected) * 100.f);
 
+	thread::Thread t(dedicated, nullptr);
+	for (u64 i = 0; i < thread::Thread::maximum() - 1; ++i) {
+		thread::Thread(dedicated, nullptr);
+	}
+
+	u32 remaining = thread::Thread::collect();
+	printf("%u threads remain after collection\n", remaining);
+	
+	t.join();
+	puts("Joined thread t");
+	
 	return 0;
 }

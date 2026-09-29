@@ -3,6 +3,7 @@ set(LIBRARY_NAME "descent-thread")
 add_library(${LIBRARY_NAME}
 	futex.cpp
 	task.cpp
+	thread.cpp
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC

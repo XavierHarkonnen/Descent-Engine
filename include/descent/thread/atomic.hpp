@@ -39,8 +39,16 @@ public:
 		return __atomic_test_and_set(&_, static_cast<int>(order));
 	}
 
+	void set(Order order) {
+		__atomic_store_n(&_, true, static_cast<int>(order));
+	}
+
 	void clear(Order order) {
 		__atomic_clear(&_, static_cast<int>(order));
+	}
+
+	bool load(Order order) {
+		return __atomic_load_n(&_, static_cast<int>(order));
 	}
 };
 
