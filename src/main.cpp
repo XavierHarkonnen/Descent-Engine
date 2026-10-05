@@ -147,9 +147,12 @@ int main() {
 	puts("Joined thread t");
 
 	{
-		memory::stack::Alloc a(12);
-		u8 *data = reinterpret_cast<u8 *>(a.data());
+		auto data = memory::stack::Allocator::create<u8>(12);
 		data[0] = 1;
+		{
+
+			
+		}
 	}
 	
 	return 0;

@@ -2,7 +2,6 @@
 
 extern "C" {
 #include <pthread.h>
-#include <stdint.h>
 #include <string.h>
 #include <sys/mman.h>
 }
@@ -32,9 +31,11 @@ private:
 	}
 
 public:
+	static constexpr u32 SIZE_MAX = SIZE_MASK;
+
 	void init(u32 size) {
 		sys_assert(size != 0, "Footer size must not be zero");
-		sys_assert((size & DEAD_MASK) == 0, "Size must not be set live bit");
+		sys_assert(size <= SIZE_MAX, "Size must not exceed SIZE_MAX");
 		word(size);
 	}
 
@@ -54,17 +55,16 @@ public:
 
 static_assert(sizeof(Footer) == sizeof(u32), "Architecture requires size of Footer to equal size of u32");
 
-class Allocator {
+class Bump {
 private:
 	static constexpr u32 CAPACITY  = 0x80000000u;
-	static constexpr u32 WIPE_SIZE = 0x100000u;
 
 	u8 *_map;
 	u32 _size;
 	u32 _cursor;
 
 public:
-	Allocator() : _map(nullptr), _size(0), _cursor(0) {
+	Bump() : _map(nullptr), _size(0), _cursor(0) {
 		void *map = mmap(nullptr, CAPACITY, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 		if (map != MAP_FAILED) {
 			_map = static_cast<u8 *>(map);
@@ -72,7 +72,7 @@ public:
 		}
 	}
 
-	~Allocator() {
+	~Bump() {
 		if (_map) {
 			munmap(_map, _size);
 			_map = nullptr;
@@ -81,31 +81,50 @@ public:
 		}
 	}
 
-	u8 *alloc(u32 size) {
-		u64 total = u64(size) + sizeof(Footer);
+	void alloc(void *&data, void *&meta, u32 size, u32 align, u32 count) {
+    sys_assert(size != 0, "Attempted to allocate box with zero size");
+    sys_assert(align != 0, "Attempted to allocate box with zero alignment");
+    sys_assert(count != 0, "Attempted to allocate box with zero count");
+    sys_assert((align & (align - 1)) == 0, "Alignment must be a power of two");
 
-		if (_size - _cursor < total)
-			return nullptr;
+		u64 payload = u64(size) * u64(count);
+		u64 aligned = (u64(_cursor) + (u64(align) - 1)) & ~(u64(align) - 1);
+		u64 padding = aligned - _cursor;
 
-		u8 *data = _map + _cursor;
-		Footer *footer = reinterpret_cast<Footer *>(data + size);
+		// This multiplication is proven to never overflow
+		u64 total = payload + padding + sizeof(Footer);
+		if (_size - _cursor < total || total > Footer::SIZE_MAX) {
+			data = nullptr;
+			meta = nullptr;
+			return;
+		}
+
+		u8 *alloc = _map + aligned;
+		Footer *footer = reinterpret_cast<Footer *>(alloc + payload);
+		data = alloc;
+		meta = footer;
 		
 		_cursor += u32(total);
 
 		footer->init(u32(total));
 
-		return data;
+		sys_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
+		sys_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
 	}
 
 	void free(Footer *footer) {
 		sys_assert(footer, "Attempted to free null footer");
 		sys_assert(!footer->dead(), "Attempted to free dead footer");
-		sys_assert(_cursor, "Attempted to free footer from empty allocator");
-		sys_assert(_cursor > sizeof(Footer), "Something very bad happened");
+		sys_assert(_cursor > 0, "Attempted to free footer from empty allocator");
+		sys_assert(footer->size() > sizeof(Footer), "Attempted to free invalid footer");
+
+		sys_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
+		sys_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
 
 		u8 *ptr = reinterpret_cast<u8 *>(footer);
 
-		sys_assert(ptr >= _map + sizeof(Footer), "Footer is outside allocator");
+		sys_assert(ptr >= _map, "Footer is outside allocated range");
+		sys_assert(ptr >= _map + 1, "Footer is not attached to allocation (minimum size 1 byte)");
 		sys_assert(ptr + sizeof(Footer) <= _map + _cursor, "Footer is outside allocated range");
 
 		// This allocation isn't the top allocation
@@ -133,30 +152,19 @@ public:
 	}
 };
 
-static thread_local Allocator bump;
+static thread_local Bump bump;
 
-Alloc::Alloc(u32 size) : _data(nullptr), _meta(nullptr) {
-	if (size != 0) {
-		_data = bump.alloc(size);
-		if (_data)
-			_meta = _data + size;
-	}
+void Allocator::create(void *&data, void *&meta, u32 size, u32 align, u32 count) {
+	bump.alloc(data, meta, size, align, count);
 }
 
-Alloc::~Alloc() {
-	if (_data) {
-		bump.free(reinterpret_cast<Footer *>(_meta));
-		_data = nullptr;
-		_meta = nullptr;
-	}
-}
+void Allocator::clear(void *data, void *meta) {
+	sys_assert(data, "Attempted to call clear on null data");
+	sys_assert(meta, "Attempted to call clear on null meta");
 
-void *Alloc::data() {
-	return _data;
-}
-
-u32 Alloc::size() {
-	return _data ? reinterpret_cast<Footer *>(_meta)->size() - sizeof(Footer) : 0;
+	bump.free(reinterpret_cast<Footer *>(meta));
+	data = nullptr;
+	meta = nullptr;
 }
 
 }

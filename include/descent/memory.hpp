@@ -17,9 +17,7 @@
 #define DESCENT_MEMORY_HPP
 
 #include <descent/type.hpp>
-
-#include <new>
-// TODO: Don't use placement new
+#include <descent/memory/construct.hpp>
 
 namespace descent::memory {
 
@@ -106,7 +104,7 @@ public:
 			return false;
 
 		for (u64 i = 0 ; i < capacity(); ++i)
-			new (_data + i) T();
+			construct(_data + i);
 
 		return true;
 	}
