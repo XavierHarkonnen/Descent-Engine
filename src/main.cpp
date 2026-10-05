@@ -21,6 +21,7 @@
 #include <descent/time.hpp>
 
 #include <descent/random.hpp>
+#include <descent/memory/stack.hpp>
 
 #include <pthread.h>
 
@@ -80,7 +81,7 @@ void dedicated(void *) {
 }
 
 int main() {
-	u64 workers = thread::task::diagnostic::workers();
+	u64 workers = thread::task::get();
 	printf("Worker count: %lu\n", workers);
 
 	struct context context;
@@ -102,12 +103,12 @@ int main() {
 
 	for (u64 i = 0; i < FRAMES; ++i) {
 		printf("Starting frame\n");
-		thread::task::frame::begin(jobs);
+		thread::task::begin(jobs);
 
 		u32 unfinished;
-		while((unfinished = thread::task::frame::poll()) != 0);
+		while((unfinished = thread::task::poll()) != 0);
 
-		thread::task::frame::end();
+		thread::task::end();
 	}
 
 	u64 tier_1 = sizeof(jobs) / sizeof(jobs[0]);
@@ -144,6 +145,12 @@ int main() {
 	
 	t.join();
 	puts("Joined thread t");
+
+	{
+		memory::stack::Alloc a(12);
+		u8 *data = reinterpret_cast<u8 *>(a.data());
+		data[0] = 1;
+	}
 	
 	return 0;
 }

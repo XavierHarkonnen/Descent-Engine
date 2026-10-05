@@ -1,7 +1,8 @@
 set(LIBRARY_NAME "descent-memory")
 
 add_library(${LIBRARY_NAME}
-	memory.cpp
+	region.cpp
+	stack.cpp
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC

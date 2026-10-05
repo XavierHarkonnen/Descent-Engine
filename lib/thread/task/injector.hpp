@@ -11,13 +11,13 @@ namespace descent::thread::task {
 
 class Injector {
 private:
-	Task _tasks[frame::MAX_START_JOBS];
+	Task _tasks[MAX_START_JOBS];
 	u64 _cursor;
 public:
 	Injector() : _cursor(0) {}
 
   void push(const Job &job, Root &root) {
-		sys_assert(_cursor < frame::MAX_START_JOBS, "Attempted to inject more than MAX_START_JOBS");
+		sys_assert(_cursor < MAX_START_JOBS, "Attempted to inject more than MAX_START_JOBS");
 
 		_tasks[_cursor++].init(job, root);
 	}

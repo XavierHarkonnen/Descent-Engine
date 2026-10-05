@@ -20,13 +20,16 @@ extern "C" {
 
 namespace descent::thread::task {
 
-namespace state {
-	static Pool _pool(16);
-	static thread_local Worker *_self = nullptr;
+static Pool _pool;
+static thread_local Worker *_self = nullptr;
 
-	Worker *self() { return _self; }
-	void self(Worker *self) { _self = self; }
-};
+Worker *self() {
+	return _self;
+}
+
+void self(Worker *self) {
+	_self = self;
+}
 
 bool Handle::spawn(Job job) {
 	return _->spawn(job);
@@ -36,16 +39,16 @@ bool Task::spawn(const Job &job) {
 	if (!job.routine)
 		return false;
 
-	Worker *self = state::self();
-	if (!self)
+	Worker *host = self();
+	if (!host)
 		return false;
 	
-	Task *task = self->allocate();
+	Task *task = host->allocate();
 	if (!task)
 		return false;
 
 	task->create(job, *this);
-	self->submit(task);
+	host->submit(task);
 
 	return true;
 }
@@ -56,35 +59,46 @@ bool Task::spawn(const Job &job, u64 size) {
 
 	sys_assert(size <= INLINE_DATA_SIZE, "Attempted to set task with oversized data");
 	
-	Worker *self = state::self();
-	if (!self)
+	Worker *host = self();
+	if (host)
 		return false;
 	
-	Task *task = self->allocate();
+	Task *task = host->allocate();
 	if (!task)
 		return false;
 
 	memcpy(task->_data, job.context, size);
 	task->create({job.routine, task->_data}, *this);
-	self->submit(task);
+	host->submit(task);
 
 	return true;
 }
 
-bool frame::begin(const Job *jobs, u64 count) {
-	return state::_pool.begin(jobs, count);
+u64 set(u64 count) {
+	return _pool.set(count);
 }
 
-u32 frame::poll() {
-	return state::_pool.poll();
+u64 get() {
+	return _pool.get();
 }
 
-bool frame::end() {
-	return state::_pool.end();
+bool begin(const Job *jobs, u64 count) {
+	if (count == 0 || count > MAX_START_JOBS)
+		return false;
+
+	for (u64 i = 0; i < count; ++i)
+		if (!jobs[i].routine)
+			return false;
+
+	return _pool.begin(jobs, count);
 }
 
-u64 diagnostic::workers() {
-	return state::_pool.count();
+u32 poll() {
+	return _pool.poll();
+}
+
+bool end() {
+	return _pool.end();
 }
 
 }

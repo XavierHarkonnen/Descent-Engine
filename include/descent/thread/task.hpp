@@ -20,7 +20,9 @@
 
 namespace descent::thread::task {
 
-static constexpr u64 INLINE_DATA_SIZE = 36;
+static inline constexpr u64 INLINE_DATA_SIZE = 36;
+static inline constexpr u64 MAX_START_JOBS = 64;
+static inline constexpr u64 MAX_WORKERS = 16;
 
 class Handle;
 class Task;
@@ -65,60 +67,38 @@ public:
 		return _ != nullptr;
 	}
 
-	// Spawns job as a child of the current task.
-	// Returns false if the job could not be spawned.
-	// A failed spawn does not create a child task.
+	// Spawns job as a child of the current task. Returns false if the job could
+	// not be spawned. A failed spawn does not create a child task.
 	bool spawn(Job job);
 };
 
-struct frame {
-private:
-	static bool begin(const Job *jobs, u64 count);
+// If the task frame is inactive, sets the number of task worker threads.
+// Returns the current total number of worker threads.
+u64 set(u64 count);
 
-public:
-	static constexpr u64 MAX_START_JOBS = 64;
+// Returns the total number of task worker threads.
+u64 get();
 
-	// If the frame is inactive, activates it and returns true.
-	// Otherwise returns false.
-	template <u64 N>
-	static bool begin(const Job (&jobs)[N]) {
-		static_assert(N > 0 && N <= MAX_START_JOBS, "Illegal starting job count");
+bool begin(const Job *jobs, u64 count);
 
-		for (const Job &job : jobs)
-			if (!job.routine)
-				return false;
-
-		return begin(jobs, N);
-	}
-
-	// Return the number of unfinished tasks.
-	// Always returns zero if the frame is inactive.
-	static u32 poll();
-
-	// Waits until the number of unfinished tasks is zero.
-	static void wait();
-
-	// Check completion and, while incomplete, execute available work on the calling thread
-	//static u32 help();
-
-	// If the frame is active and contains no active tasks, deactivates it and returns true.
-	// Otherwise returns false.
-	static bool end();
-};
-
-namespace diagnostic {
-	// Returns the total number of task worker threads
-	u64 workers();
-
-	//u64 active_workers();
-	//u64 sleeping_workers();
-	// Per-thread:
-	//tasks_executed
-	//tasks_stolen
-	//steal_attempts
-	//failed_steals
+// If the task frame is inactive, activates it and returns true. Otherwise
+// returns false.
+template <u64 N>
+static bool begin(const Job (&jobs)[N]) {
+	static_assert(N > 0 && N <= MAX_START_JOBS, "Illegal starting job count");
+	return begin(jobs, N);
 }
 
+// Return the number of unfinished tasks. Always returns zero if the task
+// frame is inactive.
+u32 poll();
+
+// Waits until the number of unfinished tasks is zero.
+void wait();
+
+// If the task frame is active and contains no active tasks, deactivates it
+// and returns true. Otherwise returns false.
+bool end();
 }
 
 #endif

@@ -4,14 +4,13 @@
 #include <descent/type.hpp>
 
 namespace descent::thread::task {
-	class Root;
-	class Worker;
-	class Pool;
-}
 
-namespace descent::thread::task::state {
-	Worker *self();
-	void self(Worker *);
+class Worker;
+
+Worker *self();
+
+void self(Worker *);
+
 };
 
 #endif

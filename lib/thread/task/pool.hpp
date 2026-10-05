@@ -19,57 +19,76 @@ private:
 
 	Worker _workers[MAX];
 	Root _root;
-	u64 _count;
+	Atomic<u64> _count;
 	Mutex _mutex;
 	Futex _finished;
 	bool _active;
 
-	void init(u64 desired) {
-		for (u64 index = 0; index < desired; ++index) {
+	void set_up(u64 count) {
+		sys_assert(count > get(), "Attempted to call set_up with desired workers less than or equal to current workers");
+
+		u64 index;
+		for (index = get(); index < count; ++index) {
 			if (!_workers[index].init())
 				break;
-
-			++_count;
 		}
+
+		_count.store(index, atomic::Order::RELAXED);
+	}
+
+	void set_down(u64 count) {
+		sys_assert(count < get(), "Attempted to call set_down with desired workers greater than or equal to current workers");
+
+		const u64 current = get();
+
+		// Signal the workers that are being removed.
+		for (u64 index = count; index < current; ++index)
+			_workers[index].terminate();
+
+		// Wait for their threads to actually exit.
+		for (u64 index = count; index < current; ++index)
+			_workers[index].join();
+
+		_count.store(count, atomic::Order::RELAXED);
 	}
 
 	void configure() {
-		for (u64 index = 0; index < _count; ++index)
-			_workers[index].configure(&_finished, _workers, _count, index);
+		for (u64 index = 0; index < get(); ++index)
+			_workers[index].configure(&_finished, _workers, get(), index);
 	}
 
 	void terminate() {
-		for (u64 index = 0; index < _count; ++index) {
+		for (u64 index = 0; index < get(); ++index) {
 			_workers[index].terminate();
 		}
 	}
 
 	void join() {
-		for (u64 index = 0; index < _count; ++index) {
+		for (u64 index = 0; index < get(); ++index) {
 			_workers[index].join();
 		}
 	}
 
 	void start() {
-		for (u64 index = 0; index < _count; ++index)
+		for (u64 index = 0; index < get(); ++index)
 			_workers[index].start();
 	}
 
 	void inject(const Job *jobs, u64 count) {
 		for (u64 i = 0; i < count; ++i) {
-			_workers[i % _count].inject(jobs[i], _root);
+			_workers[i % get()].inject(jobs[i], _root);
 		}
 	}
 
 	void stop() {
-		for (u64 i = 0; i < _count; ++i) {
+		for (u64 i = 0; i < get(); ++i) {
 			_workers[i].stop();
 		}
 		
 		for (;;) {
 			const u32 finished = _finished.word.load(atomic::Order::ACQUIRE);
 
-			if (finished == _count)
+			if (finished == get())
 				break;
 
 			_finished.wait(finished);
@@ -77,14 +96,14 @@ private:
 	}
 
 	void clear() {
-		for (u64 index = 0; index < _count; ++index) {
+		for (u64 index = 0; index < get(); ++index) {
 			_workers[index].clear();
 		}
 
 		for (;;) {
 			const u32 finished = _finished.word.load(atomic::Order::ACQUIRE);
 
-			if (finished == _count)
+			if (finished == get())
 				break;
 
 			_finished.wait(finished);
@@ -93,20 +112,43 @@ private:
 
 public:
 
-	Pool(u64 desired) : _count(0), _finished(0), _active(false) {
-		init(desired < MAX ? desired : MAX);
-		configure();
-	}
+	Pool() : _count(0), _finished(0), _active(false) {}
 
 	~Pool() {
 		terminate();
 		join();
 	}
 
+	u64 set(u64 count) {
+		mutex::Scope scope(_mutex);
+
+		if (!_active) {
+			if (count > MAX)
+				count = MAX;
+
+			const u64 current = get();
+			if (count > current)
+				set_up(count);
+			else if (count < current)
+				set_down(count);
+
+			configure();
+		}
+
+		return get();
+	}
+
+	u64 get() {
+		return _count.load(atomic::Order::RELAXED);
+	}
+
 	bool begin(const Job *jobs, u64 count) {
 		mutex::Scope scope(_mutex);
 
 		if (_active)
+			return false;
+
+		if (get() == 0)
 			return false;
 
 		_active = true;
@@ -145,12 +187,6 @@ public:
 
 		return true;
 	}
-
-	u64 count() const {
-		return _count;
-	}
-
-	// Exposing internals - bad, fix
 
 	Root &root() {
 		return _root;

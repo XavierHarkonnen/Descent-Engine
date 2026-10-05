@@ -63,7 +63,7 @@ private:
 		Worker *worker = static_cast<Worker *>(argument);
 		sys_assert(worker, "Routine called with null worker");
 
-		state::self(worker);
+		self(worker);
 		Worker &self = *worker;
 
 		self.wait(STATE_WAIT_POOL);
@@ -91,7 +91,7 @@ private:
 				(*task)();
 				goto executing;
 			}
-		} while (frame::poll() != 0);
+		} while (poll() != 0);
 
 		// All work is done, none can be added until a new frame is started.
 

@@ -12,6 +12,7 @@ namespace descent::thread {
 
 constexpr u32 MAX_THREADS = 32;
 constexpr u32 STACK_SIZE = 1024 * 16;
+const u32 STACK_MIN = static_cast<u32>(PTHREAD_STACK_MIN);
 
 static_assert(MAX_THREADS == 32, "MAX_THREADS must be 32");
 
@@ -25,7 +26,6 @@ struct ThreadData {
 	Futex signal;
 	Futex finished;
 	atomic::Flag owned;
-	u8 _pad[31];
 };
 
 static_assert(sizeof(ThreadData) == memory::CACHE_LINE_SIZE);
@@ -61,22 +61,32 @@ static u32 acquire() {
 }
 
 static void release(u32 index) {
-	free.fetch_or(u32(1) << index, atomic::Order::RELEASE);
+	free.fetch_or(u32(1) << index, atomic::Order::RELAXED);
 }
 
-static void *wrapper(void *argument) {
+static void cleanup(void *argument) {
 	ThreadData &thread = *static_cast<ThreadData *>(argument);
-	self_index = u32(&thread - threads);
-
-	thread.routine(thread.argument);
 
 	thread.finished.word.store(1, atomic::Order::RELEASE);
 	thread.finished.wake_one();
+}
+
+static void *wrapper(void *argument) {
+	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, nullptr);
+
+	ThreadData &thread = *static_cast<ThreadData *>(argument);
+	self_index = u32(&thread - threads);
+
+	pthread_cleanup_push(cleanup, argument);
+
+	thread.routine(thread.argument);
+
+	pthread_cleanup_pop(1);
 
 	return nullptr;
 }
 
-static u32 create_thread(Routine routine, void *argument, u64 stack_size) {
+static u32 create_thread(Routine routine, void *argument, u32 stack_size) {
 	if (!routine)
 		return MAX_THREADS;
 
@@ -89,6 +99,8 @@ static u32 create_thread(Routine routine, void *argument, u64 stack_size) {
 	threads[index].signal.word.store(0, atomic::Order::RELAXED);
 	threads[index].finished.word.store(0, atomic::Order::RELAXED);
 	threads[index].owned.set(atomic::Order::RELAXED);
+
+	stack_size = stack_size < STACK_MIN ? STACK_MIN : stack_size;
 
 	pthread_attr_t attributes;
 	if (pthread_attr_init(&attributes)) {
@@ -121,7 +133,7 @@ Thread::Thread(Routine routine, void *argument) : Thread() {
 	_.store(index, atomic::Order::RELAXED);
 }
 
-Thread::Thread(Routine routine, void *argument, u64 stack_size) : Thread() {
+Thread::Thread(Routine routine, void *argument, u32 stack_size) : Thread() {
 	u32 index = create_thread(routine, argument, stack_size);
 	if (index == MAX_THREADS)
 		return;
@@ -137,15 +149,32 @@ Thread::~Thread() {
 		threads[index].owned.clear(atomic::Order::RELAXED);
 }
 
+Thread &Thread::operator=(Thread &&other) {
+	if (this != &other) {
+		Thread *t0 = this > &other ? this : &other;
+		Thread *t1 = this > &other ? &other : this;
+
+		mutex::Scope s0(t0->lock);
+		mutex::Scope s1(t1->lock);
+
+		u32 old_index = _.load(atomic::Order::RELAXED);
+		if (old_index != INVALID)
+			threads[old_index].owned.clear(atomic::Order::RELAXED);
+
+		u32 new_index = other._.load(atomic::Order::RELAXED);
+		_.store(new_index, atomic::Order::RELAXED);
+		other._.store(INVALID, atomic::Order::RELAXED);
+	}
+
+	return *this;
+}
+
 bool Thread::join() {
+	if (!is_main_thread)
+		return false;
+
 	lock.lock();
-
-	u32 index = _.load(atomic::Order::RELAXED);
-	if (index == self_index)
-		index = INVALID;
-	else
-		_.store(INVALID, atomic::Order::RELAXED);
-
+	u32 index = _.exchange(INVALID, atomic::Order::RELAXED);
 	lock.unlock();
 
 	if (index == INVALID)
@@ -156,7 +185,7 @@ bool Thread::join() {
 	if (pthread_join(thread.pthread, nullptr))
 		while (thread.finished.word.load(atomic::Order::ACQUIRE) == 0)
 			thread.finished.wait(0);
-	
+
 	release(index);
 	return true;
 }
