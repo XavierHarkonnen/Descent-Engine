@@ -13,18 +13,16 @@
  * limitations under the License.
  */
 
-#include <descent/thread/atomic.hpp>
-#include <descent/thread/task.hpp>
-#include <descent/thread/thread.hpp>
-#include <descent/time.hpp>
+#ifndef DESCENT_MEMORY_PLATFORM_HPP
+#define DESCENT_MEMORY_PLATFORM_HPP
 
-#include <descent/random.hpp>
-#include <descent/memory/stack.hpp>
+#include <descent/type/core.hpp>
 
-#include <pthread.h>
+namespace descent::memory {
 
-using namespace descent;
+constexpr u64 CACHE_LINE_SIZE = 64;
+constexpr u64 PAGE_SIZE = 4096;
 
-int main() {
-	return 0;
 }
+
+#endif

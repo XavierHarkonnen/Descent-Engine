@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <descent/memory/stack.hpp>
 
 extern "C" {
@@ -6,7 +21,7 @@ extern "C" {
 #include <sys/mman.h>
 }
 
-#include <descent/memory.hpp>
+#include <descent/memory/platform.hpp>
 #include <descent/system.hpp>
 #include <descent/type/core.hpp>
 
@@ -82,10 +97,10 @@ public:
 	}
 
 	void alloc(void *&data, void *&meta, u32 size, u32 align, u32 count) {
-    sys_assert(size != 0, "Attempted to allocate box with zero size");
-    sys_assert(align != 0, "Attempted to allocate box with zero alignment");
-    sys_assert(count != 0, "Attempted to allocate box with zero count");
-    sys_assert((align & (align - 1)) == 0, "Alignment must be a power of two");
+		sys_assert(size != 0, "Attempted to allocate box with zero size");
+		sys_assert(align != 0, "Attempted to allocate box with zero alignment");
+		sys_assert(count != 0, "Attempted to allocate box with zero count");
+		sys_assert((align & (align - 1)) == 0, "Alignment must be a power of two");
 
 		u64 payload = u64(size) * u64(count);
 		u64 aligned = (u64(_cursor) + (u64(align) - 1)) & ~(u64(align) - 1);

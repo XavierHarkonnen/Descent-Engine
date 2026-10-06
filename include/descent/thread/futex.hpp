@@ -32,12 +32,12 @@ public:
 		const Futex &futex;
 		u32 expected;
 
-		 Pair(const Futex &futex, u32 expected) : futex(futex), expected(expected) {}
+		Pair(const Futex &futex, u32 expected) : futex(futex), expected(expected) {}
 	};
 
 	template <u64 N>
 	struct Any {
-		static_assert(N <= MAX_WAIT_ANY);
+		static_assert(N <= MAX_WAIT_ANY, "Cannot create Futex::Any with more than MAX_WAIT_ANY elements");
 
 		Pair pairs[N]{};
 	};
