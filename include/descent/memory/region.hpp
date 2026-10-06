@@ -16,7 +16,7 @@
 #ifndef DESCENT_MEMORY_REGION_HPP
 #define DESCENT_MEMORY_REGION_HPP
 
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 #include <descent/memory/construct.hpp>
 #include <descent/memory/platform.hpp>
 
@@ -193,7 +193,7 @@ public:
 		
 		_size = page_count * PAGE_SIZE;
 		for (u64 i = 0 ; i < capacity(); ++i)
-			new (_data + i) T();
+			construct(_data + i);
 
 		return true;
 	}

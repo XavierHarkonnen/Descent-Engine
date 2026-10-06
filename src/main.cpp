@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-#include <descent/thread/atomic.hpp>
-#include <descent/thread/task.hpp>
-#include <descent/thread/thread.hpp>
-#include <descent/time.hpp>
-
-#include <descent/random.hpp>
 #include <descent/memory/stack.hpp>
-
-#include <pthread.h>
+#include <descent/type/core.hpp>
 
 using namespace descent;
 
 int main() {
-	return 0;
+	auto box = memory::stack::Allocator::create<u64>(1024);
+	return box.size();
 }

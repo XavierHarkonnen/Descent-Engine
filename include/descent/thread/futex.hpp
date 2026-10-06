@@ -16,9 +16,9 @@
 #ifndef DESCENT_THREAD_FUTEX_HPP
 #define DESCENT_THREAD_FUTEX_HPP
 
-#include <descent/time.hpp>
-#include <descent/type.hpp>
 #include <descent/thread/atomic.hpp>
+#include <descent/time.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::thread {
 

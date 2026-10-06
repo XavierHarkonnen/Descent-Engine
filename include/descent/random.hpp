@@ -17,7 +17,10 @@
 #define DESCENT_RANDOM_HPP
 
 #include <descent/system.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
+#include <descent/type/math.hpp>
+#include <descent/type/bit.hpp>
+#include <descent/type/traits.hpp>
 
 namespace descent::random {
 

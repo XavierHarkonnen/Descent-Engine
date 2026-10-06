@@ -18,7 +18,7 @@
 
 #include <descent/system.hpp>
 #include <descent/thread/task.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 #include "node.hpp"
 

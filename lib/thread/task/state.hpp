@@ -16,7 +16,7 @@
 #ifndef DESCENT_LIB_THREAD_STATE_HPP
 #define DESCENT_LIB_THREAD_STATE_HPP
 
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::thread::task {
 

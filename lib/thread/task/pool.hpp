@@ -21,7 +21,7 @@ extern "C" {
 }
 
 #include <descent/thread/mutex.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 #include "worker.hpp"
 #include "state.hpp"

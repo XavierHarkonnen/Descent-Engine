@@ -22,7 +22,7 @@ extern "C" {
 
 #include <descent/random.hpp>
 #include <descent/thread/futex.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 #include "allocator.hpp"
 #include "deque.hpp"

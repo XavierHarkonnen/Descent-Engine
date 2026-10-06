@@ -16,7 +16,7 @@
 #ifndef DESCENT_SYSTEM_TIME_HPP
 #define DESCENT_SYSTEM_TIME_HPP
 
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::time {
 

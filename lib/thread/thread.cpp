@@ -20,8 +20,11 @@ extern "C" {
 }
 
 #include <descent/memory/platform.hpp>
+#include <descent/thread/atomic.hpp>
 #include <descent/thread/futex.hpp>
 #include <descent/thread/mutex.hpp>
+#include <descent/type/bit.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::thread {
 

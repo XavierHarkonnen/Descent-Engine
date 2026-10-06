@@ -23,9 +23,10 @@ extern "C" {
 #include <unistd.h>
 }
 
-#include <descent/time.hpp>
-#include <descent/type.hpp>
 #include <descent/system.hpp>
+#include <descent/thread/atomic.hpp>
+#include <descent/time.hpp>
+#include <descent/type/core.hpp>
 
 #include <intern/time.hpp>
 

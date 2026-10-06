@@ -16,7 +16,7 @@
 #ifndef DESCENT_THREAD_TASK_HPP
 #define DESCENT_THREAD_TASK_HPP
 
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::thread::task {
 

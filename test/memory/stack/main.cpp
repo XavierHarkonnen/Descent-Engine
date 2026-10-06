@@ -1,12 +1,12 @@
-#include "descent/type/core.hpp"
-#include <descent/memory/stack.hpp>
-#include <descent/system.hpp>
-#include <descent/type.hpp>
-
 extern "C" {
 #include <stdio.h>
 #include <stdint.h>
 }
+
+#include "descent/type/core.hpp"
+#include <descent/memory/stack.hpp>
+#include <descent/system.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::memory {
 

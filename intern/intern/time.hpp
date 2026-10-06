@@ -21,7 +21,7 @@ extern "C" {
 }
 
 #include <descent/time.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::intern {
 

@@ -21,7 +21,6 @@ extern "C" {
 #include <sys/mman.h>
 }
 
-#include <descent/memory/platform.hpp>
 #include <descent/system.hpp>
 #include <descent/type/core.hpp>
 

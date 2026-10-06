@@ -17,21 +17,18 @@
 
 extern "C" {
 #include <pthread.h>
-#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/sysinfo.h>
 }
 
-#include <descent/memory/region.hpp>
 #include <descent/system.hpp>
-#include <descent/thread/futex.hpp>
-#include <descent/thread/mutex.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
-#include "task/worker.hpp"
+#include "task/node.hpp"
 #include "task/pool.hpp"
 #include "task/state.hpp"
+#include "task/worker.hpp"
 
 namespace descent::thread::task {
 

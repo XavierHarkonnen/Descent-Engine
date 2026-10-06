@@ -20,7 +20,7 @@
 #include <descent/thread/futex.hpp>
 #include <descent/thread/utilities.hpp>
 #include <descent/time.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::thread {
 

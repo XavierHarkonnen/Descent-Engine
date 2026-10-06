@@ -15,12 +15,13 @@
 
 #include <descent/time.hpp>
 
+extern "C" {
 #include <time.h>
+}
 
 #include <descent/system.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 #include <intern/time.hpp>
-
 
 namespace descent::time {
 

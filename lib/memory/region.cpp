@@ -17,7 +17,8 @@
 
 #include <sys/mman.h>
 
-#include <descent/type.hpp>
+#include <descent/memory/platform.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::memory {
 

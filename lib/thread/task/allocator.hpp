@@ -16,7 +16,7 @@
 #ifndef DESCENT_LIB_THREAD_TASK_ALLOCATOR_HPP
 #define DESCENT_LIB_THREAD_TASK_ALLOCATOR_HPP
 
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 #include <descent/memory/region.hpp>
 
 #include "node.hpp"

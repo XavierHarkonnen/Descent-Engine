@@ -15,9 +15,11 @@
 
 #include <descent/system.hpp>
 
+extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+}
 
 static inline void sys_err_write(const char *s) {
 	(void) write(STDERR_FILENO, s, strnlen(s, 1023));

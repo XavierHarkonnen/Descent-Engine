@@ -18,7 +18,7 @@
 
 #include <descent/thread/atomic.hpp>
 #include <descent/thread/mutex.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 namespace descent::thread {
 

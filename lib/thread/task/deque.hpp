@@ -17,7 +17,7 @@
 #define DESCENT_LIB_THREAD_TASK_DEQUE_HPP
 
 #include <descent/thread/atomic.hpp>
-#include <descent/type.hpp>
+#include <descent/type/core.hpp>
 
 #include "node.hpp"
 
