@@ -61,7 +61,7 @@ private:
 		if (_count <= 1)
 			return *this;
 
-		const u64 offset = rng.get<u64>(1, _count - 1);
+		const u64 offset = rng.get<u64>(1, _count);
 		return _workers[(_index + offset) % _count];
 	}
 
