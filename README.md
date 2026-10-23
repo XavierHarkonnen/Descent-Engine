@@ -18,7 +18,7 @@ The project prioritizes low-level systems programming, explicit control over imp
 - **C++ standard library:** Standard library headers are prohibited, except where their use is unavoidably necessary. Exceptions require documentation. Required functionality should generally be implemented within the project, potentially using specialized or idiosyncratic designs.
 - **System interfaces:** Minimal use of the C standard library, POSIX APIs, and Linux-specific interfaces is permitted. C headers should be included within `extern "C"` blocks where appropriate.
 - **Exceptions:** C++ exceptions are disabled.
-- **Numeric types:** Prefer fixed-width numeric types defined in [`descent/types/core.hpp`](descent/types/core.hpp) where practical.
+- **Numeric types:** Prefer fixed-width numeric types defined in [`include/descent/type/core.hpp`](include/descent/type/core.hpp) where practical.
 - **Third-party libraries:** Selected dependencies are permitted when they provide necessary platform integration or complex functionality that would be impractical to implement within the project.
 
 ## Graphics and Windowing
