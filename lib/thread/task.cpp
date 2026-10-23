@@ -72,7 +72,7 @@ bool Task::spawn(const Job &job, u64 size) {
 	sys_assert(size <= INLINE_DATA_SIZE, "Attempted to set task with oversized data");
 	
 	Worker *host = self();
-	if (host)
+	if (!host)
 		return false;
 	
 	Task *task = host->allocate();
