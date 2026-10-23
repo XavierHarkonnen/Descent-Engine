@@ -34,26 +34,43 @@ private:
 
 	Futex futex;
 
+	// Takes one count if any are available.
+	bool take() {
+		u32 count = futex.word.load(atomic::Order::RELAXED);
+
+		while (count != 0) {
+			if (futex.word.compare_exchange(count, count - 1, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
+				return true;
+		}
+
+		return false;
+	}
+
 public:
 	Semaphore(u32 count) : futex(count) {}
 
-	bool wait(u64 timeout = time::INDEFINITE_TIMEOUT) {
-		u64 start = time::now();
+	bool wait() {
+		for (;;) {
+			if (take())
+				return true;
+
+			futex.wait(0);
+		}
+	}
+
+	bool wait(time::duration timeout) {
+		time::monotonic start = time::monotonic::now();
 
 		for (;;) {
-			u32 count = futex.word.load(atomic::Order::RELAXED);
+			if (take())
+				return true;
 
-			while (count != 0) {
-				if (futex.word.compare_exchange(count, count - 1, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
-					return true;
-			}
-
-			u64 now = time::now();
-			u64 elapsed = now - start;
-			if (timeout != time::INDEFINITE_TIMEOUT && elapsed >= timeout)
+			time::monotonic now = time::monotonic::now();
+			time::duration elapsed = now - start;
+			if (elapsed >= timeout)
 				return false;
 
-			u64 remaining = timeout ? timeout - elapsed : 0;
+			time::duration remaining = timeout - elapsed;
 
 			futex.wait(0, remaining);
 		}
