@@ -180,6 +180,10 @@ public:
 	Worker() : _state(STATE_WAIT_POOL), _workers(nullptr), _count(0), _index(0) {}
 
 	bool init() {
+		// A worker restarted after set_down() still holds STATE_TERMINATE, which
+		// would let its new thread exit before configure() runs.
+		_state.word.store((frame() << STATE_BITS) | STATE_WAIT_POOL, atomic::Order::RELAXED);
+
 		return pthread_create(&_pthread, nullptr, routine, this) == 0;
 	}
 
