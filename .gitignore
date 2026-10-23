@@ -16,6 +16,8 @@
 !intern/**
 !extern/
 !extern/**
+!docs/
+!docs/**
 
 # Files
 !.gitignore

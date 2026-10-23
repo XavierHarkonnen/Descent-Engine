@@ -63,11 +63,13 @@ constexpr bool ipow2(u32  x) { return x != 0 && (x & (x - 1)) == 0; }
 constexpr bool ipow2(u64  x) { return x != 0 && (x & (x - 1)) == 0; }
 constexpr bool ipow2(u128 x) { return x != 0 && (x & (x - 1)) == 0; }
 
-constexpr u8   npow2(u8   x) { return x == 0 ? 1 : (u8)   (1 << (8   - bit::clz((u8)   (x - 1)))); }
-constexpr u16  npow2(u16  x) { return x == 0 ? 1 : (u16)  (1 << (16  - bit::clz((u16)  (x - 1)))); }
-constexpr u32  npow2(u32  x) { return x == 0 ? 1 : (u32)  (1 << (32  - bit::clz((u32)  (x - 1)))); }
-constexpr u64  npow2(u64  x) { return x == 0 ? 1 : (u64)  (1 << (64  - bit::clz((u64)  (x - 1)))); }
-constexpr u128 npow2(u128 x) { return x == 0 ? 1 : (u128) (1 << (128 - bit::clz((u128) (x - 1)))); }
+// Returns the smallest power of two not less than x, or zero if that power of
+// two is not representable in the type of x.
+constexpr u8   npow2(u8   x) { return x == 0 ? 1 : x > (u8)   (U8_MAX   / 2 + 1) ? 0 : (u8)   ((u8)   1 << (8   - bit::clz((u8)   (x - 1)))); }
+constexpr u16  npow2(u16  x) { return x == 0 ? 1 : x > (u16)  (U16_MAX  / 2 + 1) ? 0 : (u16)  ((u16)  1 << (16  - bit::clz((u16)  (x - 1)))); }
+constexpr u32  npow2(u32  x) { return x == 0 ? 1 : x > (u32)  (U32_MAX  / 2 + 1) ? 0 : (u32)  ((u32)  1 << (32  - bit::clz((u32)  (x - 1)))); }
+constexpr u64  npow2(u64  x) { return x == 0 ? 1 : x > (u64)  (U64_MAX  / 2 + 1) ? 0 : (u64)  ((u64)  1 << (64  - bit::clz((u64)  (x - 1)))); }
+constexpr u128 npow2(u128 x) { return x == 0 ? 1 : x > (u128) (U128_MAX / 2 + 1) ? 0 : (u128) ((u128) 1 << (128 - bit::clz((u128) (x - 1)))); }
 
 constexpr bool add_overflow(u8   x, u8   y, u8   &out) { return __builtin_add_overflow(x, y, &out); }
 constexpr bool add_overflow(u16  x, u16  y, u16  &out) { return __builtin_add_overflow(x, y, &out); }

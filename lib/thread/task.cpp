@@ -72,7 +72,7 @@ bool Task::spawn(const Job &job, u64 size) {
 	sys_assert(size <= INLINE_DATA_SIZE, "Attempted to set task with oversized data");
 	
 	Worker *host = self();
-	if (host)
+	if (!host)
 		return false;
 	
 	Task *task = host->allocate();
@@ -107,6 +107,15 @@ bool begin(const Job *jobs, u64 count) {
 
 u32 poll() {
 	return _pool.poll();
+}
+
+void wait() {
+	// A task waiting on its own frame can never finish.
+	sys_assert(!self(), "Attempted to wait on the task frame from a task");
+	if (self())
+		return;
+
+	_pool.wait();
 }
 
 bool end() {

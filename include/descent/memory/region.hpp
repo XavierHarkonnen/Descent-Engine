@@ -134,7 +134,7 @@ template<typename T>
 class Region<T, DYNAMIC_PAGES> : public Detail {
 private:
 
-	u8 *_data;
+	T *_data;
 	u64 _size;
 
 	Region(const Region &) = delete;

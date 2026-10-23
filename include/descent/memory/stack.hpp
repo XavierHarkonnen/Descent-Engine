@@ -23,6 +23,34 @@
 
 namespace descent::memory::stack {
 
+// A Box owns objects in its thread's stack allocator, a LIFO bump allocator
+// private to each thread. A Box is bound to the scope that receives it from
+// Allocator:
+//
+// - It must be a local variable on the stack of the thread that created it,
+//   and must be destroyed by that thread. It must never be static,
+//   thread_local, heap-allocated or a member of an object stored in any of
+//   those places.
+// - It must not outlive its thread, nor be shared with another thread.
+// - Pointers and references into it, from data() or operator[], must not
+//   outlive it. Other threads may use them only while it is alive.
+//
+// A function may return the result of Allocator directly, as Allocator does;
+// the Box then belongs to the caller's scope.
+//
+// Enforced in every build: a Box cannot be copied, moved by user code, or
+// created or destroyed with a class new-expression or delete-expression.
+//
+// Checked in debug builds only (DESCENT_DEBUG), at no cost to release builds:
+// - A Box that owns objects lies on the calling thread's stack whenever it is
+//   created, moved into or destroyed.
+// - A Box is freed into the allocator that allocated it.
+// - A thread other than the main thread holds no allocations when it exits.
+//
+// Not checked: a Box made with a global placement new-expression (::new) in
+// stack storage and never destroyed, while its thread keeps running; a Box
+// left alive when the main thread calls exit(); and pointers into a Box that
+// escape its scope.
 template<typename T>
 class Box {
 	friend class Allocator;
@@ -32,6 +60,8 @@ class Box {
 
 	void clear();
 
+	void local() const;
+
 private:
 	T *_data;
 	void *_meta;
@@ -40,9 +70,14 @@ private:
 
 	Box() : _data(nullptr), _meta(nullptr), _size(0), _capacity(0) {}
 
-	Box(T* data, void *meta, u64 capacity) : _data(data), _meta(meta), _size(0), _capacity(capacity) {}
+	Box(T* data, void *meta, u64 capacity) : _data(data), _meta(meta), _size(0), _capacity(capacity) {
+		local();
+	}
 
 	Box(Box &&other) : _data(other._data), _meta(other._meta), _size(other._size), _capacity(other._capacity) {
+		if (_data || _meta)
+			local();
+
 		other._data = nullptr;
 		other._meta = nullptr;
 		other._size = 0;
@@ -57,6 +92,9 @@ private:
 			_meta = other._meta;
 			_size = other._size;
 			_capacity = other._capacity;
+
+			if (_data || _meta)
+				local();
 
 			other._data = nullptr;
 			other._meta = nullptr;
@@ -88,6 +126,14 @@ private:
 	}
 
 public:
+	// A Box exists only on its thread's stack
+	static void *operator new(__SIZE_TYPE__) = delete;
+	static void *operator new(__SIZE_TYPE__, void *) = delete;
+	static void *operator new[](__SIZE_TYPE__) = delete;
+	static void *operator new[](__SIZE_TYPE__, void *) = delete;
+	static void operator delete(void *) = delete;
+	static void operator delete[](void *) = delete;
+
 	~Box() {
 		clear();
 	}
@@ -128,6 +174,10 @@ private:
 	static bool create(void *&data, void *&meta, u32 size, u32 align, u32 capacity);
 
 	static void clear(void *data, void *meta);
+
+#if defined(DESCENT_DEBUG)
+	static void local(const void *box);
+#endif
 
 public:
 	template<typename T, typename ...Args>
@@ -182,7 +232,17 @@ public:
 };
 
 template<typename T>
+void Box<T>::local() const {
+#if defined(DESCENT_DEBUG)
+	Allocator::local(this);
+#endif
+}
+
+template<typename T>
 void Box<T>::clear() {
+	if (_data || _meta)
+		local();
+
 	if (_data) {
 		for (u64 i = 0; i < _size; ++i)
 			_data[i].~T();

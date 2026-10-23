@@ -57,16 +57,21 @@ public:
 		while (spins-- && futex.word.load(atomic::Order::RELAXED) == LOCKED)
 			spin_pause();
 
-		for (;;) {
-			u32 expected = FREE;
-			if (futex.word.compare_exchange(expected, LOCKED, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
-				return true;
+		u32 state = FREE;
+		if (futex.word.compare_exchange(state, LOCKED, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
+			return true;
 
-			if (expected == LOCKED)
-				futex.word.compare_exchange(expected, CONTENDED, atomic::Order::RELAXED, atomic::Order::RELAXED);
+		// A thread that may sleep must acquire as CONTENDED, since it cannot
+		// know whether other waiters remain and its unlock must then wake one.
+		if (state != CONTENDED)
+			state = futex.word.exchange(CONTENDED, atomic::Order::ACQUIRE);
 
+		while (state != FREE) {
 			futex.wait(CONTENDED);
+			state = futex.word.exchange(CONTENDED, atomic::Order::ACQUIRE);
 		}
+
+		return true;
 	}
 
 	bool lock(time::duration timeout) {
@@ -79,14 +84,16 @@ public:
 		while (spins-- && futex.word.load(atomic::Order::RELAXED) == LOCKED)
 			spin_pause();
 
-		for (;;) {
-			u32 expected = FREE;
-			if (futex.word.compare_exchange(expected, LOCKED, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
-				return true;
+		u32 state = FREE;
+		if (futex.word.compare_exchange(state, LOCKED, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
+			return true;
 
-			if (expected == LOCKED)
-				futex.word.compare_exchange(expected, CONTENDED, atomic::Order::RELAXED, atomic::Order::RELAXED);
+		// See lock(). Timing out leaves the word CONTENDED, which only costs
+		// the holder one unnecessary wake.
+		if (state != CONTENDED)
+			state = futex.word.exchange(CONTENDED, atomic::Order::ACQUIRE);
 
+		while (state != FREE) {
 			time::monotonic now = time::monotonic::now();
 			time::duration elapsed = now - start;
 			if (elapsed >= timeout)
@@ -95,7 +102,10 @@ public:
 			time::duration remaining = timeout - elapsed;
 
 			futex.wait(CONTENDED, remaining);
+			state = futex.word.exchange(CONTENDED, atomic::Order::ACQUIRE);
 		}
+
+		return true;
 	}
 
 	void unlock() {

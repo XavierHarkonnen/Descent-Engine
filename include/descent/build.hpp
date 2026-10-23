@@ -21,7 +21,7 @@
 #endif
 
 #if !defined(__cplusplus) || __cplusplus < 201703L
-#error "Descent Engine requires C++11 or newer!"
+#error "Descent Engine requires C++17 or newer!"
 #endif
 
 #if !defined(__linux__) || defined(__ANDROID__)

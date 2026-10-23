@@ -21,6 +21,5 @@
 #include <descent/type/math.hpp>
 #include <descent/type/string.hpp>
 #include <descent/type/traits.hpp>
-#include <descent/type/uuid.hpp>
 
 #endif

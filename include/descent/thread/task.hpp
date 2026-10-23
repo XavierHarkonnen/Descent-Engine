@@ -93,7 +93,8 @@ static bool begin(const Job (&jobs)[N]) {
 // frame is inactive.
 u32 poll();
 
-// Waits until the number of unfinished tasks is zero.
+// Sleeps until the number of unfinished tasks is zero. Returns immediately if
+// the task frame is inactive or if called from a task.
 void wait();
 
 // If the task frame is active and contains no active tasks, deactivates it
