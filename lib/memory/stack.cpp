@@ -225,13 +225,11 @@ void Allocator::local(const void *box) {
 }
 #endif
 
-void Allocator::clear(void *data, void *meta) {
+void Allocator::clear([[maybe_unused]] void *data, void *meta) {
 	sys_assert(data, "Attempted to call clear on null data");
 	sys_assert(meta, "Attempted to call clear on null meta");
 
 	bump.free(reinterpret_cast<Footer *>(meta));
-	data = nullptr;
-	meta = nullptr;
 }
 
 }
