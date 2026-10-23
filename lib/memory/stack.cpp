@@ -19,6 +19,7 @@ extern "C" {
 #include <pthread.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <unistd.h>
 }
 
 #include <descent/system.hpp>
@@ -87,6 +88,10 @@ public:
 	}
 
 	~Bump() {
+		// The main thread is exempt, since exit() destroys its thread_local
+		// storage while Boxes may still be alive in its frames
+		sys_assert(_cursor == 0 || gettid() == getpid(), "Thread exited while a Box it allocated was alive");
+
 		if (_map) {
 			munmap(_map, _size);
 			_map = nullptr;
@@ -128,8 +133,14 @@ public:
 		return true;
 	}
 
+	bool owns(const void *ptr) const {
+		const u8 *byte = static_cast<const u8 *>(ptr);
+		return byte >= _map && byte < _map + _size;
+	}
+
 	void free(Footer *footer) {
 		sys_assert(footer, "Attempted to free null footer");
+		sys_assert(owns(footer), "Box was freed on a thread other than the one that allocated it");
 		sys_assert(!footer->dead(), "Attempted to free dead footer");
 		sys_assert(_cursor > 0, "Attempted to free footer from empty allocator");
 		sys_assert(footer->size() > sizeof(Footer), "Attempted to free invalid footer");
@@ -170,9 +181,49 @@ public:
 
 static thread_local Bump bump;
 
+#if defined(DESCENT_DEBUG)
+// Bounds of the calling thread's stack, where every live Box must lie
+class Range {
+private:
+	const u8 *_low;
+	const u8 *_high;
+
+public:
+	Range() : _low(nullptr), _high(nullptr) {
+		pthread_attr_t attr;
+		if (pthread_getattr_np(pthread_self(), &attr) != 0)
+			return;
+
+		void *low;
+		__SIZE_TYPE__ size;
+		if (pthread_attr_getstack(&attr, &low, &size) == 0) {
+			_low = static_cast<const u8 *>(low);
+			_high = _low + size;
+		}
+
+		pthread_attr_destroy(&attr);
+	}
+
+	// Accepts everything if the bounds are unknown
+	bool contains(const void *ptr) const {
+		const u8 *byte = static_cast<const u8 *>(ptr);
+		return !_low || (byte >= _low && byte < _high);
+	}
+};
+
+static thread_local Range range;
+#endif
+
 bool Allocator::create(void *&data, void *&meta, u32 size, u32 align, u32 capacity) {
 	return bump.alloc(data, meta, size, align, capacity);
 }
+
+#if defined(DESCENT_DEBUG)
+void Allocator::local(const void *box) {
+	sys_assert(range.contains(box), "Box is not a local variable of the calling thread "
+		"(it is static, thread_local, on the heap or on another thread's stack)");
+}
+#endif
 
 void Allocator::clear(void *data, void *meta) {
 	sys_assert(data, "Attempted to call clear on null data");
