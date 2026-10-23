@@ -185,6 +185,16 @@ public:
 		return _root.poll();
 	}
 
+	void wait() {
+		for (;;) {
+			const u32 unfinished = _root.poll();
+			if (unfinished == 0)
+				return;
+
+			_root.wait(unfinished);
+		}
+	}
+
 	bool end() {
 		mutex::Scope scope(_mutex);
 

@@ -109,6 +109,15 @@ u32 poll() {
 	return _pool.poll();
 }
 
+void wait() {
+	// A task waiting on its own frame can never finish.
+	sys_assert(!self(), "Attempted to wait on the task frame from a task");
+	if (self())
+		return;
+
+	_pool.wait();
+}
+
 bool end() {
 	return _pool.end();
 }

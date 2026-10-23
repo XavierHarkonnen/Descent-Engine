@@ -39,31 +39,36 @@ protected:
 	Routine _routine;
 	void *_context;
 	Node *_parent;
-	Atomic<u32> _unfinished;
+	Futex _unfinished;
 	u8 _data[INLINE_DATA_SIZE];
 
 	Node(Routine routine, void *context, Node *parent, u32 unfinished)
 	: _routine(routine), _context(context), _parent(parent), _unfinished(unfinished) {}
 
 	u32 increment() {
-		return _unfinished.add_fetch(1, atomic::Order::RELEASE);
+		return _unfinished.word.add_fetch(1, atomic::Order::RELEASE);
 	}
 
 	u32 decrement() {
-		return _unfinished.sub_fetch(1, atomic::Order::RELEASE);
+		return _unfinished.word.sub_fetch(1, atomic::Order::RELEASE);
 	}
 
 	void finish() {
 		const u32 unfinished = decrement();
 
-		if ((unfinished == 0 && _parent)) {
+		if (unfinished != 0)
+			return;
+
+		if (_parent)
 			_parent->finish();
-		}
+		else
+			_unfinished.wake_all();
+			// Only the root has no parent; its completion ends the frame
 	}
 
 public:
 	u32 poll() {
-		return _unfinished.load(atomic::Order::ACQUIRE);
+		return _unfinished.word.load(atomic::Order::ACQUIRE);
 	}
 };
 
@@ -80,13 +85,21 @@ public:
 		_routine = nullptr;
 		_context = nullptr;
 		_parent = nullptr;
-		_unfinished.store(1, atomic::Order::RELEASE);
+		_unfinished.word.store(1, atomic::Order::RELEASE);
 	}
 
 	void release() {
-		[[maybe_unused]] u32 unfinished = decrement();
+		u32 unfinished = decrement();
 
 		sys_assert(unfinished + 1 != 0, "Attempted to release an uninitialized root");
+
+		if (unfinished == 0)
+			_unfinished.wake_all();
+	}
+
+	// Sleeps while the unfinished count equals expected. May return spuriously.
+	void wait(u32 expected) const {
+		_unfinished.wait(expected);
 	}
 };
 
@@ -99,7 +112,7 @@ private:
 		_routine = job.routine;
 		_context = job.context;
 		_parent = &parent;
-		_unfinished.store(1, atomic::Order::RELEASE);
+		_unfinished.word.store(1, atomic::Order::RELEASE);
 		parent.increment();
 	}
 
