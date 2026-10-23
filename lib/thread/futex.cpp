@@ -132,7 +132,14 @@ u64 Futex::wait_any(const Pair *pairs, u64 size, time::duration timeout) {
 		return INVALID_INDEX;
 		// Immediate timeout, need not check predicate
 
-	struct timespec ts = intern::time::timespec_from_ns(timeout.ns());
+	// futex_waitv takes an absolute CLOCK_MONOTONIC deadline, unlike FUTEX_WAIT.
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC, &now);
+
+	const i64 start = intern::time::ns_from_timespec(now);
+	const i64 deadline = timeout.ns() > I64_MAX - start ? I64_MAX : start + timeout.ns();
+
+	struct timespec ts = intern::time::timespec_from_ns(deadline);
 	return futex_waitv(pairs, size, &ts);
 }
 
