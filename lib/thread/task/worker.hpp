@@ -42,11 +42,22 @@ public:
 	};
 
 private:
+	// The state word holds the frame number above the state. start() advances
+	// the frame, so a worker waiting for a new frame can tell that one began
+	// even if it was stopped again before the worker ran.
+	static constexpr u32 STATE_BITS = 2;
+	static constexpr u32 STATE_MASK = (u32(1) << STATE_BITS) - 1;
+
 	Allocator _allocator;
 	Injector _injector;
 	Deque _deque;
 	pthread_t _pthread;
 	Futex _state;
+
+	// The frame current when the worker was configured. Read by the worker
+	// thread at startup, so a frame started before the thread first runs is
+	// still seen as new.
+	Atomic<u32> _origin;
 
 	random::WyRand rng;
 
@@ -65,13 +76,49 @@ private:
 		return _workers[(_index + offset) % _count];
 	}
 
+	static u32 state_of(u32 word) {
+		return word & STATE_MASK;
+	}
+
+	static u32 frame_of(u32 word) {
+		return word >> STATE_BITS;
+	}
+
 	u32 state() {
-		return _state.word.load(atomic::Order::ACQUIRE);
+		return state_of(_state.word.load(atomic::Order::ACQUIRE));
+	}
+
+	u32 frame() {
+		return frame_of(_state.word.load(atomic::Order::ACQUIRE));
 	}
 
 	void wait(u32 state) {
-		while (this->state() == state)
-			_state.wait(state);
+		for (;;) {
+			const u32 word = _state.word.load(atomic::Order::ACQUIRE);
+			if (state_of(word) != state)
+				return;
+
+			_state.wait(word);
+		}
+	}
+
+	// Waits until a frame after `frame` has started or the worker is told to
+	// terminate. Returns the current frame.
+	u32 wait_frame(u32 frame) {
+		for (;;) {
+			const u32 word = _state.word.load(atomic::Order::ACQUIRE);
+			if (frame_of(word) != frame || state_of(word) == STATE_TERMINATE)
+				return frame_of(word);
+
+			_state.wait(word);
+		}
+	}
+
+	// Only the pool's controlling thread changes the state word.
+	void transition(u32 state, bool next_frame) {
+		const u32 next = frame() + (next_frame ? 1 : 0);
+		_state.word.store((next << STATE_BITS) | state, atomic::Order::RELEASE);
+		_state.wake_one();
 	}
 
 	static void *routine(void *argument) {
@@ -82,10 +129,12 @@ private:
 		Worker &self = *worker;
 
 		self.wait(STATE_WAIT_POOL);
-		
+
+		u32 seen = self._origin.load(atomic::Order::RELAXED);
+
 	new_frame:
 
-		self.wait(STATE_WAIT_FRAME);
+		seen = self.wait_frame(seen);
 
 		self._injector.drain();
 
@@ -141,13 +190,13 @@ public:
 		_workers = workers;
 		_count = count;
 		_index = index;
-		_state.word.store(STATE_WAIT_FRAME, atomic::Order::RELEASE);
-		_state.wake_one();
+		// Published to the worker by the release store in transition().
+		_origin.store(frame(), atomic::Order::RELAXED);
+		transition(STATE_WAIT_FRAME, false);
 	}
 
 	void terminate() {
-		_state.word.store(STATE_TERMINATE, atomic::Order::RELEASE);
-		_state.wake_one();
+		transition(STATE_TERMINATE, false);
 	}
 
 	void join() {
@@ -155,8 +204,7 @@ public:
 	}
 
 	void start() {
-		_state.word.store(STATE_CONTINUE, atomic::Order::RELEASE);
-		_state.wake_one();
+		transition(STATE_CONTINUE, true);
 	}
 
 	void inject(const Job &job, Root &root) {
@@ -164,8 +212,7 @@ public:
 	}
 
 	void stop() {
-		_state.word.store(STATE_WAIT_FRAME, atomic::Order::RELEASE);
-		_state.wake_one();
+		transition(STATE_WAIT_FRAME, false);
 	}
 
 	void clear() {
