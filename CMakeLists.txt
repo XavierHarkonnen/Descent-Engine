@@ -20,6 +20,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Find required libraries
 find_package(Vulkan REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(WAYLAND REQUIRED IMPORTED_TARGET wayland-client)
 
 # Flags
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
@@ -31,13 +33,17 @@ add_compile_options(
 	-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=
 )
 
-# Subdirectories
-#add_subdirectory(extern)
+# Program Subdirectories
 add_subdirectory(lib)
 add_subdirectory(src)
 
-# Tests
+# Test Subdirectory
 if(DESCENT_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(test)
+endif()
+
+# Scratch Subdirectory
+IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/scratch/CMakeLists.txt")
+	add_subdirectory(scratch)
 endif()

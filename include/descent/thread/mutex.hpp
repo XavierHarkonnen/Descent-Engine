@@ -25,6 +25,11 @@
 namespace descent::thread {
 
 class Mutex {
+	Mutex(Mutex &&) = delete;
+	Mutex(const Mutex &) = delete;
+	Mutex operator =(Mutex &&) = delete;
+	Mutex operator =(const Mutex &) = delete;
+
 private:
 	static constexpr u64 MUTEX_SPIN_COUNT = 64;
 
@@ -37,17 +42,16 @@ private:
 	Futex futex;
 
 public:
+	Mutex() : futex(FREE) {}
 
 	bool trylock() {
 		u32 expected = FREE;
 		return futex.word.compare_exchange(expected, LOCKED, atomic::Order::ACQUIRE, atomic::Order::RELAXED);
 	}
 
-	bool lock(u64 timeout = time::INDEFINITE_TIMEOUT) {
+	bool lock() {
 		if (trylock())
 			return true;
-
-		u64 start = time::now();
 
 		u64 spins = MUTEX_SPIN_COUNT;
 		while (spins-- && futex.word.load(atomic::Order::RELAXED) == LOCKED)
@@ -61,15 +65,36 @@ public:
 			if (expected == LOCKED)
 				futex.word.compare_exchange(expected, CONTENDED, atomic::Order::RELAXED, atomic::Order::RELAXED);
 
-			u64 now = time::now();
-			u64 elapsed = now - start;
-			if (timeout && elapsed >= timeout)
+			futex.wait(CONTENDED);
+		}
+	}
+
+	bool lock(time::duration timeout) {
+		if (trylock())
+			return true;
+
+		time::monotonic start = time::monotonic::now();
+
+		u64 spins = MUTEX_SPIN_COUNT;
+		while (spins-- && futex.word.load(atomic::Order::RELAXED) == LOCKED)
+			spin_pause();
+
+		for (;;) {
+			u32 expected = FREE;
+			if (futex.word.compare_exchange(expected, LOCKED, atomic::Order::ACQUIRE, atomic::Order::RELAXED))
+				return true;
+
+			if (expected == LOCKED)
+				futex.word.compare_exchange(expected, CONTENDED, atomic::Order::RELAXED, atomic::Order::RELAXED);
+
+			time::monotonic now = time::monotonic::now();
+			time::duration elapsed = now - start;
+			if (elapsed >= timeout)
 				return false;
 
-			u64 remaining = timeout ? timeout - elapsed : 0;
+			time::duration remaining = timeout - elapsed;
 
-			expected = CONTENDED;
-			futex.wait(expected, remaining);
+			futex.wait(CONTENDED, remaining);
 		}
 	}
 

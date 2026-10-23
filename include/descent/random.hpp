@@ -623,6 +623,11 @@ private:
 	void init(u64 seed) {
 		_state = seed;
 	}
+
+public:
+	WyRand(u64 seed = 0) {
+		init(seed);
+	}
 };
 
 class SplitMix : public Random<SplitMix, u64> {
@@ -642,10 +647,15 @@ private:
 	void init(u64 seed) {
 		_state = seed;
 	}
+
+public:
+	SplitMix(u64 seed = 0) {
+		init(seed);
+	}
 };
 
-// TODO: Bulk generation
-
 }
+
+// TODO: Bulk generation
 
 #endif

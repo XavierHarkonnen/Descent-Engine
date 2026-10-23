@@ -95,7 +95,7 @@ public:
 		}
 	}
 
-	void alloc(void *&data, void *&meta, u32 size, u32 align, u32 count) {
+	bool alloc(void *&data, void *&meta, u32 size, u32 align, u32 count) {
 		sys_assert(size != 0, "Attempted to allocate box with zero size");
 		sys_assert(align != 0, "Attempted to allocate box with zero alignment");
 		sys_assert(count != 0, "Attempted to allocate box with zero count");
@@ -110,7 +110,7 @@ public:
 		if (_size - _cursor < total || total > Footer::SIZE_MAX) {
 			data = nullptr;
 			meta = nullptr;
-			return;
+			return false;
 		}
 
 		u8 *alloc = _map + aligned;
@@ -124,6 +124,8 @@ public:
 
 		sys_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
 		sys_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
+
+		return true;
 	}
 
 	void free(Footer *footer) {
@@ -168,8 +170,8 @@ public:
 
 static thread_local Bump bump;
 
-void Allocator::create(void *&data, void *&meta, u32 size, u32 align, u32 count) {
-	bump.alloc(data, meta, size, align, count);
+bool Allocator::create(void *&data, void *&meta, u32 size, u32 align, u32 capacity) {
+	return bump.alloc(data, meta, size, align, capacity);
 }
 
 void Allocator::clear(void *data, void *meta) {

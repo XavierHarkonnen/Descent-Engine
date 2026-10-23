@@ -25,14 +25,20 @@
 namespace descent::thread {
 
 class Semaphore {
+	Semaphore(Semaphore &&) = delete;
+	Semaphore(const Semaphore &) = delete;
+	Semaphore operator =(Semaphore &&) = delete;
+	Semaphore operator =(const Semaphore &) = delete;
+
 private:
 
 	Futex futex;
 
 public:
+	Semaphore(u32 count) : futex(count) {}
 
 	bool wait(u64 timeout = time::INDEFINITE_TIMEOUT) {
-		u64 deadline = time::now() + timeout;
+		u64 start = time::now();
 
 		for (;;) {
 			u32 count = futex.word.load(atomic::Order::RELAXED);
@@ -42,10 +48,12 @@ public:
 					return true;
 			}
 
-			u64 remaining = deadline - time::now();
-
-			if (remaining <= 0)
+			u64 now = time::now();
+			u64 elapsed = now - start;
+			if (timeout != time::INDEFINITE_TIMEOUT && elapsed >= timeout)
 				return false;
+
+			u64 remaining = timeout ? timeout - elapsed : 0;
 
 			futex.wait(0, remaining);
 		}

@@ -4,6 +4,7 @@ add_library(${LIBRARY_NAME}
 	futex.cpp
 	task.cpp
 	thread.cpp
+	utilities.cpp
 )
 
 target_include_directories(${LIBRARY_NAME} PUBLIC

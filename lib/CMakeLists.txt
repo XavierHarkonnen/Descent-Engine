@@ -1,4 +1,7 @@
+#add_subdirectory(bsl)
+add_subdirectory(file)
 add_subdirectory(memory)
+add_subdirectory(rengine)
 add_subdirectory(system)
 add_subdirectory(thread)
 add_subdirectory(time)

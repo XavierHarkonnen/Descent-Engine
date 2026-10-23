@@ -16,8 +16,17 @@
 #ifndef DESCENT_THREAD_UTILITIES_HPP
 #define DESCENT_THREAD_UTILITIES_HPP
 
+#include <descent/type/core.hpp>
+
+namespace descent::thread {
+
 static inline void spin_pause(void) {
 	__asm__ __volatile__( "pause" : : : "memory" );
 }
+
+u64 id();
+
+}
+
 
 #endif

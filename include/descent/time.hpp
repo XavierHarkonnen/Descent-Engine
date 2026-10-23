@@ -13,19 +13,120 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_SYSTEM_TIME_HPP
-#define DESCENT_SYSTEM_TIME_HPP
+#ifndef DESCENT_TIME_HPP
+#define DESCENT_TIME_HPP
 
 #include <descent/type/core.hpp>
+#include <descent/type/traits.hpp>
 
 namespace descent::time {
 
-constexpr u64 NANOSECONDS_PER_SECOND = 1000000000;
-constexpr u64 INDEFINITE_TIMEOUT = 0;
+class duration {
+private:
+	i64 _ns;
 
-u64 now(void);
+	constexpr explicit duration(i64 ns) : _ns(ns) {}
 
-u64 sleep(u64 duration);
+public:
+	constexpr duration() : _ns(0) {}
+
+	static constexpr duration ns(i64 ns) { return duration(ns); }
+	static constexpr duration us(i64 us) { return ns(us * 1000); }
+	static constexpr duration ms(i64 ms) { return us(ms * 1000); }
+	static constexpr duration s(i64 s) { return ms(s * 1000); }
+
+	constexpr duration operator +(const duration d) const {
+		return duration(ns() + d.ns());
+	}
+
+	constexpr duration operator -(const duration o) const {
+		return duration(ns() - o.ns());
+	}
+
+	template<typename T>
+	constexpr duration operator *(T scale) const {
+		static_assert(type::traits<T>::is_numeric, "Attempted to scale duration with non-numeric type");
+		return duration(i64(ns() * scale));
+	}
+
+	template<typename T>
+	constexpr duration operator /(T scale) const {
+		static_assert(type::traits<T>::is_numeric, "Attempted to scale duration with non-numeric type");
+		return duration(i64(ns() / scale));
+	}
+
+	constexpr bool operator ==(duration o) const { return _ns == o._ns; }
+	constexpr bool operator !=(duration o) const { return _ns != o._ns; }
+	constexpr bool operator <(duration o) const { return _ns < o._ns; }
+	constexpr bool operator <=(duration o) const { return _ns <= o._ns; }
+	constexpr bool operator >(duration o) const { return _ns > o._ns; }
+	constexpr bool operator >=(duration o) const { return _ns >= o._ns; }
+
+	constexpr i64 ns() const { return _ns; }
+	constexpr i64 us() const { return ns() / 1000; }
+	constexpr i64 ms() const { return us() / 1000; }
+	constexpr i64 s() const { return ms() / 1000; }
+};
+
+class monotonic {
+private:
+	i64 _ns;
+
+	constexpr explicit monotonic(i64 ns) : _ns(ns) {}
+
+public:
+	static monotonic now();
+
+	constexpr monotonic operator +(const duration d) const {
+		return monotonic(ns() + d.ns());
+	}
+
+	constexpr monotonic operator -(const duration d) const {
+		return monotonic(ns() - d.ns());
+	}
+
+	constexpr duration operator -(const monotonic o) const {
+		return duration::ns(ns() - o.ns());
+	}
+
+	constexpr bool operator == (monotonic o) const { return _ns == o._ns; }
+	constexpr bool operator != (monotonic o) const { return _ns != o._ns; }
+	constexpr bool operator <  (monotonic o) const { return _ns <  o._ns; }
+	constexpr bool operator <= (monotonic o) const { return _ns <= o._ns; }
+	constexpr bool operator >  (monotonic o) const { return _ns >  o._ns; }
+	constexpr bool operator >= (monotonic o) const { return _ns >= o._ns; }
+
+	constexpr i64 ns() const { return _ns; }
+	constexpr i64 us() const { return ns() / 1000; }
+	constexpr i64 ms() const { return us() / 1000; }
+	constexpr i64 s() const { return ms() / 1000; }
+};
+
+class timestamp {
+private:
+	i64 _ns;
+
+	constexpr explicit timestamp(i64 ns) : _ns(ns) {}
+
+public:
+	static timestamp now();
+
+	constexpr bool operator == (timestamp o) const { return _ns == o._ns; }
+	constexpr bool operator != (timestamp o) const { return _ns != o._ns; }
+	constexpr bool operator <  (timestamp o) const { return _ns <  o._ns; }
+	constexpr bool operator <= (timestamp o) const { return _ns <= o._ns; }
+	constexpr bool operator >  (timestamp o) const { return _ns >  o._ns; }
+	constexpr bool operator >= (timestamp o) const { return _ns >= o._ns; }
+
+	constexpr i64 ns() const { return _ns; }
+	constexpr i64 us() const { return ns() / 1000; }
+	constexpr i64 ms() const { return us() / 1000; }
+	constexpr i64 s() const { return ms() / 1000; }
+};
+
+void sleep(duration d);
+
+void sleep(monotonic deadline);
 
 }
 

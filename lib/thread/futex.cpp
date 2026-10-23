@@ -32,14 +32,8 @@ extern "C" {
 
 namespace descent::thread {
 
-bool Futex::wait(u32 expected, u64 timeout) const {
-	struct timespec ts = intern::timespec_from_duration(timeout);
-	struct timespec *tsp = &ts;
-	
-	if (timeout == time::INDEFINITE_TIMEOUT)
-		tsp = nullptr;
-
-	long result = syscall(SYS_futex, &word._, FUTEX_WAIT_PRIVATE, expected, tsp, NULL, 0);
+static bool futex_wait(const Atomic<u32> &word, u32 expected, const struct timespec *timeout) {
+	long result = syscall(SYS_futex, &word, FUTEX_WAIT_PRIVATE, expected, timeout, NULL, 0);
 	if (result == 0)
 		return true;
 		// Woken, should check predicate
@@ -67,21 +61,15 @@ bool Futex::wait(u32 expected, u64 timeout) const {
 	}
 }
 
-u64 Futex::wait_any(const Pair *pairs, u64 size, u64 timeout) {
-	sys_assert(size <= MAX_WAIT_ANY, "Futex wait_any size exceeds maximum");
+static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec *timeout) {
+	sys_assert(size <= Futex::MAX_WAIT_ANY, "Futex wait_any size exceeds maximum");
 	
-	struct timespec ts = intern::timespec_from_duration(timeout);
-	struct timespec *tsp = &ts;
-	
-	if (timeout == time::INDEFINITE_TIMEOUT)
-		tsp = nullptr;
-
-	u64 indices[MAX_WAIT_ANY];
-	struct futex_waitv waitv[MAX_WAIT_ANY];
+	u64 indices[Futex::MAX_WAIT_ANY];
+	struct futex_waitv waitv[Futex::MAX_WAIT_ANY];
 	u64 count = 0;
 
 	for (u64 index = 0; index < size; ++index) {
-		waitv[count].uaddr = reinterpret_cast<u64>(&pairs[index].futex.word._);
+		waitv[count].uaddr = reinterpret_cast<u64>(&pairs[index].futex.word);
 		waitv[count].val = pairs[index].expected;
 		waitv[count].flags = FUTEX2_SIZE_U32 | FUTEX2_PRIVATE;
 		waitv[count].__reserved = 0;
@@ -91,35 +79,61 @@ u64 Futex::wait_any(const Pair *pairs, u64 size, u64 timeout) {
 	}
 
 	if (count == 0) {
-		return INVALID_INDEX;
+		return Futex::INVALID_INDEX;
 	}
 
-	long result = syscall(SYS_futex_waitv, waitv, count, 0, tsp, CLOCK_MONOTONIC);
+	long result = syscall(SYS_futex_waitv, waitv, count, 0, timeout, CLOCK_MONOTONIC);
 	if (result >= 0)
 		return indices[result];
 		// Woken, should check predicate
 
 	switch(errno) {
 		case EINTR:
-			return INVALID_INDEX;
+			return Futex::INVALID_INDEX;
 			// Interrupted, should check predicate
 
 		case EAGAIN:
-			return INVALID_INDEX;
+			return Futex::INVALID_INDEX;
 			// Value changed, should check predicate
 
 		case ETIMEDOUT:
-			return INVALID_INDEX;
+			return Futex::INVALID_INDEX;
 			// Timeout, need not check predicate
 
 		default:
 			sys_trap("Futex wait failed");
-			return INVALID_INDEX;
+			return Futex::INVALID_INDEX;
 			// Unhandled failure, should check predicate
 			// Failure to wait a thread is recoverable.
 			// This event is either exceptionally rare or indicates programmer error.
 			// In release, may cause a busywait. In debug, knowing about it is more important.
 	}
+}
+
+bool Futex::wait(u32 expected) const {
+	return futex_wait(word, expected, nullptr);
+}
+
+bool Futex::wait(u32 expected, time::duration timeout) const {
+	if (timeout.ns() <= 0)
+		return false;
+		// Immediate timeout, need not check predicate
+
+	struct timespec ts = intern::time::timespec_from_ns(timeout.ns());
+	return futex_wait(word, expected, &ts);
+}
+
+u64 Futex::wait_any(const Pair *pairs, u64 size) {
+	return futex_waitv(pairs, size, nullptr);
+}
+
+u64 Futex::wait_any(const Pair *pairs, u64 size, time::duration timeout) {
+	if (timeout.ns() <= 0)
+		return INVALID_INDEX;
+		// Immediate timeout, need not check predicate
+
+	struct timespec ts = intern::time::timespec_from_ns(timeout.ns());
+	return futex_waitv(pairs, size, &ts);
 }
 
 void Futex::wake_one() const {

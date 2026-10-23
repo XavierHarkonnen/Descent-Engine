@@ -49,7 +49,8 @@ private:
 	Futex& operator=(Futex &&) = delete;
 	Futex& operator=(const Futex &) = delete;
 
-	static u64 wait_any(const Pair *pairs, u64 size, u64 timeout);
+	static u64 wait_any(const Pair *pairs, u64 size);
+	static u64 wait_any(const Pair *pairs, u64 size, time::duration timeout);
 
 public:
 
@@ -57,10 +58,16 @@ public:
 
 	explicit Futex(u32 value = 0) : word(value) {}
 
-	bool wait(u32 expected, u64 timeout = time::INDEFINITE_TIMEOUT) const;
+	bool wait(u32 expected) const;
+	bool wait(u32 expected, time::duration timeout) const;
 
 	template <u64 N>
-	static u64 wait_any(const Any<N> &any, u64 timeout = time::INDEFINITE_TIMEOUT) {
+	static u64 wait_any(const Any<N> &any) {
+		return wait_any(any.pairs, N);
+	}
+
+	template <u64 N>
+	static u64 wait_any(const Any<N> &any, time::duration timeout) {
 		return wait_any(any.pairs, N, timeout);
 	}
 

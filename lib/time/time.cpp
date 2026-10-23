@@ -14,12 +14,14 @@
  */
 
 #include <descent/time.hpp>
-
+ 
 extern "C" {
+#include <errno.h>
 #include <time.h>
 }
 
 #include <descent/system.hpp>
+#include <descent/thread/utilities.hpp>
 #include <descent/type/core.hpp>
 #include <intern/time.hpp>
 
@@ -31,25 +33,46 @@ static void init(void) {
 	if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
 		sys_fatal("Platform does not support CLOCK_MONOTONIC");
 	}
+
+	if (clock_gettime(CLOCK_REALTIME, &ts) != 0) {
+		sys_fatal("Platform does not support CLOCK_REALTIME");
+	}
 }
 
-u64 now(void) {
+monotonic monotonic::now() {
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
-
-	return intern::duration_from_timespec(ts);
+	return monotonic(intern::time::ns_from_timespec(ts));
 }
 
-u64 sleep(u64 duration) {
-	if (duration == 0)
-		return 0;
+timestamp timestamp::now() {
+	struct timespec ts;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	return timestamp(intern::time::ns_from_timespec(ts));
+}
 
-	struct timespec ts = intern::timespec_from_duration(duration);
-	struct timespec rts;
-	if (nanosleep(&ts, &rts))
-		return intern::duration_from_timespec(rts);
+void sleep(duration d) {
+	if (d.ns() <= 0)
+		return;
 
-	return 0;
+	sleep(monotonic::now() + d);
+}
+
+void sleep(monotonic deadline) {
+	timespec ts = intern::time::timespec_from_ns(deadline.ns());
+
+	for (;;) {
+		int rc = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
+		if (rc == 0)
+			return;
+
+		if (rc == EINTR)
+			continue;
+
+		// Busy-wait on failure in production - undesirable but better than terminating.
+		sys_trap("clock_nanosleep failed");
+		thread::spin_pause();
+	}
 }
 
 }
