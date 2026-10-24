@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 extern "C" {
 #include <stdint.h>
 }
@@ -29,7 +44,7 @@ static inline bool is_aligned(void *p, u64 align) {
 }
 
 u64 Tracker::constructed = 0;
-u64 Tracker::destroyed = 0;
+u64 Tracker::destroyed   = 0;
 
 void test_size() {
 	auto b1 = stack::Allocator::create<u8>(1);
@@ -50,9 +65,9 @@ void test_size() {
 
 void test_constructor() {
 	constexpr u8 VALUE = 0x1A;
-	auto b1 = stack::Allocator::create<u8>(8, VALUE);
+	auto b1            = stack::Allocator::create<u8>(8, VALUE);
 	test_check(b1, "Incorrect box size");
-	for (u64 i = 0; i  < b1.size(); ++i)
+	for (u64 i = 0; i < b1.size(); ++i)
 		test_check(b1[i] == VALUE, "Incorrectly constructed element");
 }
 
@@ -74,16 +89,16 @@ void test_align() {
 }
 
 void test_lifo_reclamation() {
-	auto a = stack::Allocator::create<u64>(8);
+	auto a      = stack::Allocator::create<u64>(8);
 	auto *a_ptr = a.data();
 
-	auto b = stack::Allocator::create<u64>(8);
+	auto b      = stack::Allocator::create<u64>(8);
 	auto *b_ptr = b.data();
 
-	auto c = stack::Allocator::create<u64>(8);
+	auto c      = stack::Allocator::create<u64>(8);
 	auto *c_ptr = c.data();
 
-	auto d = stack::Allocator::create<u64>(8);
+	auto d      = stack::Allocator::create<u64>(8);
 	auto *d_ptr = d.data();
 
 	test_check(a, "Allocation A failed");
@@ -125,14 +140,14 @@ void test_lifo_reclamation() {
 }
 
 void test_loop() {
-	auto base = stack::Allocator::create<u8>(1);
+	auto base      = stack::Allocator::create<u8>(1);
 	auto *base_ptr = base.data();
 	base.~Box();
 
 	for (u64 i = 0; i < 100; ++i) {
 		auto box = stack::Allocator::create<u8>(12);
 	}
-	
+
 	auto box = stack::Allocator::create<u8>(12);
 	test_check(box.data() == base_ptr, "Frees were not reclaimed");
 }
@@ -166,61 +181,55 @@ void test_nested() {
 
 void test_object_lifetime() {
 	Tracker::constructed = 0;
-	Tracker::destroyed = 0;
+	Tracker::destroyed   = 0;
 
 	{
 		auto box = stack::Allocator::create<Tracker>(100, 42);
 
-		test_check(
-			Tracker::constructed == 100,
-			"Incorrect number of constructions"
-		);
+		test_check(Tracker::constructed == 100, "Incorrect number of constructions");
 
 		for (u64 i = 0; i < box.size(); ++i)
 			test_check(box[i].value == 42, "Incorrect constructor argument");
 	}
 
-	test_check(
-		Tracker::destroyed == 100,
-		"Incorrect number of destructions"
-	);
+	test_check(Tracker::destroyed == 100, "Incorrect number of destructions");
 }
 
 void test_reuse() {
 	for (u64 iteration = 0; iteration < 100000; ++iteration) {
-		auto base = stack::Allocator::create<u64>(1);
+		auto base     = stack::Allocator::create<u64>(1);
 		auto base_ptr = base.data();
 		base.~Box();
 
 		{
 			auto a = stack::Allocator::create<u64>(1);
-			a[0] = iteration;
+			a[0]   = iteration;
 		}
 
-		auto ba = stack::Allocator::create<u64>(1);
+		auto ba     = stack::Allocator::create<u64>(1);
 		auto ba_ptr = ba.data();
 		test_check(ba_ptr == base_ptr, "Freed box A was not reclaimed");
 		ba.~Box();
 
 		{
 			auto b = stack::Allocator::create<u64>(2);
-			b[0] = iteration;
-			b[1] = iteration + 1;
+			b[0]   = iteration;
+			b[1]   = iteration + 1;
 		}
 
-		auto bb = stack::Allocator::create<u64>(1);
+		auto bb     = stack::Allocator::create<u64>(1);
 		auto bb_ptr = bb.data();
 		test_check(bb_ptr == base_ptr, "Freed box B was not reclaimed");
 		bb.~Box();
 
 		{
 			auto c = stack::Allocator::create<u64>(3);
-			c[0] = iteration;
-			c[1] = iteration + 1;
-			c[2] = iteration + 2;
+			c[0]   = iteration;
+			c[1]   = iteration + 1;
+			c[2]   = iteration + 2;
 		}
 
-		auto bc = stack::Allocator::create<u64>(1);
+		auto bc     = stack::Allocator::create<u64>(1);
 		auto bc_ptr = bc.data();
 		test_check(bc_ptr == base_ptr, "Freed box C was not reclaimed");
 		bc.~Box();
@@ -264,17 +273,15 @@ void stress_varying_sizes() {
 using namespace descent;
 using namespace descent::memory;
 
-static constexpr test::Case cases[] = {
-	{ "test_size",                 test_size },
-	{ "test_constructor",          test_constructor },
-	{ "test_align",                test_align },
-	{ "test_lifo_reclamation",     test_lifo_reclamation },
-	{ "test_loop",                 test_loop },
-	{ "test_nested",               test_nested },
-	{ "test_object_lifetime",      test_object_lifetime },
-	{ "test_reuse",                test_reuse },
-	{ "stress_varying_sizes",      stress_varying_sizes }
-};
+static constexpr test::Case cases[] = { { "test_size", test_size },
+										{ "test_constructor", test_constructor },
+										{ "test_align", test_align },
+										{ "test_lifo_reclamation", test_lifo_reclamation },
+										{ "test_loop", test_loop },
+										{ "test_nested", test_nested },
+										{ "test_object_lifetime", test_object_lifetime },
+										{ "test_reuse", test_reuse },
+										{ "stress_varying_sizes", stress_varying_sizes } };
 
 int main(int argc, char **argv) {
 	return test::run(cases, argc, argv);

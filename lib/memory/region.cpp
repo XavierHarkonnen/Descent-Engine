@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,7 +42,7 @@ void *Detail::acquire(u32 page_count, Access access) {
 }
 
 void *Detail::resize(void *data, u32 page_count, u32 new_count) {
-	u64 size = PAGE_SIZE * page_count;
+	u64 size     = PAGE_SIZE * page_count;
 	u64 new_size = PAGE_SIZE * new_count;
 
 	void *new_data = mremap(data, size, new_size, MREMAP_MAYMOVE);
@@ -54,7 +54,7 @@ void *Detail::resize(void *data, u32 page_count, u32 new_count) {
 
 bool Detail::protect(void *data, u32 page_start, u32 page_count, Access access) {
 	u64 start = PAGE_SIZE * page_start;
-	u64 size = PAGE_SIZE * page_count;
+	u64 size  = PAGE_SIZE * page_count;
 
 	if (mprotect(static_cast<u8 *>(data) + start, size, mem_prot(access)))
 		return false;

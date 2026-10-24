@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,7 @@ bool Task::spawn(const Job &job) {
 	Worker *host = self();
 	if (!host)
 		return false;
-	
+
 	Task *task = host->allocate();
 	if (!task)
 		return false;
@@ -70,17 +70,17 @@ bool Task::spawn(const Job &job, u64 size) {
 		return false;
 
 	sys_assert(size <= INLINE_DATA_SIZE, "Attempted to set task with oversized data");
-	
+
 	Worker *host = self();
 	if (!host)
 		return false;
-	
+
 	Task *task = host->allocate();
 	if (!task)
 		return false;
 
 	memcpy(task->_data, job.context, size);
-	task->create({job.routine, task->_data}, *this);
+	task->create({ job.routine, task->_data }, *this);
 	host->submit(task);
 
 	return true;

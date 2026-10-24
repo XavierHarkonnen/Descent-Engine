@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,13 +46,13 @@ class Region : public Detail {
 	static_assert(__is_constructible(T), "T must be default-constructable");
 	static_assert(PAGES != DYNAMIC_PAGES, "Cannot create static region with DYNAMIC_PAGES");
 
-	Region(const Region &) = delete;
-	Region &operator=(const Region &) = delete;
+	Region(const Region &)             = delete;
+	Region &operator =(const Region &) = delete;
 
 private:
-	static constexpr u64 SIZE = PAGES * PAGE_SIZE;
+	static constexpr u64 SIZE     = PAGES * PAGE_SIZE;
 	static constexpr u64 CAPACITY = SIZE / sizeof(T);
-	
+
 	static_assert(CAPACITY > 0, "Region has insufficient size to contain instance of type");
 	static_assert(alignof(T) <= PAGE_SIZE, "Type has greater alignment than page alignment");
 
@@ -69,39 +69,39 @@ public:
 		Region::release();
 	}
 
-	Region &operator=(Region &&other) {
+	Region &operator =(Region &&other) {
 		if (this != &other) {
 			Region::release();
 
-			_data = other._data;
+			_data       = other._data;
 			other._data = nullptr;
 		}
 
 		return *this;
 	}
 
-	explicit operator bool() const { 
-		return _data; 
+	explicit operator bool() const {
+		return _data;
 	}
 
 	T &operator [](u64 index) {
 		return _data[index];
 	}
-	
+
 	const T &operator [](u64 index) const {
 		return _data[index];
 	}
-	
+
 	bool acquire() {
 		if (_data)
 			return false;
-		
+
 		_data = static_cast<T *>(Detail::acquire(PAGES, Access::EDIT));
 
 		if (!_data)
 			return false;
 
-		for (u64 i = 0 ; i < capacity(); ++i)
+		for (u64 i = 0; i < capacity(); ++i)
 			construct(_data + i);
 
 		return true;
@@ -109,7 +109,7 @@ public:
 
 	void release() {
 		if (_data) {
-			for (u64 i = 1 ; i <= capacity(); ++i)
+			for (u64 i = 1; i <= capacity(); ++i)
 				(_data + capacity() - i)->~T();
 
 			Detail::release(_data, pages());
@@ -137,8 +137,8 @@ private:
 	T *_data;
 	u64 _size;
 
-	Region(const Region &) = delete;
-	Region &operator=(const Region &) = delete;
+	Region(const Region &)             = delete;
+	Region &operator =(const Region &) = delete;
 
 public:
 	Region() : _data(nullptr), _size(0) {}
@@ -156,13 +156,13 @@ public:
 		release();
 	}
 
-	Region &operator=(Region &&other) {
+	Region &operator =(Region &&other) {
 		if (this != &other) {
 			release();
-	
+
 			_data = other._data;
 			_size = other._size;
-	
+
 			other._data = nullptr;
 			other._size = 0;
 		}
@@ -170,34 +170,34 @@ public:
 		return *this;
 	}
 
-	explicit operator bool() const { 
-		return _data; 
+	explicit operator bool() const {
+		return _data;
 	}
 
 	T &operator [](u64 index) {
 		return _data[index];
 	}
-	
+
 	const T &operator [](u64 index) const {
 		return _data[index];
 	}
-	
+
 	bool acquire(u32 page_count) {
 		if (_data || page_count == 0)
 			return false;
-		
+
 		_data = static_cast<T *>(Detail::acquire(page_count, Access::EDIT));
-		
+
 		if (!_data)
 			return false;
-		
+
 		_size = page_count * PAGE_SIZE;
-		for (u64 i = 0 ; i < capacity(); ++i)
+		for (u64 i = 0; i < capacity(); ++i)
 			construct(_data + i);
 
 		return true;
 	}
-	
+
 	bool resize(u32 page_count) {
 		void *new_data = Detail::resize(_data, pages(), page_count);
 		if (new_data) {
@@ -211,7 +211,7 @@ public:
 
 	void release() {
 		if (_data) {
-			for (u64 i = 1 ; i <= capacity(); ++i)
+			for (u64 i = 1; i <= capacity(); ++i)
 				(_data + capacity() - i)->~T();
 
 			Detail::release(_data, pages());

@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <descent/bsl/level.hpp>
 #include <descent/bsl/site.hpp>
 #include <descent/random.hpp>
@@ -45,23 +60,21 @@ static int session_directory() {
 static const char *symbol_path() {
 	char path[sizeof(i64)];
 
-	
+
 
 	return path;
 }
 
-static const char *thread_path() {
-
-}
+static const char *thread_path() {}
 
 template<typename T>
 static void hexcpy(char *output, T input, u64 size) {
 	static_assert(type::traits<T>::is_integer, "hexcpy requires integer argument");
 
-	constexpr char HEX[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+	constexpr char HEX[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 	using U = typename type::traits<T>::to_unsigned;
-	U bits = U(input);
+	U bits  = U(input);
 
 	for (u64 i = 0; i < size; ++i) {
 		output[size - i - 1] = HEX[bits & 0xF];
@@ -109,7 +122,7 @@ static bool init_symbol() {
 bool init_thread() {
 	if (!init_symbol())
 		return false;
-	
+
 	static thread::Once once(generate_thread_file);
 	return once();
 }

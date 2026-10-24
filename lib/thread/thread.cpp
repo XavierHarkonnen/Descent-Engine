@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,8 +29,8 @@ extern "C" {
 namespace descent::thread {
 
 constexpr u32 MAX_THREADS = 32;
-constexpr u32 STACK_SIZE = 1024 * 16;
-const u32 STACK_MIN = static_cast<u32>(PTHREAD_STACK_MIN);
+constexpr u32 STACK_SIZE  = 1024 * 16;
+const u32 STACK_MIN       = static_cast<u32>(PTHREAD_STACK_MIN);
 
 static_assert(MAX_THREADS == 32, "MAX_THREADS must be 32");
 
@@ -38,7 +38,7 @@ static_assert(MAX_THREADS == 32, "MAX_THREADS must be 32");
 struct ThreadData {
 	alignas(memory::CACHE_LINE_SIZE)
 
-	pthread_t pthread;
+		pthread_t pthread;
 	Routine routine;
 	void *argument;
 	Futex signal;
@@ -53,11 +53,11 @@ static_assert(alignof(ThreadData) == memory::CACHE_LINE_SIZE);
 static Atomic<u32> free(~u32(0));
 ThreadData threads[MAX_THREADS];
 
-static thread_local u32 self_index = MAX_THREADS;
+static thread_local u32 self_index      = MAX_THREADS;
 static thread_local bool is_main_thread = false;
 
 
-__attribute__((constructor))
+[[gnu::constructor]]
 static void init() {
 	is_main_thread = true;
 }
@@ -71,7 +71,7 @@ static u32 acquire() {
 		return MAX_THREADS;
 
 	const u32 index = static_cast<u32>(bit::ctz(available));
-	const u64 mask = u64(1) << index;
+	const u64 mask  = u64(1) << index;
 
 	free.store(available & ~mask, atomic::Order::RELAXED);
 
@@ -93,7 +93,7 @@ static void *wrapper(void *argument) {
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, nullptr);
 
 	ThreadData &thread = *static_cast<ThreadData *>(argument);
-	self_index = u32(&thread - threads);
+	self_index         = u32(&thread - threads);
 
 	pthread_cleanup_push(cleanup, argument);
 
@@ -112,7 +112,7 @@ static u32 create_thread(Routine routine, void *argument, u32 stack_size) {
 	if (index == MAX_THREADS)
 		return MAX_THREADS;
 
-	threads[index].routine = routine;
+	threads[index].routine  = routine;
 	threads[index].argument = argument;
 	threads[index].signal.word.store(0, atomic::Order::RELAXED);
 	threads[index].finished.word.store(0, atomic::Order::RELAXED);
@@ -167,7 +167,7 @@ Thread::~Thread() {
 		threads[index].owned.clear(atomic::Order::RELAXED);
 }
 
-Thread &Thread::operator=(Thread &&other) {
+Thread &Thread::operator =(Thread &&other) {
 	if (this != &other) {
 		Thread *t0 = this > &other ? this : &other;
 		Thread *t1 = this > &other ? &other : this;
@@ -275,7 +275,7 @@ u32 Thread::collect() {
 			temp.join();
 		}
 	}
-	
+
 	return static_cast<u32>(bit::popcnt(~free.load(atomic::Order::RELAXED)));
 }
 

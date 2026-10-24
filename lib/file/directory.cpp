@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "file.hpp"
 
 extern "C" {
@@ -121,7 +136,7 @@ static bool make_dirs(string path) {
 
 		if (buffer[i] == '/' && buffer[i - 1] != '/') {
 			buffer[i] = '\0';
-		
+
 			if (!make_dir_cstr(buffer.data()))
 				return false;
 
@@ -150,7 +165,7 @@ static bool make_dirs(int root, string path) {
 
 		if (buffer[i] == '/' && buffer[i - 1] != '/') {
 			buffer[i] = '\0';
-		
+
 			if (!make_dir_cstr(root, buffer.data()))
 				return false;
 
@@ -203,7 +218,7 @@ static int home_fd() {
 static int generate_base_fd(void) {
 	char buffer[PATH_MAX];
 	i64 size = readlink("/proc/self/exe", buffer, sizeof(buffer));
-	
+
 	if (size <= 0 || u64(size) >= sizeof(buffer))
 		return -1;
 
@@ -215,7 +230,7 @@ static int generate_base_fd(void) {
 	if (slash == string::INVALID)
 		return -1;
 
-	u64 index = (slash == 0) ? 1 : slash;
+	u64 index   = (slash == 0) ? 1 : slash;
 	string base = executable.sub(0, index);
 
 	return open_dir(base);
@@ -231,7 +246,7 @@ static int generate_root_fd(string name, string env_name, string fallback) {
 	// variables it should consider the path invalid and ignore it."
 	if (env_path && env_path[0] == '/')
 		env_fd = make_open_dir(env_path);
-	
+
 	if (env_fd < 0)
 		env_fd = make_open_dir(home_fd(), fallback);
 
@@ -255,7 +270,7 @@ bool set_program_name(string name) {
 		return false;
 
 	const u64 C_LENGTH = name.c_length();
-	const u64 LENGTH = (C_LENGTH == string::INVALID) ? name.size() : C_LENGTH;
+	const u64 LENGTH   = (C_LENGTH == string::INVALID) ? name.size() : C_LENGTH;
 
 	if (LENGTH >= MAX_PROGRAM_NAME_SIZE)
 		return false;
@@ -301,7 +316,7 @@ const Directory &Directory::data() {
 const Directory &Directory::state() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
-	
+
 	static const Directory result(generate_root_fd(program_name, string("XDG_STATE_HOME"), string(".local/state")));
 	return result;
 }
@@ -309,7 +324,7 @@ const Directory &Directory::state() {
 const Directory &Directory::cache() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
-	
+
 	static const Directory result(generate_root_fd(program_name, string("XDG_CACHE_HOME"), string(".cache")));
 	return result;
 }
@@ -319,7 +334,7 @@ Directory &Directory::operator =(Directory &&other) {
 		if (fd >= 0)
 			close(fd);
 
-		fd = other.fd;
+		fd       = other.fd;
 		other.fd = -1;
 	}
 

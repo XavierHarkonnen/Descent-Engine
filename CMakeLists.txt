@@ -19,6 +19,12 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(DescentTargets)
 
+# Source hygiene (licence, include guards, whitespace): cmake --build <dir> --target check-sources
+add_custom_target(check-sources
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/CheckSources.cmake
+	VERBATIM
+)
+
 # Find required libraries
 find_package(Vulkan REQUIRED)
 find_package(PkgConfig REQUIRED)

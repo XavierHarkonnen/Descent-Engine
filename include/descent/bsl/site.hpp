@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef DESCENT_BSL_SITE_HPP
 #define DESCENT_BSL_SITE_HPP
 
@@ -12,7 +27,7 @@
 namespace descent::bsl {
 
 class SiteData {
-	friend bool deserialize(SiteData &schema, const u8* input, u64 size, u64& offset);
+	friend bool deserialize(SiteData &schema, const u8 *input, u64 size, u64 &offset);
 
 protected:
 	string _message;
@@ -46,7 +61,7 @@ public:
 	}
 };
 
-template<typename ...Args>
+template<typename... Args>
 class Site : public SiteData {
 
 private:
@@ -66,13 +81,13 @@ public:
 		extern const SiteData __stop_bsl_sites[];
 
 		const u64 start = reinterpret_cast<u64>(__start_bsl_sites);
-		const u64 stop = reinterpret_cast<u64>(__stop_bsl_sites);
-		const u64 self = reinterpret_cast<u64>(this);
+		const u64 stop  = reinterpret_cast<u64>(__stop_bsl_sites);
+		const u64 self  = reinterpret_cast<u64>(this);
 
 		if (self < start || self > stop || sizeof(*this) > stop - self)
 			return;
-		
-		const u64 index = (self - start) / sizeof(Site);;
+
+		const u64 index = (self - start) / sizeof(Site);
 
 		sys_assert(index <= U32_MAX, "Site index exceeds the supported u32 range");
 		sys_assert(bit::popcnt(u8(level)) == 1, "Logging can only be performed at a single level");
@@ -80,14 +95,14 @@ public:
 		sys_assert(file.data() != nullptr, "Logging cannot be performed with a null file");
 
 		_message = message;
-		_file = file;
-		_line = line;
-		_index = u32(index);
-		_schema = Schema<Args...>();
-		_level = level;
+		_file    = file;
+		_line    = line;
+		_index   = u32(index);
+		_schema  = Schema<Args...>();
+		_level   = level;
 	}
 
-	void log(Args ...args) const {
+	void log(Args... args) const {
 		if (enabled(_level)) {
 			entry();
 			(parameter(args), ...);
@@ -95,7 +110,7 @@ public:
 	}
 };
 
-inline bool serialize(const SiteData &site, u8* output, u64 size, u64& offset) {
+inline bool serialize(const SiteData &site, u8 *output, u64 size, u64 &offset) {
 	u64 cursor = offset;
 
 	if (!serialize(site.message(), output, size, cursor))
@@ -117,7 +132,7 @@ inline bool serialize(const SiteData &site, u8* output, u64 size, u64& offset) {
 	return true;
 }
 
-inline bool deserialize(SiteData &site, const u8* input, u64 size, u64& offset) {
+inline bool deserialize(SiteData &site, const u8 *input, u64 size, u64 &offset) {
 	u64 cursor = offset;
 
 	if (!deserialize(site._message, input, size, cursor))

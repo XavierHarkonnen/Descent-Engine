@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -144,13 +144,13 @@ private:
 			Task *task = self._deque.pop();
 			if (!task)
 				break;
-			
+
 			(*task)();
 		}
-		
+
 		do {
 			Worker &victim = self.victim();
-			Task *task = victim._deque.steal();
+			Task *task     = victim._deque.steal();
 			if (task) {
 				(*task)();
 				goto executing;
@@ -160,7 +160,7 @@ private:
 		// All work is done, none can be added until a new frame is started.
 
 		for (;;) {
-			switch(self.state()) {
+			switch (self.state()) {
 				case STATE_WAIT_FRAME:
 					self._finished->word.fetch_add(1, atomic::Order::RELEASE);
 					self._finished->wake_one();
@@ -169,9 +169,7 @@ private:
 					self._finished->word.fetch_add(1, atomic::Order::RELEASE);
 					self._finished->wake_one();
 					return nullptr;
-				default:
-					self.wait(STATE_CONTINUE);
-					break;
+				default: self.wait(STATE_CONTINUE); break;
 			}
 		}
 	}
@@ -191,9 +189,9 @@ public:
 		rng.seed(index);
 
 		_finished = finished;
-		_workers = workers;
-		_count = count;
-		_index = index;
+		_workers  = workers;
+		_count    = count;
+		_index    = index;
 		// Published to the worker by the release store in transition().
 		_origin.store(frame(), atomic::Order::RELAXED);
 		transition(STATE_WAIT_FRAME, false);
@@ -226,7 +224,7 @@ public:
 	Task *allocate() {
 		return _allocator.allocate();
 	}
-	
+
 	void submit(Task *task) {
 		_deque.push(task);
 	}

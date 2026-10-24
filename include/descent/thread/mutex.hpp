@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,9 @@
 namespace descent::thread {
 
 class Mutex {
-	Mutex(Mutex &&) = delete;
-	Mutex(const Mutex &) = delete;
-	Mutex operator =(Mutex &&) = delete;
+	Mutex(Mutex &&)                 = delete;
+	Mutex(const Mutex &)            = delete;
+	Mutex operator =(Mutex &&)      = delete;
 	Mutex operator =(const Mutex &) = delete;
 
 private:
@@ -94,7 +94,7 @@ public:
 			state = futex.word.exchange(CONTENDED, atomic::Order::ACQUIRE);
 
 		while (state != FREE) {
-			time::monotonic now = time::monotonic::now();
+			time::monotonic now    = time::monotonic::now();
 			time::duration elapsed = now - start;
 			if (elapsed >= timeout)
 				return false;
@@ -118,10 +118,10 @@ public:
 
 namespace mutex {
 class Scope {
-	Scope(Scope &&) = delete;
-	Scope(const Scope &) = delete;
-	Scope &operator=(Scope &&) = delete;
-	Scope &operator=(const Scope &) = delete;
+	Scope(Scope &&)                  = delete;
+	Scope(const Scope &)             = delete;
+	Scope &operator =(Scope &&)      = delete;
+	Scope &operator =(const Scope &) = delete;
 
 private:
 	Mutex &_mutex;

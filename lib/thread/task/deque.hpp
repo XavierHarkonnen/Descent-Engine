@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,8 +28,8 @@ private:
 	static constexpr u64 CAPACITY = 1024;
 	static_assert((CAPACITY & (CAPACITY - 1)) == 0, "CAPACITY must be a power of two");
 
-	Atomic<Task *>tasks[CAPACITY];
-	
+	Atomic<Task *> tasks[CAPACITY];
+
 	Atomic<u64> top;
 	Atomic<u64> bottom;
 
@@ -86,7 +86,7 @@ public:
 
 		// Win or lose, update the bottom to canonical empty state
 		bottom.store(b + 1, atomic::Order::RELAXED);
-		
+
 		return task;
 	}
 
@@ -103,12 +103,12 @@ public:
 		}
 
 		Task *task = tasks[t & (CAPACITY - 1)].load(atomic::Order::RELAXED);
-		
+
 		// Verify that another thread has not taken the work
 		if (!top.compare_exchange(t, t + 1, atomic::Order::SEQ_CST, atomic::Order::RELAXED)) {
 			return nullptr;
 		}
-		
+
 		// Task is now known to be valid and can be returned
 		return task;
 	}

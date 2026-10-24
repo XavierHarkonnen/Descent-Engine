@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_THREAD_TASK_TASK_HPP
-#define DESCENT_LIB_THREAD_TASK_TASK_HPP
+#ifndef DESCENT_LIB_THREAD_TASK_NODE_HPP
+#define DESCENT_LIB_THREAD_TASK_NODE_HPP
 
 #include <descent/memory/platform.hpp>
 #include <descent/system.hpp>
@@ -28,15 +28,15 @@ namespace descent::thread::task {
 class Node {
 	friend class Task;
 
-	Node(Node &&other) = delete;
-	Node(const Node &other) = delete;
-	Node &operator=(Node &&other) = delete;
-	Node &operator=(const Node &other) = delete;
+	Node(Node &&other)                  = delete;
+	Node(const Node &other)             = delete;
+	Node &operator =(Node &&other)      = delete;
+	Node &operator =(const Node &other) = delete;
 
 protected:
 	alignas(memory::CACHE_LINE_SIZE)
 
-	Routine _routine;
+		Routine _routine;
 	void *_context;
 	Node *_parent;
 	Futex _unfinished;
@@ -84,7 +84,7 @@ public:
 
 		_routine = nullptr;
 		_context = nullptr;
-		_parent = nullptr;
+		_parent  = nullptr;
 		_unfinished.word.store(1, atomic::Order::RELEASE);
 	}
 
@@ -111,7 +111,7 @@ private:
 
 		_routine = job.routine;
 		_context = job.context;
-		_parent = &parent;
+		_parent  = &parent;
 		_unfinished.word.store(1, atomic::Order::RELEASE);
 		parent.increment();
 	}

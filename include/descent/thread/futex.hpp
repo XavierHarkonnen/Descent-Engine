@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +25,7 @@ namespace descent::thread {
 class Futex {
 public:
 
-	static constexpr u64 MAX_WAIT_ANY = 4;
+	static constexpr u64 MAX_WAIT_ANY  = 4;
 	static constexpr u64 INVALID_INDEX = MAX_WAIT_ANY;
 
 	struct Pair {
@@ -35,7 +35,7 @@ public:
 		Pair(const Futex &futex, u32 expected) : futex(futex), expected(expected) {}
 	};
 
-	template <u64 N>
+	template<u64 N>
 	struct Any {
 		static_assert(N <= MAX_WAIT_ANY, "Cannot create Futex::Any with more than MAX_WAIT_ANY elements");
 
@@ -44,10 +44,10 @@ public:
 
 private:
 
-	Futex(Futex &&) = delete;
-	Futex(const Futex &) = delete;
-	Futex& operator=(Futex &&) = delete;
-	Futex& operator=(const Futex &) = delete;
+	Futex(Futex &&)                  = delete;
+	Futex(const Futex &)             = delete;
+	Futex &operator =(Futex &&)      = delete;
+	Futex &operator =(const Futex &) = delete;
 
 	static u64 wait_any(const Pair *pairs, u64 size);
 	static u64 wait_any(const Pair *pairs, u64 size, time::duration timeout);
@@ -61,12 +61,12 @@ public:
 	bool wait(u32 expected) const;
 	bool wait(u32 expected, time::duration timeout) const;
 
-	template <u64 N>
+	template<u64 N>
 	static u64 wait_any(const Any<N> &any) {
 		return wait_any(any.pairs, N);
 	}
 
-	template <u64 N>
+	template<u64 N>
 	static u64 wait_any(const Any<N> &any, time::duration timeout) {
 		return wait_any(any.pairs, N, timeout);
 	}

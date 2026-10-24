@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,8 @@
 namespace descent::thread::task {
 
 static inline constexpr u64 INLINE_DATA_SIZE = 36;
-static inline constexpr u64 MAX_START_JOBS = 64;
-static inline constexpr u64 MAX_WORKERS = 16;
+static inline constexpr u64 MAX_START_JOBS   = 64;
+static inline constexpr u64 MAX_WORKERS      = 16;
 
 class Handle;
 class Task;
@@ -39,8 +39,8 @@ struct Job {
 class Handle {
 	friend class Task;
 
-	Handle(const Handle &other) = delete;
-	Handle &operator=(const Handle &other) = delete;
+	Handle(const Handle &other)             = delete;
+	Handle &operator =(const Handle &other) = delete;
 
 private:
 	Task *_;
@@ -51,9 +51,9 @@ private:
 		other._ = nullptr;
 	}
 
-	Handle &operator=(Handle &&other) {
+	Handle &operator =(Handle &&other) {
 		if (this != &other) {
-			_ = other._;
+			_       = other._;
 			other._ = nullptr;
 		}
 
@@ -83,7 +83,7 @@ bool begin(const Job *jobs, u64 count);
 
 // If the task frame is inactive, activates it and returns true. Otherwise
 // returns false.
-template <u64 N>
+template<u64 N>
 static bool begin(const Job (&jobs)[N]) {
 	static_assert(N > 0 && N <= MAX_START_JOBS, "Illegal starting job count");
 	return begin(jobs, N);

@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,14 +26,15 @@ namespace descent::random {
 
 class Detail {
 protected:
-	template <typename T>
+	template<typename T>
 	struct normal;
 
-	template <typename T>
+	template<typename T>
 	struct exponential;
 
-	template <>
+	template<>
 	struct normal<f32> {
+		// clang-format off
 		inline static constexpr u32 K[128] = {
 			0x76AD2212u, 0x00000000u, 0x600F1B53u, 0x6CE447A6u, 0x725B46A2u, 0x7560051Du, 0x774921EBu, 0x789A25BDu,
 			0x799045C3u, 0x7A4BCE5Du, 0x7ADF629Fu, 0x7B5682A6u, 0x7BB8A8C6u, 0x7C0AE722u, 0x7C50CCE7u, 0x7C8CEC5Bu,
@@ -52,7 +53,9 @@ protected:
 			0x7E6B9933u, 0x7E5D8A1Au, 0x7E4D9DEDu, 0x7E3B737Au, 0x7E268C2Fu, 0x7E0E3FF5u, 0x7DF1AA5Du, 0x7DCF8C72u,
 			0x7DA61A1Eu, 0x7D72A0FBu, 0x7D30E097u, 0x7CD9B4ABu, 0x7C600F1Au, 0x7BA90BDCu, 0x7A722176u, 0x77D664E5u
 		};
+		// clang-format on
 
+		// clang-format off
 		inline static constexpr f32 W[128] = {
 			0x1.DB4668p-30f, 0x1.16DB48p-33f, 0x1.739492p-33f, 0x1.B4C8FEp-33f, 0x1.E8E576p-33f, 0x1.0A936Ep-32f, 0x1.1E0CE6p-32f, 0x1.2F98D6p-32f,
 			0x1.3FABEEp-32f, 0x1.4E94C0p-32f, 0x1.5C8AFEp-32f, 0x1.69B7B2p-32f, 0x1.763A16p-32f, 0x1.822A86p-32f, 0x1.8D9C6Ap-32f, 0x1.989F86p-32f,
@@ -71,7 +74,9 @@ protected:
 			0x1.329D98p-30f, 0x1.3694F4p-30f, 0x1.3AC11Cp-30f, 0x1.3F2984p-30f, 0x1.43D75Cp-30f, 0x1.48D618p-30f, 0x1.4E3456p-30f, 0x1.540520p-30f,
 			0x1.5A61EEp-30f, 0x1.616E00p-30f, 0x1.695C2Cp-30f, 0x1.7279DEp-30f, 0x1.7D45ECp-30f, 0x1.8AA73Ep-30f, 0x1.9C8E0Cp-30f, 0x1.B8A7C4p-30f
 		};
+		// clang-format on
 
+		// clang-format off
 		inline static constexpr f32 F[128] = {
 			0x1.000000p+0f, 0x1.ED5CF0p-1f, 0x1.DF6072p-1f, 0x1.D37A74p-1f, 0x1.C8D924p-1f, 0x1.BF19B6p-1f, 0x1.B6042Cp-1f, 0x1.AD750Cp-1f,
 			0x1.A55418p-1f, 0x1.9D8FE0p-1f, 0x1.961B4Cp-1f, 0x1.8EEC3Cp-1f, 0x1.87FAA6p-1f, 0x1.814006p-1f, 0x1.7AB6FAp-1f, 0x1.745B04p-1f,
@@ -90,6 +95,7 @@ protected:
 			0x1.D0EAF6p-5f, 0x1.AF738Cp-5f, 0x1.8E6DB4p-5f, 0x1.6DDC9Ep-5f, 0x1.4DC3FCp-5f, 0x1.2E282Cp-5f, 0x1.0F0E54p-5f, 0x1.E0F952p-6f,
 			0x1.A4F57Ap-6f, 0x1.6A23FAp-6f, 0x1.309CEEp-6f, 0x1.F10084p-7f, 0x1.83F4BEp-7f, 0x1.1A9B6Cp-7f, 0x1.6BA8B0p-8f, 0x1.5DE9E4p-9f
 		};
+		// clang-format on
 
 		static constexpr i32 sample(u64 bits) {
 			return static_cast<i32>(bits >> 32);
@@ -100,8 +106,9 @@ protected:
 		}
 	};
 
-	template <>
+	template<>
 	struct normal<f64> {
+		// clang-format off
 		inline static constexpr u64 K[128] = {
 			0x76AD221234F07098ull, 0x0000000000000000ull, 0x600F1B53E4E8B095ull, 0x6CE447A6E0135F3Bull, 0x725B46A20F4B4418ull, 0x7560051D0B94927Dull, 0x774921EB72D33B9Aull, 0x789A25BD7EFCE63Cull,
 			0x799045C3D4329252ull, 0x7A4BCE5D1B0877FEull, 0x7ADF629F33679D4Aull, 0x7B5682A62F1F1DE9ull, 0x7BB8A8C61AD441F7ull, 0x7C0AE72231CD3BB2ull, 0x7C50CCE75F5E15D3ull, 0x7C8CEC5B5D935D51ull,
@@ -120,7 +127,9 @@ protected:
 			0x7E6B99332C7D8F91ull, 0x7E5D8A1A1F041BD6ull, 0x7E4D9DED89F9D6F8ull, 0x7E3B737A33784AFAull, 0x7E268C2F2A9EEBE5ull, 0x7E0E3FF53B03A865ull, 0x7DF1AA5DF8C17BBBull, 0x7DCF8C72262573FAull,
 			0x7DA61A1E4F14C0D6ull, 0x7D72A0FBC9B87AC9ull, 0x7D30E0977A7CE185ull, 0x7CD9B4ABEBB9209Cull, 0x7C600F1A81E06E02ull, 0x7BA90BDC33BAB184ull, 0x7A7221766999AA38ull, 0x77D664E59F4A975Eull
 		};
+		// clang-format on
 
+		// clang-format off
 		inline static constexpr f64 W[128] = {
 			0x1.DB4668FE7E49DP-62, 0x1.16DB47E193C8EP-65, 0x1.73949184DB8E3P-65, 0x1.B4C8FECE48DC1P-65, 0x1.E8E576E43FB4EP-65, 0x1.0A936DA5E5567P-64, 0x1.1E0CE6B596975P-64, 0x1.2F98D6BB4F3E5P-64,
 			0x1.3FABEE1911CA1P-64, 0x1.4E94C08C0BA86P-64, 0x1.5C8AFDBF0214CP-64, 0x1.69B7B213F3F3CP-64, 0x1.763A1600EEC49P-64, 0x1.822A858AF0E54P-64, 0x1.8D9C6A9D35E15P-64, 0x1.989F85C753B05P-64,
@@ -139,7 +148,9 @@ protected:
 			0x1.329D9725E32F7P-62, 0x1.3694F3A3740D9P-62, 0x1.3AC11B8E206D6P-62, 0x1.3F29848D3B416P-62, 0x1.43D75B60BCA1DP-62, 0x1.48D61806D600FP-62, 0x1.4E3456B0E3A1BP-62, 0x1.54052012A04A4P-62,
 			0x1.5A61EDF7E8F32P-62, 0x1.616DFF7C8F54AP-62, 0x1.695C2BE68EDC9P-62, 0x1.7279DD4AC3F9DP-62, 0x1.7D45EB36EB841P-62, 0x1.8AA73E440FFBBP-62, 0x1.9C8E0C7C8098F0p-62, 0x1.B8A7C476D2BE80p-62
 		};
+		// clang-format on
 
+		// clang-format off
 		inline static constexpr f64 F[128] = {
 			0x1.0000000000000p+0, 0x1.ED5CF060D53EFp-1, 0x1.DF6071934C0C1p-1, 0x1.D37A74FFB7E65p-1, 0x1.C8D923F9E0690p-1, 0x1.BF19B6810E622p-1, 0x1.B6042CF903CD3p-1, 0x1.AD750B7255A35p-1,
 			0x1.A55418110D2BAp-1, 0x1.9D8FDFAEC7C04p-1, 0x1.961B4C1AFE594p-1, 0x1.8EEC3C5BBFB4Dp-1, 0x1.87FAA61A739FEp-1, 0x1.814005219CC85p-1, 0x1.7AB6F9C656C2Bp-1, 0x1.745B04D027F33p-1,
@@ -158,6 +169,7 @@ protected:
 			0x1.D0EAF63395869p-5, 0x1.AF738C17A5017p-5, 0x1.8E6DB483BC1BCp-5, 0x1.6DDC9DD1FE24Ap-5, 0x1.4DC3FCBD99703p-5, 0x1.2E282B724ADAFp-5, 0x1.0F0E539C89B78p-5, 0x1.E0F951D57E237p-6,
 			0x1.A4F57A25D9CC1p-6, 0x1.6A23FA9D5F276p-6, 0x1.309CEE4E09983p-6, 0x1.F100847645168p-7, 0x1.83F4BED1933A0p-7, 0x1.1A9B6B3FC193Bp-7, 0x1.6BA8B0FFB6282p-8, 0x1.5DE9E33726F26p-9
 		};
+		// clang-format on
 
 		static constexpr i64 sample(u64 bits) {
 			return static_cast<i64>(bits);
@@ -168,8 +180,9 @@ protected:
 		}
 	};
 
-	template <>
+	template<>
 	struct exponential<f32> {
+		// clang-format off
 		inline static constexpr u32 K[256] = {
 			0xE290A139u, 0x00000000u, 0x9BEADEBCu, 0xC377AC71u, 0xD4DDB990u, 0xDE893FB8u, 0xE4A8E87Cu, 0xE8DFF16Au,
 			0xEBF2DEABu, 0xEE49A6E8u, 0xF0204EFDu, 0xF19BDB8Eu, 0xF2D458BBu, 0xF3DA104Bu, 0xF4B86D78u, 0xF577AD8Au,
@@ -204,7 +217,9 @@ protected:
 			0xFBB8051Au, 0xFB890078u, 0xFB5411A5u, 0xFB180005u, 0xFAD33482u, 0xFA839276u, 0xFA263B32u, 0xF9B72D1Cu,
 			0xF930A1A2u, 0xF889F023u, 0xF7B577D2u, 0xF69C650Cu, 0xF51530F0u, 0xF2CB0E3Cu, 0xEEEFB15Du, 0xE6DA6ECFu
 		};
+		// clang-format on
 
+		// clang-format off
 		inline static constexpr f32 W[256] = {
 			0x1.164ECAp-29f, 0x1.0589D8p-36f, 0x1.AD6B24p-36f, 0x1.19335Ap-35f, 0x1.522E6Ep-35f, 0x1.850910p-35f, 0x1.B38D1Ep-35f, 0x1.DECD8Cp-35f,
 			0x1.03BF04p-34f, 0x1.170DB2p-34f, 0x1.29802Ap-34f, 0x1.3B3890p-34f, 0x1.4C515Cp-34f, 0x1.5CDF8Ap-34f, 0x1.6CF410p-34f, 0x1.7C9CDEp-34f,
@@ -239,7 +254,9 @@ protected:
 			0x1.1EBBCAp-30f, 0x1.23D2BCp-30f, 0x1.293F5Ap-30f, 0x1.2F0E38p-30f, 0x1.354EE2p-30f, 0x1.3C14ECp-30f, 0x1.437976p-30f, 0x1.4B9D7Cp-30f,
 			0x1.54AD84p-30f, 0x1.5EE7AEp-30f, 0x1.6AA676p-30f, 0x1.78750Ep-30f, 0x1.8939FEp-30f, 0x1.9E9DC0p-30f, 0x1.BC39E6p-30f, 0x1.EC9D92p-30f
 		};
+		// clang-format on
 
+		// clang-format off
 		static constexpr f32 F[256] = {
 			0x1.000000p+0f, 0x1.E0545Ep-1f, 0x1.CD0A66p-1f, 0x1.BE5008p-1f, 0x1.B210F0p-1f, 0x1.A76BAAp-1f,  0x1.9DE972p-1f,  0x1.95431Cp-1f,
 			0x1.8D4A38p-1f, 0x1.85DE88p-1f, 0x1.7EE8A2p-1f, 0x1.7856EAp-1f, 0x1.721BB6p-1f, 0x1.6C2C34p-1f,  0x1.667FA6p-1f,  0x1.610EDCp-1f,
@@ -274,6 +291,7 @@ protected:
 			0x1.734B6Ep-7f, 0x1.56E930p-7f, 0x1.3B0B8Cp-7f, 0x1.1FB69Ep-7f, 0x1.04EF22p-7f, 0x1.D57520p-8f,  0x1.A23E9Ep-8f,  0x1.7049F4p-8f,
 			0x1.3FA97Cp-8f, 0x1.1073D6p-8f, 0x1.C58B38p-9f, 0x1.6D8890p-9f, 0x1.1946BAp-9f, 0x1.92BB56p-10f, 0x1.FB20B0p-11f, 0x1.DC31C4p-12f
 		};
+		// clang-format on
 
 		static constexpr u32 sample(u64 bits) {
 			return static_cast<u32>(bits >> 32);
@@ -284,8 +302,9 @@ protected:
 		}
 	};
 
-	template <>
+	template<>
 	struct exponential<f64> {
+		// clang-format off
 		static constexpr u64 K[256] = {
 			0xE290A139245E8873ull, 0x0000000000000000ull, 0x9BEADEBCE166F1DBull, 0xC377AC71F9D275EAull, 0xD4DDB990757E3D04ull, 0xDE893FB8CA1F8D13ull, 0xE4A8E87C4325F635ull, 0xE8DFF16AE1C98ECFull,
 			0xEBF2DEAB58C411ADull, 0xEE49A6E8B9625BBFull, 0xF0204EFD64ED5B7Dull, 0xF19BDB8EA3C0F35Eull, 0xF2D458BBE5BC73F9ull, 0xF3DA104B7822D9B4ull, 0xF4B86D78457178CEull, 0xF577AD8A77848E14ull,
@@ -320,7 +339,9 @@ protected:
 			0xFBB8051AC1565052ull, 0xFB890078D120CEEAull, 0xFB5411A5B9A93FC5ull, 0xFB18000547131D4Bull, 0xFAD334827F1E02FEull, 0xFA839276708B6B51ull, 0xFA263B32E37EACFFull, 0xF9B72D1C52CCDD0Bull,
 			0xF930A1A281A009F6ull, 0xF889F023D8204AEFull, 0xF7B577D2BE5EC810ull, 0xF69C650C40A85AA9ull, 0xF51530F0916CB21Eull, 0xF2CB0E3C59328FDDull, 0xEEEFB15D605B21C5ull, 0xE6DA6ECF274021DAull
 		};
+		// clang-format on
 
+		// clang-format off
 		static constexpr f64 W[256] = {
 			0x1.164EC94BF6631p-61, 0x1.0589D8B5D3A06p-68, 0x1.AD6B2495B47EFp-68, 0x1.19335A95B8B8Fp-67, 0x1.522E6E54A2890p-67, 0x1.85090FBC278CDp-67, 0x1.B38D1EF79B63Dp-67, 0x1.DECD8B76DBC25p-67,
 			0x1.03BF049C65B8Ep-66, 0x1.170DB24D6F5CCp-66, 0x1.2980290DA2596p-66, 0x1.3B388FE3D6E34p-66, 0x1.4C515C60BFD92p-66, 0x1.5CDF89D024A39p-66, 0x1.6CF40F0A72B38p-66, 0x1.7C9CDDA17CF98p-66,
@@ -355,7 +376,9 @@ protected:
 			0x1.1EBBCA0C9FA9Cp-62, 0x1.23D2BB65991C1p-62, 0x1.293F5AE49AACAp-62, 0x1.2F0E38A441218p-62, 0x1.354EE27CCF789p-62, 0x1.3C14EC7C8B890p-62, 0x1.4379766E41396p-62, 0x1.4B9D7CD47520Cp-62,
 			0x1.54AD83CCF7438p-62, 0x1.5EE7AE173141Fp-62, 0x1.6AA676D4BBFCBp-62, 0x1.78750D6EAC69Ap-62, 0x1.8939FE6F2ED9Fp-62, 0x1.9E9DC0D487C37p-62, 0x1.BC39E51DA7303p-62, 0x1.EC9D9297EBD6Fp-62
 		};
+		// clang-format on
 
+		// clang-format off
 		static constexpr f64 F[256] = {
 			0x1.0000000000000p+0, 0x1.E0545E588120Bp-1, 0x1.CD0A650820087p-1, 0x1.BE5007BEB7BA0p-1, 0x1.B210F0EE67F91p-1, 0x1.A76BAA562FB41p-1,  0x1.9DE9715556DECp-1,  0x1.95431C455AA83p-1,
 			0x1.8D4A376D3D273p-1, 0x1.85DE87806C5F6p-1, 0x1.7EE8A2D243161p-1, 0x1.7856E9B09D4B5p-1, 0x1.721BB5BA94B97p-1, 0x1.6C2C3498418F7p-1,  0x1.667FA6D4F5C35p-1,  0x1.610EDC1A7AF92p-1,
@@ -390,6 +413,7 @@ protected:
 			0x1.734B6E6AA743Ep-7, 0x1.56E930BE41616p-7, 0x1.3B0B8C1516EAEp-7, 0x1.1FB69EDB375BFp-7, 0x1.04EF2295FD748p-7, 0x1.D5751FA745C6Ap-8,  0x1.A23E9D49746E0p-8,  0x1.7049F37EC34CFp-8,
 			0x1.3FA97CEE321B2p-8, 0x1.1073D69573EFFp-8, 0x1.C58B381CD4899p-9, 0x1.6D888F3A1FC9Ap-9, 0x1.1946BA8E1A0D7p-9, 0x1.92BB5540C39C5p-10, 0x1.FB20AF78DF496p-11, 0x1.DC31C329EFCFCp-12
 		};
+		// clang-format on
 
 		static constexpr u64 sample(u64 bits) {
 			return bits;
@@ -409,8 +433,8 @@ private:
 	template<typename T>
 	static constexpr u64 COUNT = (type::traits<T>::bits + type::traits<G>::bits - 1) / type::traits<G>::bits;
 
-	Generator& generator() {
-		return static_cast<Generator&>(*this);
+	Generator &generator() {
+		return static_cast<Generator &>(*this);
 	}
 
 	template<typename T>
@@ -418,7 +442,7 @@ private:
 		static_assert(type::traits<T>::is_integer, "next type must be an integer");
 
 		using U = typename type::traits<T>::to_unsigned;
-		
+
 		U result = 0;
 		for (u64 i = 0; i < COUNT<T>; ++i) {
 			U value = static_cast<U>(generator().next());
@@ -464,7 +488,7 @@ private:
 		U range = (static_cast<U>(max) - static_cast<U>(min)) - 1;
 		if (range == 0)
 			return min;
-	
+
 		U mask = type::traits<U>::max >> bit::clz(range);
 
 		U random;
@@ -475,7 +499,7 @@ private:
 		return min + static_cast<T>(random);
 	}
 
-	template <typename T>
+	template<typename T>
 	T normal() {
 		static_assert(type::traits<T>::is_float, "Attempted to get unsupported type");
 
@@ -485,12 +509,12 @@ private:
 
 		for (;;) {
 			const u64 bits = next<u64>();
-			auto hz = D::sample(bits);
-			auto iz = D::index(bits);
+			auto hz        = D::sample(bits);
+			auto iz        = D::index(bits);
 
 			if (math::abs(hz) < D::K[iz])
 				return static_cast<T>(hz) * D::W[iz];
-		
+
 			const T x = static_cast<T>(hz) * D::W[iz];
 
 			if (iz == 0) {
@@ -512,7 +536,7 @@ private:
 		}
 	}
 
-	template <typename T>
+	template<typename T>
 	T exponential() {
 		static_assert(type::traits<T>::is_float, "Attempted to get unsupported type");
 
@@ -591,7 +615,7 @@ public:
 	T uniform(T min, T max) {
 		return min + (max - min) * uniform<T>();
 	}
-	
+
 	// Generates a normally distributed floating-point number with the specified mean and standard deviation
 	template<typename T>
 	T normal(T mean, T std_dev) {
@@ -639,8 +663,8 @@ private:
 	u64 next() {
 		_state += 0x9E3779B97F4A7C15;
 		u64 z = _state;
-		z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
-		z = (z ^ (z >> 27)) * 0x94D049BB133111EB;
+		z     = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
+		z     = (z ^ (z >> 27)) * 0x94D049BB133111EB;
 		return z ^ (z >> 31);
 	}
 

@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_FILE_HPP
-#define DESCENT_FILE_HPP
+#ifndef DESCENT_LIB_FILE_FILE_HPP
+#define DESCENT_LIB_FILE_FILE_HPP
 
 #include <descent/type/string.hpp>
 
@@ -23,8 +23,8 @@ namespace descent {
 class Directory {
 	friend class File;
 
-	Directory(const Directory &) = delete;
-	Directory &operator=(const Directory &) = delete;
+	Directory(const Directory &)             = delete;
+	Directory &operator =(const Directory &) = delete;
 
 private:
 	int fd = -1;
@@ -56,8 +56,8 @@ public:
 };
 
 class File {
-	File(const File &) = delete;
-	File &operator=(const File &) = delete;
+	File(const File &)             = delete;
+	File &operator =(const File &) = delete;
 
 private:
 	int fd = -1;

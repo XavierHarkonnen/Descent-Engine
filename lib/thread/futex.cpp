@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ static bool futex_wait(const Atomic<u32> &word, u32 expected, const struct times
 		return true;
 		// Woken, should check predicate
 
-	switch(errno) {
+	switch (errno) {
 		case EINTR:
 			return true;
 			// Interrupted, should check predicate
@@ -63,17 +63,17 @@ static bool futex_wait(const Atomic<u32> &word, u32 expected, const struct times
 
 static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec *timeout) {
 	sys_assert(size <= Futex::MAX_WAIT_ANY, "Futex wait_any size exceeds maximum");
-	
+
 	u64 indices[Futex::MAX_WAIT_ANY];
 	struct futex_waitv waitv[Futex::MAX_WAIT_ANY];
 	u64 count = 0;
 
 	for (u64 index = 0; index < size; ++index) {
-		waitv[count].uaddr = reinterpret_cast<u64>(&pairs[index].futex.word);
-		waitv[count].val = pairs[index].expected;
-		waitv[count].flags = FUTEX2_SIZE_U32 | FUTEX2_PRIVATE;
+		waitv[count].uaddr      = reinterpret_cast<u64>(&pairs[index].futex.word);
+		waitv[count].val        = pairs[index].expected;
+		waitv[count].flags      = FUTEX2_SIZE_U32 | FUTEX2_PRIVATE;
 		waitv[count].__reserved = 0;
-		indices[count] = index;
+		indices[count]          = index;
 
 		++count;
 	}
@@ -87,7 +87,7 @@ static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec
 		return indices[result];
 		// Woken, should check predicate
 
-	switch(errno) {
+	switch (errno) {
 		case EINTR:
 			return Futex::INVALID_INDEX;
 			// Interrupted, should check predicate
@@ -136,7 +136,7 @@ u64 Futex::wait_any(const Pair *pairs, u64 size, time::duration timeout) {
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	const i64 start = intern::time::ns_from_timespec(now);
+	const i64 start    = intern::time::ns_from_timespec(now);
 	const i64 deadline = timeout.ns() > I64_MAX - start ? I64_MAX : start + timeout.ns();
 
 	struct timespec ts = intern::time::timespec_from_ns(deadline);

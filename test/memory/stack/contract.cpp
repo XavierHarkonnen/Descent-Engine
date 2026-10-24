@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Contract checks for memory::stack::Box: a Box is bound to the scope that
 // receives it from Allocator, on the stack of the thread that created it, and
 // must not outlive that thread.
@@ -93,10 +108,10 @@ static void join(void *(*fn)(void *), void *arg = nullptr) {
 // Hands a Box from one thread to another, which destroys it.
 
 static pthread_mutex_t gate = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-static Box *shared = nullptr;
+static pthread_cond_t cond  = PTHREAD_COND_INITIALIZER;
+static Box *shared          = nullptr;
 
-__attribute__((noreturn))
+[[noreturn]]
 static void publish_and_wait(Box *box) {
 	pthread_mutex_lock(&gate);
 	shared = box;
@@ -204,16 +219,15 @@ static constexpr const char *NOT_LOCAL = "not a local variable of the calling th
 
 static constexpr test::Case cases[] = {
 	{ "scoped_main_thread", scoped_main_thread },
-	{ "scoped_threads",     scoped_threads },
+	{ "scoped_threads", scoped_threads },
 #if defined(DESCENT_DEBUG)
-	{ "destroyed_on_other_thread",       destroyed_on_other_thread,       10, NOT_LOCAL },
-	{ "created_in_static_storage",       created_in_static_storage,       10, NOT_LOCAL },
+	{ "destroyed_on_other_thread", destroyed_on_other_thread, 10, NOT_LOCAL },
+	{ "created_in_static_storage", created_in_static_storage, 10, NOT_LOCAL },
 	{ "created_in_thread_local_storage", created_in_thread_local_storage, 10, NOT_LOCAL },
-	{ "created_on_heap",                 created_on_heap,                 10, NOT_LOCAL },
-	{ "outlives_thread",                 outlives_thread,                 10,
-		"Thread exited while a Box it allocated was alive" },
-	{ "freed_into_other_allocator",      freed_into_other_allocator,      10,
-		"freed on a thread other than the one that allocated it" },
+	{ "created_on_heap", created_on_heap, 10, NOT_LOCAL },
+	{ "outlives_thread", outlives_thread, 10, "Thread exited while a Box it allocated was alive" },
+	{ "freed_into_other_allocator", freed_into_other_allocator, 10,
+	  "freed on a thread other than the one that allocated it" },
 #endif
 };
 
