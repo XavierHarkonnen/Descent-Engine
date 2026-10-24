@@ -1,11 +1,10 @@
 extern "C" {
-#include <stdio.h>
 #include <stdint.h>
 }
 
-#include "descent/type/core.hpp"
+#include <harness.hpp>
+
 #include <descent/memory/stack.hpp>
-#include <descent/system.hpp>
 #include <descent/type/core.hpp>
 
 namespace descent::memory {
@@ -34,44 +33,44 @@ u64 Tracker::destroyed = 0;
 
 void test_size() {
 	auto b1 = stack::Allocator::create<u8>(1);
-	sys_assert(b1.size() == 1, "Incorrect box size");
+	test_check(b1.size() == 1, "Incorrect box size");
 
 	auto b2 = stack::Allocator::create<u16>(2);
-	sys_assert(b2.size() == 2, "Incorrect box size");
+	test_check(b2.size() == 2, "Incorrect box size");
 
 	auto b3 = stack::Allocator::create<u32>(3);
-	sys_assert(b3.size() == 3, "Incorrect box size");
+	test_check(b3.size() == 3, "Incorrect box size");
 
 	auto b4 = stack::Allocator::create<u64>(5);
-	sys_assert(b4.size() == 5, "Incorrect box size");
+	test_check(b4.size() == 5, "Incorrect box size");
 
 	auto b5 = stack::Allocator::create<u128>(7);
-	sys_assert(b5.size() == 7, "Incorrect box size");
+	test_check(b5.size() == 7, "Incorrect box size");
 }
 
 void test_constructor() {
 	constexpr u8 VALUE = 0x1A;
 	auto b1 = stack::Allocator::create<u8>(8, VALUE);
-	sys_assert(b1, "Incorrect box size");
+	test_check(b1, "Incorrect box size");
 	for (u64 i = 0; i  < b1.size(); ++i)
-		sys_assert(b1[i] == VALUE, "Incorrectly constructed element");
+		test_check(b1[i] == VALUE, "Incorrectly constructed element");
 }
 
 void test_align() {
 	auto b1 = stack::Allocator::create<u8>(1);
-	sys_assert(is_aligned(&b1[0], alignof(u8)), "Incorrect box alignment");
+	test_check(is_aligned(&b1[0], alignof(u8)), "Incorrect box alignment");
 
 	auto b2 = stack::Allocator::create<u16>(2);
-	sys_assert(is_aligned(&b2[0], alignof(u16)), "Incorrect box alignment");
+	test_check(is_aligned(&b2[0], alignof(u16)), "Incorrect box alignment");
 
 	auto b3 = stack::Allocator::create<u32>(3);
-	sys_assert(is_aligned(&b3[0], alignof(u32)), "Incorrect box alignment");
+	test_check(is_aligned(&b3[0], alignof(u32)), "Incorrect box alignment");
 
 	auto b4 = stack::Allocator::create<u64>(5);
-	sys_assert(is_aligned(&b4[0], alignof(u64)), "Incorrect box alignment");
+	test_check(is_aligned(&b4[0], alignof(u64)), "Incorrect box alignment");
 
 	auto b5 = stack::Allocator::create<u128>(7);
-	sys_assert(is_aligned(&b5[0], alignof(u128)), "Incorrect box alignment");
+	test_check(is_aligned(&b5[0], alignof(u128)), "Incorrect box alignment");
 }
 
 void test_lifo_reclamation() {
@@ -87,41 +86,41 @@ void test_lifo_reclamation() {
 	auto d = stack::Allocator::create<u64>(8);
 	auto *d_ptr = d.data();
 
-	sys_assert(a, "Allocation A failed");
-	sys_assert(b, "Allocation B failed");
-	sys_assert(c, "Allocation C failed");
-	sys_assert(d, "Allocation D failed");
+	test_check(a, "Allocation A failed");
+	test_check(b, "Allocation B failed");
+	test_check(c, "Allocation C failed");
+	test_check(d, "Allocation D failed");
 
 	d.~Box();
-	sys_assert(!d, "Allocation D was not released");
+	test_check(!d, "Allocation D was not released");
 
 	{
 		auto e = stack::Allocator::create<u64>(8);
-		sys_assert(e.data() == d_ptr, "Top allocation was not reclaimed");
+		test_check(e.data() == d_ptr, "Top allocation was not reclaimed");
 	}
 
 	a.~Box();
-	sys_assert(!a, "Allocation A was not released");
+	test_check(!a, "Allocation A was not released");
 
 	{
 		auto e = stack::Allocator::create<u64>(8);
-		sys_assert(e.data() == d_ptr, "Allocation shifted on non-contiguous frees");
+		test_check(e.data() == d_ptr, "Allocation shifted on non-contiguous frees");
 	}
 
 	c.~Box();
-	sys_assert(!c, "Allocation C was not released");
+	test_check(!c, "Allocation C was not released");
 
 	{
 		auto e = stack::Allocator::create<u64>(8);
-		sys_assert(e.data() == c_ptr, "Top allocation was not reclaimed");
+		test_check(e.data() == c_ptr, "Top allocation was not reclaimed");
 	}
 
 	b.~Box();
-	sys_assert(!b, "Allocation B was not released");
+	test_check(!b, "Allocation B was not released");
 
 	{
 		auto e = stack::Allocator::create<u64>(8);
-		sys_assert(e.data() == a_ptr, "Contiguous frees were not reclaimed");
+		test_check(e.data() == a_ptr, "Contiguous frees were not reclaimed");
 	}
 }
 
@@ -135,7 +134,7 @@ void test_loop() {
 	}
 	
 	auto box = stack::Allocator::create<u8>(12);
-	sys_assert(box.data() == base_ptr, "Frees were not reclaimed");
+	test_check(box.data() == base_ptr, "Frees were not reclaimed");
 }
 
 void test_nested() {
@@ -158,11 +157,11 @@ void test_nested() {
 		}
 
 		for (u64 i = 0; i < middle.size(); ++i)
-			sys_assert(middle[i] == i * 3, "Middle allocation corrupted");
+			test_check(middle[i] == i * 3, "Middle allocation corrupted");
 	}
 
 	for (u64 i = 0; i < outer.size(); ++i)
-		sys_assert(outer[i] == i, "Outer allocation corrupted");
+		test_check(outer[i] == i, "Outer allocation corrupted");
 }
 
 void test_object_lifetime() {
@@ -172,16 +171,16 @@ void test_object_lifetime() {
 	{
 		auto box = stack::Allocator::create<Tracker>(100, 42);
 
-		sys_assert(
+		test_check(
 			Tracker::constructed == 100,
 			"Incorrect number of constructions"
 		);
 
 		for (u64 i = 0; i < box.size(); ++i)
-			sys_assert(box[i].value == 42, "Incorrect constructor argument");
+			test_check(box[i].value == 42, "Incorrect constructor argument");
 	}
 
-	sys_assert(
+	test_check(
 		Tracker::destroyed == 100,
 		"Incorrect number of destructions"
 	);
@@ -200,7 +199,7 @@ void test_reuse() {
 
 		auto ba = stack::Allocator::create<u64>(1);
 		auto ba_ptr = ba.data();
-		sys_assert(ba_ptr == base_ptr, "Freed box A was not reclaimed");
+		test_check(ba_ptr == base_ptr, "Freed box A was not reclaimed");
 		ba.~Box();
 
 		{
@@ -211,7 +210,7 @@ void test_reuse() {
 
 		auto bb = stack::Allocator::create<u64>(1);
 		auto bb_ptr = bb.data();
-		sys_assert(bb_ptr == base_ptr, "Freed box B was not reclaimed");
+		test_check(bb_ptr == base_ptr, "Freed box B was not reclaimed");
 		bb.~Box();
 
 		{
@@ -223,7 +222,7 @@ void test_reuse() {
 
 		auto bc = stack::Allocator::create<u64>(1);
 		auto bc_ptr = bc.data();
-		sys_assert(bc_ptr == base_ptr, "Freed box C was not reclaimed");
+		test_check(bc_ptr == base_ptr, "Freed box C was not reclaimed");
 		bc.~Box();
 	}
 }
@@ -249,13 +248,13 @@ void stress_varying_sizes() {
 				c[i] = i ^ (iteration << 2);
 
 			for (u64 i = 0; i < a.size(); ++i)
-				sys_assert(a[i] == (i ^ iteration), "A corrupted");
+				test_check(a[i] == (i ^ iteration), "A corrupted");
 
 			for (u64 i = 0; i < b.size(); ++i)
-				sys_assert(b[i] == (i ^ (iteration << 1)), "B corrupted");
+				test_check(b[i] == (i ^ (iteration << 1)), "B corrupted");
 
 			for (u64 i = 0; i < c.size(); ++i)
-				sys_assert(c[i] == (i ^ (iteration << 2)), "C corrupted");
+				test_check(c[i] == (i ^ (iteration << 2)), "C corrupted");
 		}
 	}
 }
@@ -265,12 +264,7 @@ void stress_varying_sizes() {
 using namespace descent;
 using namespace descent::memory;
 
-struct Test {
-	const char* name;
-	void (*function)();
-};
-
-static constexpr Test tests[] = {
+static constexpr test::Case cases[] = {
 	{ "test_size",                 test_size },
 	{ "test_constructor",          test_constructor },
 	{ "test_align",                test_align },
@@ -282,12 +276,6 @@ static constexpr Test tests[] = {
 	{ "stress_varying_sizes",      stress_varying_sizes }
 };
 
-int main() {
-	for (u64 i = 0; i < sizeof(tests) / sizeof(tests[0]); ++i) {
-		fprintf(stderr, "[TEST] %s\n", tests[i].name);
-		tests[i].function();
-		fprintf(stderr, "[PASS] %s\n", tests[i].name);
-	}
-
-	return 0;
+int main(int argc, char **argv) {
+	return test::run(cases, argc, argv);
 }

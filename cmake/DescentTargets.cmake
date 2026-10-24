@@ -50,15 +50,15 @@ endfunction()
 
 # descent_test(<name> SOURCES <file>... [LINK <target>...])
 #
-# Defines the executable test-descent-<name> and registers it with CTest under
-# the same name.
+# Defines the executable test-descent-<name>, linked with the test harness
+# (descent::test), and registers it with CTest under the same name.
 function(descent_test NAME)
 	cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "SOURCES;LINK")
 	set(TARGET test-descent-${NAME})
 
 	descent_executable(${TARGET}
 		SOURCES ${ARG_SOURCES}
-		LINK ${ARG_LINK}
+		LINK descent::test ${ARG_LINK}
 	)
 
 	add_test(NAME ${TARGET} COMMAND ${TARGET})
