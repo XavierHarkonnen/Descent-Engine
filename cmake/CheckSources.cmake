@@ -2,11 +2,12 @@
 #
 #   cmake -P cmake/CheckSources.cmake
 #
-# Checks every first-party source and build file under include/, intern/,
-# lib/, src/, test/ and cmake/, plus the top-level files (LICENSE.md only for
-# its final newline). extern/ and scratch/
-# are not checked. Each problem is printed as <file>:<line>: <problem>, and the
-# script fails if there is any.
+# Checks every first-party source (see DescentSources.cmake) and build file
+# under include/, lib/, src/, test/ and cmake/, plus the top-level files
+# (LICENSE.md only for its final newline). extern/ and scratch/ are not
+# checked. Each problem is printed as <file>:<line>: <problem>, and the script
+# fails if there is any. Formatting is checked separately, by
+# CheckFormat.cmake.
 #
 # Every file:
 #   - ends with a newline
@@ -19,6 +20,8 @@
 #   - has no doubled semicolon (other than "for (;;)")
 #   - spells attributes as [[...]] (such as [[gnu::constructor]]), not
 #     __attribute__((...)), which clang-format cannot keep on its own line
+#
+# Every CMake file also spells commands in lower case (if(, not IF().
 #
 # Every .hpp file is also guarded by #ifndef/#define as its first directive and
 # a bare #endif as its last line. The guard is the file's path in screaming
@@ -48,13 +51,9 @@ set(LICENCE_REST [=[ *
  */
 ]=])
 
-file(GLOB_RECURSE SOURCES RELATIVE "${ROOT}"
-	"${ROOT}/include/*.hpp"
-	"${ROOT}/intern/*.hpp"
-	"${ROOT}/lib/*.cpp" "${ROOT}/lib/*.hpp"
-	"${ROOT}/src/*.cpp" "${ROOT}/src/*.hpp"
-	"${ROOT}/test/*.cpp" "${ROOT}/test/*.hpp"
-)
+include("${CMAKE_CURRENT_LIST_DIR}/DescentSources.cmake")
+set(SOURCES ${DESCENT_SOURCES})
+
 file(GLOB_RECURSE BUILD_FILES RELATIVE "${ROOT}"
 	"${ROOT}/include/CMakeLists.txt"
 	"${ROOT}/lib/CMakeLists.txt"
@@ -62,7 +61,6 @@ file(GLOB_RECURSE BUILD_FILES RELATIVE "${ROOT}"
 	"${ROOT}/test/CMakeLists.txt"
 	"${ROOT}/cmake/*.cmake"
 )
-list(SORT SOURCES)
 list(SORT BUILD_FILES)
 set(FILES ${SOURCES} ${BUILD_FILES} CMakeLists.txt CMakePresets.json README.md .gitignore .git-blame-ignore-revs)
 
@@ -97,6 +95,11 @@ foreach(FILE IN LISTS FILES)
 	endif()
 
 	get_filename_component(EXT "${FILE}" LAST_EXT)
+	get_filename_component(NAME "${FILE}" NAME)
+	set(IS_CMAKE FALSE)
+	if(EXT STREQUAL ".cmake" OR NAME STREQUAL "CMakeLists.txt")
+		set(IS_CMAKE TRUE)
+	endif()
 	set(IS_SOURCE FALSE)
 	if(EXT STREQUAL ".cpp" OR EXT STREQUAL ".hpp")
 		set(IS_SOURCE TRUE)
@@ -160,6 +163,10 @@ foreach(FILE IN LISTS FILES)
 		endif()
 		if(LINE MATCHES "^\t* +\t")
 			problem("${FILE}" ${NUMBER} "space before tab in indentation")
+		endif()
+
+		if(IS_CMAKE AND LINE MATCHES "^\t*[A-Z][A-Z0-9_]*[ \t]*\\(")
+			problem("${FILE}" ${NUMBER} "CMake command in upper case")
 		endif()
 
 		if(IS_SOURCE)
