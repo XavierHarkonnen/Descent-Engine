@@ -17,6 +17,7 @@ endif()
 
 # Include modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(DescentTargets)
 
 # Find required libraries
 find_package(Vulkan REQUIRED)

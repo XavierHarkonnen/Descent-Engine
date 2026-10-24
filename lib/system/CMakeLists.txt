@@ -1,17 +1,3 @@
-set(LIBRARY_NAME "descent-system")
-
-add_library(${LIBRARY_NAME}
-	system.cpp
-)
-
-target_include_directories(${LIBRARY_NAME} PUBLIC
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/intern
-)
-
-target_link_libraries(${LIBRARY_NAME} PUBLIC
-)
-
-target_compile_options(${LIBRARY_NAME} PRIVATE
-	${INTERN_CXX_FLAGS}
+descent_library(system
+	SOURCES system.cpp
 )

@@ -1,22 +1,4 @@
-set(LIBRARY_NAME "descent-thread")
-
-add_library(${LIBRARY_NAME}
-	futex.cpp
-	task.cpp
-	thread.cpp
-	utilities.cpp
-)
-
-target_include_directories(${LIBRARY_NAME} PUBLIC
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/intern
-)
-
-target_link_libraries(${LIBRARY_NAME} PUBLIC
-	descent-system
-	descent-memory
-)
-
-target_compile_options(${LIBRARY_NAME} PRIVATE
-	${INTERN_CXX_FLAGS}
+descent_library(thread
+	SOURCES futex.cpp task.cpp thread.cpp utilities.cpp
+	LINK descent::system descent::memory
 )

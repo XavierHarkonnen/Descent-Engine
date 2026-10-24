@@ -18,6 +18,8 @@
 !extern/**
 !docs/
 !docs/**
+!cmake/
+!cmake/**
 
 # Files
 !.gitignore
