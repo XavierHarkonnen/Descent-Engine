@@ -1,4 +1,5 @@
 add_subdirectory(harness)
 add_subdirectory(headers)
 add_subdirectory(memory)
+add_subdirectory(thread)
 add_subdirectory(type)
