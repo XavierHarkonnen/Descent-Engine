@@ -25,6 +25,30 @@ add_custom_target(check-sources
 	VERBATIM
 )
 
+# Formatting against .clang-format, which needs clang-format 21: cmake --build <dir> --target check-format
+find_program(DESCENT_CLANG_FORMAT NAMES clang-format-21 clang-format DOC "clang-format 21, for check-format")
+set(DESCENT_CLANG_FORMAT_FOUND FALSE)
+if(DESCENT_CLANG_FORMAT)
+	execute_process(COMMAND ${DESCENT_CLANG_FORMAT} --version OUTPUT_VARIABLE DESCENT_CLANG_FORMAT_VERSION ERROR_QUIET)
+	if(DESCENT_CLANG_FORMAT_VERSION MATCHES "clang-format version 21\\.")
+		set(DESCENT_CLANG_FORMAT_FOUND TRUE)
+	endif()
+endif()
+
+if(DESCENT_CLANG_FORMAT_FOUND)
+	add_custom_target(check-format
+		COMMAND ${CMAKE_COMMAND} -DCLANG_FORMAT=${DESCENT_CLANG_FORMAT} -P ${CMAKE_SOURCE_DIR}/cmake/CheckFormat.cmake
+		VERBATIM
+	)
+else()
+	message(STATUS "clang-format 21 not found: check-format and test-descent-format are unavailable")
+	add_custom_target(check-format
+		COMMAND ${CMAKE_COMMAND} -E echo "check-format: clang-format 21 not found; set DESCENT_CLANG_FORMAT"
+		COMMAND ${CMAKE_COMMAND} -E false
+		VERBATIM
+	)
+endif()
+
 # Find required libraries
 find_package(Vulkan REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -51,6 +75,6 @@ if(DESCENT_BUILD_TESTS)
 endif()
 
 # Scratch Subdirectory
-IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/scratch/CMakeLists.txt")
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/scratch/CMakeLists.txt")
 	add_subdirectory(scratch)
 endif()
