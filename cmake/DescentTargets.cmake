@@ -4,13 +4,40 @@
 # Libraries are referenced only by their alias, descent::<module>. The real
 # target, descent-<module>, is named here and nowhere else.
 
-# descent_library(<module> SOURCES <file>... [LINK <target>...])
+# descent_library(<module> SOURCES <file>... [INCLUDE <dir>...] [LINK <target>...])
+# descent_library(<module> HEADER_ONLY [INCLUDE <dir>...] [LINK <target>...])
 #
 # Defines descent-<module> and its alias descent::<module>. LINK targets are
-# linked PUBLIC, in the order given.
+# linked PUBLIC, in the order given. INCLUDE adds include directories after
+# include/, for headers outside it.
+#
+# A library with SOURCES also sees intern/. A HEADER_ONLY library compiles
+# nothing, so it is an INTERFACE library with include/ and no intern/, and its
+# INCLUDE directories and LINK targets pass to whatever links it.
 function(descent_library MODULE)
-	cmake_parse_arguments(PARSE_ARGV 1 ARG "" "" "SOURCES;LINK")
+	cmake_parse_arguments(PARSE_ARGV 1 ARG "HEADER_ONLY" "" "SOURCES;INCLUDE;LINK")
 	set(TARGET descent-${MODULE})
+
+	if(ARG_HEADER_ONLY AND ARG_SOURCES)
+		message(FATAL_ERROR "descent_library(${MODULE}): HEADER_ONLY takes no SOURCES")
+	elseif(NOT ARG_HEADER_ONLY AND NOT ARG_SOURCES)
+		message(FATAL_ERROR "descent_library(${MODULE}): give SOURCES, or HEADER_ONLY")
+	endif()
+
+	if(ARG_HEADER_ONLY)
+		add_library(${TARGET} INTERFACE)
+		add_library(descent::${MODULE} ALIAS ${TARGET})
+
+		target_include_directories(${TARGET} INTERFACE
+			${CMAKE_SOURCE_DIR}/include
+			${ARG_INCLUDE}
+		)
+
+		target_link_libraries(${TARGET} INTERFACE
+			${ARG_LINK}
+		)
+		return()
+	endif()
 
 	add_library(${TARGET}
 		${ARG_SOURCES}
@@ -20,6 +47,7 @@ function(descent_library MODULE)
 	target_include_directories(${TARGET} PUBLIC
 		${CMAKE_SOURCE_DIR}/include
 		${CMAKE_SOURCE_DIR}/intern
+		${ARG_INCLUDE}
 	)
 
 	target_link_libraries(${TARGET} PUBLIC
