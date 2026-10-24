@@ -16,7 +16,8 @@ Rengine::Rengine() : _init(false) {
 }
 
 Rengine::~Rengine() {
-	wl_display_disconnect(_display);
+	if (_display)
+		wl_display_disconnect(_display);
 }
 
 Rengine::operator bool() {
