@@ -64,7 +64,7 @@ file(GLOB_RECURSE BUILD_FILES RELATIVE "${ROOT}"
 )
 list(SORT SOURCES)
 list(SORT BUILD_FILES)
-set(FILES ${SOURCES} ${BUILD_FILES} CMakeLists.txt CMakePresets.json README.md .gitignore)
+set(FILES ${SOURCES} ${BUILD_FILES} CMakeLists.txt CMakePresets.json README.md .gitignore .git-blame-ignore-revs)
 
 # The licence text is kept verbatim, so only its final newline is checked.
 set(VERBATIM_FILES LICENSE.md)

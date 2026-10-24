@@ -24,6 +24,7 @@
 # Files
 !.gitignore
 !.clang-format
+!.git-blame-ignore-revs
 !CMakeLists.txt
 !CMakePresets.json
 !README.md
