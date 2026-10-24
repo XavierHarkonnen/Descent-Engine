@@ -30,8 +30,6 @@ void routine(thread::task::Handle, void *) {
 	printf("Box Size: %lu\n", box.size());
 }
 
-extern int foo();
-
 int main() {
 	printf("Worker Thread Count: %lu\n", thread::task::get());
 
