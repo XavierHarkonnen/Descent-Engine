@@ -39,9 +39,9 @@ static i64 now_ms() {
 static void wait_consumes() {
 	Semaphore s(2);
 
-	const i64 start = now_ms();
-	const bool a = s.wait();
-	const bool b = s.wait();
+	const i64 start      = now_ms();
+	const bool a         = s.wait();
+	const bool b         = s.wait();
 	const i64 elapsed_ms = now_ms() - start;
 
 	test_check(a && b, "wait() on count 2 failed (%s, %s)", a ? "ok" : "fail", b ? "ok" : "fail");
@@ -52,8 +52,8 @@ static void wait_consumes() {
 static void timed_wait_expires() {
 	Semaphore s(0);
 
-	const i64 start = now_ms();
-	const bool acquired = s.wait(time::duration::ms(100));
+	const i64 start      = now_ms();
+	const bool acquired  = s.wait(time::duration::ms(100));
 	const i64 elapsed_ms = now_ms() - start;
 
 	test_check(!acquired, "wait(100ms) acquired with nothing posted");
@@ -72,8 +72,8 @@ static void timed_wait_acquires() {
 	pthread_t t;
 	test_require(pthread_create(&t, nullptr, post_later, nullptr) == 0, "pthread_create");
 
-	const i64 start = now_ms();
-	const bool acquired = posted.wait(time::duration::ms(1000));
+	const i64 start      = now_ms();
+	const bool acquired  = posted.wait(time::duration::ms(1000));
 	const i64 elapsed_ms = now_ms() - start;
 
 	pthread_join(t, nullptr);
@@ -88,8 +88,8 @@ static void zero_timeout_try() {
 
 	test_check(s.wait(time::duration::ms(0)), "wait(0) with count 1 did not acquire");
 
-	const i64 start = now_ms();
-	const bool second = s.wait(time::duration::ms(0));
+	const i64 start      = now_ms();
+	const bool second    = s.wait(time::duration::ms(0));
 	const i64 elapsed_ms = now_ms() - start;
 
 	test_check(!second, "wait(0) with count 0 acquired");
@@ -99,12 +99,12 @@ static void zero_timeout_try() {
 // Every post is consumed exactly once and no waiter is left asleep; a lost
 // wakeup shows up as a timeout.
 
-static constexpr u32 PRODUCERS = 4;
-static constexpr u32 CONSUMERS = 4;
+static constexpr u32 PRODUCERS  = 4;
+static constexpr u32 CONSUMERS  = 4;
 static constexpr u32 PER_THREAD = 20000;
 
 static Semaphore items(0);
-static Atomic<u64> consumed{0};
+static Atomic<u64> consumed{ 0 };
 
 static void *producer(void *) {
 	for (u32 i = 0; i < PER_THREAD; ++i)
@@ -132,17 +132,19 @@ static void producer_consumer() {
 		pthread_join(t, nullptr);
 
 	const u64 total = consumed.load(atomic::Order::RELAXED);
-	test_check(total == u64(PRODUCERS) * PER_THREAD, "consumed %llu of %llu", (unsigned long long) total,
-		(unsigned long long) PRODUCERS * PER_THREAD);
+	test_check(
+		total == u64(PRODUCERS) * PER_THREAD, "consumed %llu of %llu", (unsigned long long) total,
+		(unsigned long long) PRODUCERS * PER_THREAD
+	);
 	test_check(!items.wait(time::duration::ms(0)), "semaphore not empty after every post was consumed");
 }
 
 static constexpr test::Case cases[] = {
-	{ "wait_consumes",       wait_consumes,       5 },
-	{ "timed_wait_expires",  timed_wait_expires,  5 },
+	{ "wait_consumes", wait_consumes, 5 },
+	{ "timed_wait_expires", timed_wait_expires, 5 },
 	{ "timed_wait_acquires", timed_wait_acquires, 5 },
-	{ "zero_timeout_try",    zero_timeout_try,    5 },
-	{ "producer_consumer",   producer_consumer,   20 },
+	{ "zero_timeout_try", zero_timeout_try, 5 },
+	{ "producer_consumer", producer_consumer, 20 },
 };
 
 int main(int argc, char **argv) {

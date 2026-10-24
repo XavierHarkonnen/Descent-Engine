@@ -55,8 +55,8 @@ template<typename T>
 class Box {
 	friend class Allocator;
 
-	Box(const Box&) = delete;
-	Box& operator=(const Box&) = delete;
+	Box(const Box &)             = delete;
+	Box &operator =(const Box &) = delete;
 
 	void clear();
 
@@ -70,7 +70,7 @@ private:
 
 	Box() : _data(nullptr), _meta(nullptr), _size(0), _capacity(0) {}
 
-	Box(T* data, void *meta, u64 capacity) : _data(data), _meta(meta), _size(0), _capacity(capacity) {
+	Box(T *data, void *meta, u64 capacity) : _data(data), _meta(meta), _size(0), _capacity(capacity) {
 		local();
 	}
 
@@ -78,33 +78,33 @@ private:
 		if (_data || _meta)
 			local();
 
-		other._data = nullptr;
-		other._meta = nullptr;
-		other._size = 0;
+		other._data     = nullptr;
+		other._meta     = nullptr;
+		other._size     = 0;
 		other._capacity = 0;
 	}
 
-	Box& operator=(Box &&other) {
+	Box &operator =(Box &&other) {
 		if (this != &other) {
 			clear();
 
-			_data = other._data;
-			_meta = other._meta;
-			_size = other._size;
+			_data     = other._data;
+			_meta     = other._meta;
+			_size     = other._size;
 			_capacity = other._capacity;
 
 			if (_data || _meta)
 				local();
 
-			other._data = nullptr;
-			other._meta = nullptr;
-			other._size = 0;
+			other._data     = nullptr;
+			other._meta     = nullptr;
+			other._size     = 0;
 			other._capacity = 0;
 		}
 		return *this;
 	}
 
-	template<typename ...Args>
+	template<typename... Args>
 	void init(Args &&...args) {
 		if (*this) {
 			for (u64 index = 0; index < _capacity; ++index) {
@@ -114,7 +114,7 @@ private:
 		}
 	}
 
-	void copy(const T* source, u64 count) {
+	void copy(const T *source, u64 count) {
 		if (*this) {
 			u64 limit = math::min(count, _capacity);
 
@@ -127,12 +127,12 @@ private:
 
 public:
 	// A Box exists only on its thread's stack
-	static void *operator new(__SIZE_TYPE__) = delete;
-	static void *operator new(__SIZE_TYPE__, void *) = delete;
-	static void *operator new[](__SIZE_TYPE__) = delete;
+	static void *operator new(__SIZE_TYPE__)           = delete;
+	static void *operator new(__SIZE_TYPE__, void *)   = delete;
+	static void *operator new[](__SIZE_TYPE__)         = delete;
 	static void *operator new[](__SIZE_TYPE__, void *) = delete;
-	static void operator delete(void *) = delete;
-	static void operator delete[](void *) = delete;
+	static void operator delete(void *)                = delete;
+	static void operator delete[](void *)              = delete;
 
 	~Box() {
 		clear();
@@ -142,11 +142,11 @@ public:
 		return _data;
 	}
 
-	T* data() {
+	T *data() {
 		return _data;
 	}
 
-	const T* data() const {
+	const T *data() const {
 		return _data;
 	}
 
@@ -158,11 +158,11 @@ public:
 		return _capacity;
 	}
 
-	T& operator[](u64 index) {
+	T &operator [](u64 index) {
 		return data()[index];
 	}
 
-	const T& operator[](u64 index) const {
+	const T &operator [](u64 index) const {
 		return data()[index];
 	}
 };
@@ -180,7 +180,7 @@ private:
 #endif
 
 public:
-	template<typename T, typename ...Args>
+	template<typename T, typename... Args>
 	static Box<T> create(u64 capacity, Args &&...args) {
 		static_assert(sizeof(T) <= U32_MAX, "Size of object is too large");
 		static_assert(alignof(T) <= U32_MAX, "Alignment of object is too large");
@@ -188,32 +188,32 @@ public:
 		if (capacity == 0 || capacity > U32_MAX)
 			return {};
 
-		void* data = nullptr;
-		void* meta = nullptr;
+		void *data = nullptr;
+		void *meta = nullptr;
 
 		if (!create(data, meta, sizeof(T), alignof(T), capacity))
 			return {};
 
-		Box<T> result(static_cast<T*>(data), meta, capacity);
+		Box<T> result(static_cast<T *>(data), meta, capacity);
 		result.init(static_cast<Args &&>(args)...);
 		return result;
 	}
 
 	template<typename T>
-	static Box<T> copy(u64 capacity, const T* source, u64 count) {
+	static Box<T> copy(u64 capacity, const T *source, u64 count) {
 		static_assert(sizeof(T) <= U32_MAX, "Size of object is too large");
 		static_assert(alignof(T) <= U32_MAX, "Alignment of object is too large");
 
 		if (capacity == 0 || capacity > U32_MAX || source == nullptr || count == 0 || count > capacity)
 			return {};
 
-		void* data = nullptr;
-		void* meta = nullptr;
+		void *data = nullptr;
+		void *meta = nullptr;
 
 		if (!create(data, meta, sizeof(T), alignof(T), u32(capacity)))
 			return {};
 
-		Box<T> result(static_cast<T*>(data), meta, capacity);
+		Box<T> result(static_cast<T *>(data), meta, capacity);
 		result.copy(source, count);
 		return result;
 	}
@@ -222,7 +222,7 @@ public:
 		if (!s)
 			return {};
 
-		const u64 SIZE = s.size();
+		const u64 SIZE   = s.size();
 		Box<char> result = copy<char>(SIZE + 1, s.data(), SIZE);
 		if (result)
 			result[SIZE] = '\0';
@@ -251,9 +251,9 @@ void Box<T>::clear() {
 	if (_data || _meta)
 		Allocator::clear(_data, _meta);
 
-	_data = nullptr;
-	_meta = nullptr;
-	_size = 0;
+	_data     = nullptr;
+	_meta     = nullptr;
+	_size     = 0;
 	_capacity = 0;
 }
 

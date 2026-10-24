@@ -21,9 +21,9 @@
 
 namespace descent::thread {
 
-static constexpr u64 ID_MAIN = 0;
+static constexpr u64 ID_MAIN    = 0;
 static constexpr u64 ID_INVALID = ID_MAIN - 1;
-static constexpr u64 ID_FIRST = ID_MAIN + 1;
+static constexpr u64 ID_FIRST   = ID_MAIN + 1;
 
 static thread::Atomic<u64> id_next(ID_FIRST);
 static thread_local u64 id_thread = ID_INVALID;

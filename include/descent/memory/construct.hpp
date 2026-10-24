@@ -22,25 +22,29 @@ namespace descent::memory {
 
 class pnewp {
 	template<class T, class... Args>
-	friend T *construct(T* storage, Args&&... args);
+	friend T *construct(T *storage, Args &&...args);
 
 private:
 	void *_p;
 	explicit pnewp(void *p) : _p(p) {}
 
 public:
-	void *get() const { return _p; }
+	void *get() const {
+		return _p;
+	}
 };
 
 }
 
-inline void *operator new(__SIZE_TYPE__, const descent::memory::pnewp &p) { return p.get(); }
+inline void *operator new(__SIZE_TYPE__, const descent::memory::pnewp &p) {
+	return p.get();
+}
 
 namespace descent::memory {
 
 // Construct a
 template<class T, class... Args>
-T *construct(T* storage, Args&&... args) {
+T *construct(T *storage, Args &&...args) {
 	return new (pnewp(storage)) T(static_cast<Args &&>(args)...);
 }
 

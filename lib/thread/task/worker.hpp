@@ -150,7 +150,7 @@ private:
 
 		do {
 			Worker &victim = self.victim();
-			Task *task = victim._deque.steal();
+			Task *task     = victim._deque.steal();
 			if (task) {
 				(*task)();
 				goto executing;
@@ -160,7 +160,7 @@ private:
 		// All work is done, none can be added until a new frame is started.
 
 		for (;;) {
-			switch(self.state()) {
+			switch (self.state()) {
 				case STATE_WAIT_FRAME:
 					self._finished->word.fetch_add(1, atomic::Order::RELEASE);
 					self._finished->wake_one();
@@ -169,9 +169,7 @@ private:
 					self._finished->word.fetch_add(1, atomic::Order::RELEASE);
 					self._finished->wake_one();
 					return nullptr;
-				default:
-					self.wait(STATE_CONTINUE);
-					break;
+				default: self.wait(STATE_CONTINUE); break;
 			}
 		}
 	}
@@ -191,9 +189,9 @@ public:
 		rng.seed(index);
 
 		_finished = finished;
-		_workers = workers;
-		_count = count;
-		_index = index;
+		_workers  = workers;
+		_count    = count;
+		_index    = index;
 		// Published to the worker by the release store in transition().
 		_origin.store(frame(), atomic::Order::RELAXED);
 		transition(STATE_WAIT_FRAME, false);

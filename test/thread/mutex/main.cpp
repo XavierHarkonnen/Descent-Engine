@@ -44,7 +44,7 @@ static i64 now_ms() {
 // Mutual exclusion under heavy contention: a non-atomic counter must reach
 // the exact total.
 
-static constexpr u32 THREADS = 8;
+static constexpr u32 THREADS    = 8;
 static constexpr u64 ITERATIONS = 20000;
 
 static Mutex counter_mutex;
@@ -68,19 +68,21 @@ static void exclusion() {
 	for (pthread_t &t : threads)
 		pthread_join(t, nullptr);
 
-	test_check(counter == THREADS * ITERATIONS, "counter = %llu, expected %llu", (unsigned long long) counter,
-		(unsigned long long) (THREADS * ITERATIONS));
+	test_check(
+		counter == THREADS * ITERATIONS, "counter = %llu, expected %llu", (unsigned long long) counter,
+		(unsigned long long) (THREADS * ITERATIONS)
+	);
 }
 
 // lock(timeout)
 
 static Mutex timed_mutex;
-static bool timed_result = true;
+static bool timed_result    = true;
 static i64 timed_elapsed_ms = 0;
 
 static void *timed_locker(void *) {
-	const i64 start = now_ms();
-	timed_result = timed_mutex.lock(time::duration::ms(100));
+	const i64 start  = now_ms();
+	timed_result     = timed_mutex.lock(time::duration::ms(100));
 	timed_elapsed_ms = now_ms() - start;
 	if (timed_result)
 		timed_mutex.unlock();
@@ -112,8 +114,8 @@ static void timed_lock_acquires() {
 	pthread_t t;
 	test_require(pthread_create(&t, nullptr, release_later, nullptr) == 0, "pthread_create");
 
-	const i64 start = now_ms();
-	const bool acquired = timed_mutex.lock(time::duration::ms(1000));
+	const i64 start      = now_ms();
+	const bool acquired  = timed_mutex.lock(time::duration::ms(1000));
 	const i64 elapsed_ms = now_ms() - start;
 
 	pthread_join(t, nullptr);
@@ -164,7 +166,7 @@ static u32 word_of(Mutex &m) {
 struct Waiters {
 	Mutex mutex;
 	Atomic<u32> tids[2];
-	Atomic<u32> done{0};
+	Atomic<u32> done{ 0 };
 };
 
 struct Waiter {
@@ -193,7 +195,7 @@ static bool sleeping(u32 tid) {
 		return false;
 
 	char buffer[512] = {};
-	const size_t n = fread(buffer, 1, sizeof(buffer) - 1, f);
+	const size_t n   = fread(buffer, 1, sizeof(buffer) - 1, f);
 	fclose(f);
 	buffer[n] = '\0';
 
@@ -207,7 +209,7 @@ static void every_waiter_wakes() {
 
 	for (u32 run = 0; run < RUNS; ++run) {
 		Waiters shared;
-		Waiter args[2] = {{&shared, 0}, {&shared, 1}};
+		Waiter args[2] = { { &shared, 0 }, { &shared, 1 } };
 
 		shared.mutex.lock();
 
@@ -237,8 +239,10 @@ static void every_waiter_wakes() {
 			usleep(1000);
 
 		const u32 done = shared.done.load(atomic::Order::ACQUIRE);
-		test_require(done == 2, "run %u: %u of 2 waiters acquired the mutex within 2 s; word = %u", run, done,
-			word_of(shared.mutex));
+		test_require(
+			done == 2, "run %u: %u of 2 waiters acquired the mutex within 2 s; word = %u", run, done,
+			word_of(shared.mutex)
+		);
 
 		for (pthread_t &t : threads)
 			pthread_join(t, nullptr);
@@ -246,11 +250,11 @@ static void every_waiter_wakes() {
 }
 
 static constexpr test::Case cases[] = {
-	{ "exclusion",           exclusion,           20 },
-	{ "timed_lock_expires",  timed_lock_expires,  5 },
+	{ "exclusion", exclusion, 20 },
+	{ "timed_lock_expires", timed_lock_expires, 5 },
 	{ "timed_lock_acquires", timed_lock_acquires, 5 },
-	{ "trylock_semantics",   trylock_semantics,   5 },
-	{ "every_waiter_wakes",  every_waiter_wakes,  20 },
+	{ "trylock_semantics", trylock_semantics, 5 },
+	{ "every_waiter_wakes", every_waiter_wakes, 20 },
 };
 
 int main(int argc, char **argv) {

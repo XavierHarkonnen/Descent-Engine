@@ -23,6 +23,7 @@
 
 # Files
 !.gitignore
+!.clang-format
 !CMakeLists.txt
 !CMakePresets.json
 !README.md

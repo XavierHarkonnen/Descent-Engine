@@ -62,7 +62,7 @@ static inline void memory_barrier(Order order) {
 
 }
 
-template <typename T>
+template<typename T>
 class Atomic {
 	friend class Futex;
 
@@ -88,7 +88,9 @@ public:
 	}
 
 	bool compare_exchange(T &expected, T desired, atomic::Order success, atomic::Order failure) {
-		return __atomic_compare_exchange_n(&_, &expected, desired, false, static_cast<int>(success), static_cast<int>(failure));
+		return __atomic_compare_exchange_n(
+			&_, &expected, desired, false, static_cast<int>(success), static_cast<int>(failure)
+		);
 	}
 
 	T add_fetch(T value, atomic::Order order) {

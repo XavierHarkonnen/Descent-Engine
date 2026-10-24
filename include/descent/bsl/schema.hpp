@@ -23,13 +23,13 @@
 namespace descent::bsl {
 
 class SchemaData {
-	friend bool deserialize(SchemaData &schema, const u8* input, u64 size, u64& offset);
+	friend bool deserialize(SchemaData &schema, const u8 *input, u64 size, u64 &offset);
 
 public:
 	static constexpr u64 MAX_PARAMETERS = 22;
 
 protected:
-	u8 _count = 0;
+	u8 _count                         = 0;
 	type::Type _types[MAX_PARAMETERS] = {};
 
 public:
@@ -42,20 +42,20 @@ public:
 	}
 };
 
-template<typename ...Args>
+template<typename... Args>
 class Schema : public SchemaData {
 public:
 	static_assert(sizeof...(Args) <= MAX_PARAMETERS, "BSL accepts at most MAX_PARAMETERS parameters");
 
 public:
 	Schema() {
-		u64 i = 0;
+		u64 i  = 0;
 		_count = sizeof...(Args);
 		((_types[i++] = type::traits<typename type::decay<Args>::type>::type), ...);
 	}
 };
 
-inline bool serialize(const SchemaData &schema, u8* output, u64 size, u64& offset) {
+inline bool serialize(const SchemaData &schema, u8 *output, u64 size, u64 &offset) {
 	u64 cursor = offset;
 
 	if (!serialize(schema.count(), output, size, cursor))
@@ -69,7 +69,7 @@ inline bool serialize(const SchemaData &schema, u8* output, u64 size, u64& offse
 	return true;
 }
 
-inline bool deserialize(SchemaData &schema, const u8* input, u64 size, u64& offset) {
+inline bool deserialize(SchemaData &schema, const u8 *input, u64 size, u64 &offset) {
 	u64 cursor = offset;
 	u8 count;
 

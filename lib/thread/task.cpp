@@ -80,7 +80,7 @@ bool Task::spawn(const Job &job, u64 size) {
 		return false;
 
 	memcpy(task->_data, job.context, size);
-	task->create({job.routine, task->_data}, *this);
+	task->create({ job.routine, task->_data }, *this);
 	host->submit(task);
 
 	return true;

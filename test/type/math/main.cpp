@@ -80,12 +80,8 @@ static void npow2_wide() {
 }
 
 static constexpr test::Case cases[] = {
-	{ "npow2_u8",   boundaries<u8, 8> },
-	{ "npow2_u16",  boundaries<u16, 16> },
-	{ "npow2_u32",  boundaries<u32, 32> },
-	{ "npow2_u64",  boundaries<u64, 64> },
-	{ "npow2_u128", boundaries<u128, 128> },
-	{ "npow2_wide", npow2_wide },
+	{ "npow2_u8", boundaries<u8, 8> },    { "npow2_u16", boundaries<u16, 16> },    { "npow2_u32", boundaries<u32, 32> },
+	{ "npow2_u64", boundaries<u64, 64> }, { "npow2_u128", boundaries<u128, 128> }, { "npow2_wide", npow2_wide },
 };
 
 int main(int argc, char **argv) {

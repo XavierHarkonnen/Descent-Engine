@@ -40,7 +40,9 @@ private:
 	bool _active;
 
 	void set_up(u64 count) {
-		sys_assert(count > get(), "Attempted to call set_up with desired workers less than or equal to current workers");
+		sys_assert(
+			count > get(), "Attempted to call set_up with desired workers less than or equal to current workers"
+		);
 
 		u64 index;
 		for (index = get(); index < count; ++index) {
@@ -52,7 +54,9 @@ private:
 	}
 
 	void set_down(u64 count) {
-		sys_assert(count < get(), "Attempted to call set_down with desired workers greater than or equal to current workers");
+		sys_assert(
+			count < get(), "Attempted to call set_down with desired workers greater than or equal to current workers"
+		);
 
 		const u64 current = get();
 

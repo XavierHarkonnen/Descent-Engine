@@ -108,8 +108,8 @@ static void join(void *(*fn)(void *), void *arg = nullptr) {
 // Hands a Box from one thread to another, which destroys it.
 
 static pthread_mutex_t gate = PTHREAD_MUTEX_INITIALIZER;
-static pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-static Box *shared = nullptr;
+static pthread_cond_t cond  = PTHREAD_COND_INITIALIZER;
+static Box *shared          = nullptr;
 
 [[noreturn]]
 static void publish_and_wait(Box *box) {
@@ -219,16 +219,15 @@ static constexpr const char *NOT_LOCAL = "not a local variable of the calling th
 
 static constexpr test::Case cases[] = {
 	{ "scoped_main_thread", scoped_main_thread },
-	{ "scoped_threads",     scoped_threads },
+	{ "scoped_threads", scoped_threads },
 #if defined(DESCENT_DEBUG)
-	{ "destroyed_on_other_thread",       destroyed_on_other_thread,       10, NOT_LOCAL },
-	{ "created_in_static_storage",       created_in_static_storage,       10, NOT_LOCAL },
+	{ "destroyed_on_other_thread", destroyed_on_other_thread, 10, NOT_LOCAL },
+	{ "created_in_static_storage", created_in_static_storage, 10, NOT_LOCAL },
 	{ "created_in_thread_local_storage", created_in_thread_local_storage, 10, NOT_LOCAL },
-	{ "created_on_heap",                 created_on_heap,                 10, NOT_LOCAL },
-	{ "outlives_thread",                 outlives_thread,                 10,
-		"Thread exited while a Box it allocated was alive" },
-	{ "freed_into_other_allocator",      freed_into_other_allocator,      10,
-		"freed on a thread other than the one that allocated it" },
+	{ "created_on_heap", created_on_heap, 10, NOT_LOCAL },
+	{ "outlives_thread", outlives_thread, 10, "Thread exited while a Box it allocated was alive" },
+	{ "freed_into_other_allocator", freed_into_other_allocator, 10,
+	  "freed on a thread other than the one that allocated it" },
 #endif
 };
 

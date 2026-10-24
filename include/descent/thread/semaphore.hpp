@@ -25,9 +25,9 @@
 namespace descent::thread {
 
 class Semaphore {
-	Semaphore(Semaphore &&) = delete;
-	Semaphore(const Semaphore &) = delete;
-	Semaphore operator =(Semaphore &&) = delete;
+	Semaphore(Semaphore &&)                 = delete;
+	Semaphore(const Semaphore &)            = delete;
+	Semaphore operator =(Semaphore &&)      = delete;
 	Semaphore operator =(const Semaphore &) = delete;
 
 private:
@@ -65,7 +65,7 @@ public:
 			if (take())
 				return true;
 
-			time::monotonic now = time::monotonic::now();
+			time::monotonic now    = time::monotonic::now();
 			time::duration elapsed = now - start;
 			if (elapsed >= timeout)
 				return false;

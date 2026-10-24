@@ -21,7 +21,7 @@
 namespace descent::thread {
 
 static inline void spin_pause(void) {
-	__asm__ __volatile__( "pause" : : : "memory" );
+	__asm__ __volatile__("pause" : : : "memory");
 }
 
 u64 id();

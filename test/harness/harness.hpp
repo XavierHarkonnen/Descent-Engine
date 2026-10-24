@@ -52,7 +52,7 @@ namespace descent::test {
 struct Case {
 	const char *name;
 	void (*function)();
-	u32 timeout = 10;          // Seconds
+	u32 timeout      = 10;          // Seconds
 	const char *trap = nullptr; // If set, the case must trap with this text
 };
 
@@ -88,7 +88,13 @@ namespace detail {
 
 constexpr u64 OUTPUT_CAPACITY = 64 * 1024;
 
-enum class Outcome : u8 { PASSED, FAILED, CRASHED, TIMED_OUT, NO_TRAP };
+enum class Outcome : u8 {
+	PASSED,
+	FAILED,
+	CRASHED,
+	TIMED_OUT,
+	NO_TRAP
+};
 
 struct Result {
 	Outcome outcome;
@@ -151,7 +157,7 @@ inline Result run_case(const Case &c, char *output) {
 	Result r{};
 	char discard[4096];
 	for (;;) {
-		char *into = r.length < OUTPUT_CAPACITY - 1 ? output + r.length : discard;
+		char *into     = r.length < OUTPUT_CAPACITY - 1 ? output + r.length : discard;
 		const u64 room = r.length < OUTPUT_CAPACITY - 1 ? OUTPUT_CAPACITY - 1 - r.length : sizeof(discard);
 
 		const ssize_t n = read(fds[0], into, room);
@@ -171,9 +177,10 @@ inline Result run_case(const Case &c, char *output) {
 	r.elapsed_ms = now_ms() - start;
 
 	if (WIFSIGNALED(status)) {
-		r.detail = WTERMSIG(status);
+		r.detail  = WTERMSIG(status);
 		r.outcome = r.detail == SIGALRM ? Outcome::TIMED_OUT : Outcome::CRASHED;
-	} else {
+	}
+	else {
 		r.detail = WEXITSTATUS(status);
 		if (c.trap)
 			r.outcome = r.detail != 0 && strstr(output, c.trap) ? Outcome::PASSED : Outcome::NO_TRAP;
@@ -186,21 +193,15 @@ inline Result run_case(const Case &c, char *output) {
 
 inline void report(const Case &c, const Result &r, const char *output) {
 	switch (r.outcome) {
-	case Outcome::PASSED:
-		printf("[PASS] %s (%llu ms)\n", c.name, (unsigned long long) r.elapsed_ms);
-		return;
-	case Outcome::FAILED:
-		printf("[FAIL] %s: exited with status %d\n", c.name, r.detail);
-		break;
-	case Outcome::CRASHED:
-		printf("[FAIL] %s: killed by signal %d (%s)\n", c.name, r.detail, strsignal(r.detail));
-		break;
-	case Outcome::TIMED_OUT:
-		printf("[FAIL] %s: timed out after %u s\n", c.name, c.timeout);
-		break;
-	case Outcome::NO_TRAP:
-		printf("[FAIL] %s: expected a trap containing \"%s\"; exited with status %d\n", c.name, c.trap, r.detail);
-		break;
+		case Outcome::PASSED: printf("[PASS] %s (%llu ms)\n", c.name, (unsigned long long) r.elapsed_ms); return;
+		case Outcome::FAILED: printf("[FAIL] %s: exited with status %d\n", c.name, r.detail); break;
+		case Outcome::CRASHED:
+			printf("[FAIL] %s: killed by signal %d (%s)\n", c.name, r.detail, strsignal(r.detail));
+			break;
+		case Outcome::TIMED_OUT: printf("[FAIL] %s: timed out after %u s\n", c.name, c.timeout); break;
+		case Outcome::NO_TRAP:
+			printf("[FAIL] %s: expected a trap containing \"%s\"; exited with status %d\n", c.name, c.trap, r.detail);
+			break;
 	}
 
 	if (r.length) {
@@ -221,7 +222,7 @@ template<u64 N>
 int run(const Case (&cases)[N], int argc, char **argv) {
 	static char output[detail::OUTPUT_CAPACITY];
 
-	u32 ran = 0;
+	u32 ran    = 0;
 	u32 failed = 0;
 
 	for (u64 i = 0; i < N; ++i) {
@@ -244,13 +245,12 @@ int run(const Case (&cases)[N], int argc, char **argv) {
 
 }
 
-#define test_check(expression, ...)                                                      \
-	((expression) ? (void) 0                                                             \
-		: ::descent::test::fail(#expression, __FILE__, __LINE__, __VA_ARGS__))
+#define test_check(expression, ...) \
+	((expression) ? (void) 0 : ::descent::test::fail(#expression, __FILE__, __LINE__, __VA_ARGS__))
 
-#define test_require(expression, ...)                                                    \
-	((expression) ? (void) 0                                                             \
-		: (::descent::test::fail(#expression, __FILE__, __LINE__, __VA_ARGS__),          \
-			::descent::test::end_case()))
+#define test_require(expression, ...) \
+	((expression) \
+		 ? (void) 0 \
+		 : (::descent::test::fail(#expression, __FILE__, __LINE__, __VA_ARGS__), ::descent::test::end_case()))
 
 #endif

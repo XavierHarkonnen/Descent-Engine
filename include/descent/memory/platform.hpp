@@ -21,7 +21,7 @@
 namespace descent::memory {
 
 constexpr u64 CACHE_LINE_SIZE = 64;
-constexpr u64 PAGE_SIZE = 4096;
+constexpr u64 PAGE_SIZE       = 4096;
 
 }
 

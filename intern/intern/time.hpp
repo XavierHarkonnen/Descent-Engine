@@ -33,7 +33,7 @@ static inline i64 ns_from_timespec(struct timespec ts) {
 
 static inline struct timespec timespec_from_ns(i64 ns) {
 	struct timespec ts;
-	ts.tv_sec = (time_t) (ns / NANOSECONDS_PER_SECOND);
+	ts.tv_sec  = (time_t) (ns / NANOSECONDS_PER_SECOND);
 	ts.tv_nsec = (long) (ns % NANOSECONDS_PER_SECOND);
 
 	if (ts.tv_nsec < 0) {

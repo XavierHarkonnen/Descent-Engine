@@ -33,8 +33,10 @@ static void dynamic_non_byte_elements() {
 	test_require(region.acquire(1), "acquire(1)");
 	test_check(bool(region), "an acquired Region reports no storage");
 	test_check(region.pages() == 1, "pages() = %u, expected 1", region.pages());
-	test_require(region.capacity() == PAGE_SIZE / sizeof(u32), "capacity() = %llu, expected %llu",
-		(unsigned long long) region.capacity(), (unsigned long long) (PAGE_SIZE / sizeof(u32)));
+	test_require(
+		region.capacity() == PAGE_SIZE / sizeof(u32), "capacity() = %llu, expected %llu",
+		(unsigned long long) region.capacity(), (unsigned long long) (PAGE_SIZE / sizeof(u32))
+	);
 
 	for (u64 i = 0; i < region.capacity(); ++i)
 		region[i] = u32(i * 2654435761u);
@@ -42,12 +44,16 @@ static void dynamic_non_byte_elements() {
 	u64 wrong = 0;
 	for (u64 i = 0; i < region.capacity(); ++i)
 		wrong += region[i] != u32(i * 2654435761u);
-	test_check(wrong == 0, "%llu of %llu elements read back wrong", (unsigned long long) wrong,
-		(unsigned long long) region.capacity());
+	test_check(
+		wrong == 0, "%llu of %llu elements read back wrong", (unsigned long long) wrong,
+		(unsigned long long) region.capacity()
+	);
 
 	// Elements are distinct u32 objects, one sizeof(u32) apart.
-	test_check(reinterpret_cast<u8 *>(&region[1]) - reinterpret_cast<u8 *>(&region[0]) == sizeof(u32),
-		"elements are not sizeof(u32) apart");
+	test_check(
+		reinterpret_cast<u8 *>(&region[1]) - reinterpret_cast<u8 *>(&region[0]) == sizeof(u32),
+		"elements are not sizeof(u32) apart"
+	);
 
 	region.release();
 	test_check(!region, "a released Region holds storage");

@@ -25,9 +25,9 @@
 namespace descent::thread {
 
 class Mutex {
-	Mutex(Mutex &&) = delete;
-	Mutex(const Mutex &) = delete;
-	Mutex operator =(Mutex &&) = delete;
+	Mutex(Mutex &&)                 = delete;
+	Mutex(const Mutex &)            = delete;
+	Mutex operator =(Mutex &&)      = delete;
 	Mutex operator =(const Mutex &) = delete;
 
 private:
@@ -94,7 +94,7 @@ public:
 			state = futex.word.exchange(CONTENDED, atomic::Order::ACQUIRE);
 
 		while (state != FREE) {
-			time::monotonic now = time::monotonic::now();
+			time::monotonic now    = time::monotonic::now();
 			time::duration elapsed = now - start;
 			if (elapsed >= timeout)
 				return false;
@@ -118,10 +118,10 @@ public:
 
 namespace mutex {
 class Scope {
-	Scope(Scope &&) = delete;
-	Scope(const Scope &) = delete;
-	Scope &operator=(Scope &&) = delete;
-	Scope &operator=(const Scope &) = delete;
+	Scope(Scope &&)                  = delete;
+	Scope(const Scope &)             = delete;
+	Scope &operator =(Scope &&)      = delete;
+	Scope &operator =(const Scope &) = delete;
 
 private:
 	Mutex &_mutex;

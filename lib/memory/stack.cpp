@@ -72,7 +72,7 @@ static_assert(sizeof(Footer) == sizeof(u32), "Architecture requires size of Foot
 
 class Bump {
 private:
-	static constexpr u32 CAPACITY  = 0x80000000u;
+	static constexpr u32 CAPACITY = 0x80000000u;
 
 	u8 *_map;
 	u32 _size;
@@ -82,7 +82,7 @@ public:
 	Bump() : _map(nullptr), _size(0), _cursor(0) {
 		void *map = mmap(nullptr, CAPACITY, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 		if (map != MAP_FAILED) {
-			_map = static_cast<u8 *>(map);
+			_map  = static_cast<u8 *>(map);
 			_size = CAPACITY;
 		}
 	}
@@ -94,8 +94,8 @@ public:
 
 		if (_map) {
 			munmap(_map, _size);
-			_map = nullptr;
-			_size = 0;
+			_map    = nullptr;
+			_size   = 0;
 			_cursor = 0;
 		}
 	}
@@ -118,10 +118,10 @@ public:
 			return false;
 		}
 
-		u8 *alloc = _map + aligned;
+		u8 *alloc      = _map + aligned;
 		Footer *footer = reinterpret_cast<Footer *>(alloc + payload);
-		data = alloc;
-		meta = footer;
+		data           = alloc;
+		meta           = footer;
 
 		_cursor += u32(total);
 
@@ -197,7 +197,7 @@ public:
 		void *low;
 		__SIZE_TYPE__ size;
 		if (pthread_attr_getstack(&attr, &low, &size) == 0) {
-			_low = static_cast<const u8 *>(low);
+			_low  = static_cast<const u8 *>(low);
 			_high = _low + size;
 		}
 
@@ -220,8 +220,10 @@ bool Allocator::create(void *&data, void *&meta, u32 size, u32 align, u32 capaci
 
 #if defined(DESCENT_DEBUG)
 void Allocator::local(const void *box) {
-	sys_assert(range.contains(box), "Box is not a local variable of the calling thread "
-		"(it is static, thread_local, on the heap or on another thread's stack)");
+	sys_assert(
+		range.contains(box), "Box is not a local variable of the calling thread "
+							 "(it is static, thread_local, on the heap or on another thread's stack)"
+	);
 }
 #endif
 

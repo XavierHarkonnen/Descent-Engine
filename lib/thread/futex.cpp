@@ -38,7 +38,7 @@ static bool futex_wait(const Atomic<u32> &word, u32 expected, const struct times
 		return true;
 		// Woken, should check predicate
 
-	switch(errno) {
+	switch (errno) {
 		case EINTR:
 			return true;
 			// Interrupted, should check predicate
@@ -69,11 +69,11 @@ static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec
 	u64 count = 0;
 
 	for (u64 index = 0; index < size; ++index) {
-		waitv[count].uaddr = reinterpret_cast<u64>(&pairs[index].futex.word);
-		waitv[count].val = pairs[index].expected;
-		waitv[count].flags = FUTEX2_SIZE_U32 | FUTEX2_PRIVATE;
+		waitv[count].uaddr      = reinterpret_cast<u64>(&pairs[index].futex.word);
+		waitv[count].val        = pairs[index].expected;
+		waitv[count].flags      = FUTEX2_SIZE_U32 | FUTEX2_PRIVATE;
 		waitv[count].__reserved = 0;
-		indices[count] = index;
+		indices[count]          = index;
 
 		++count;
 	}
@@ -87,7 +87,7 @@ static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec
 		return indices[result];
 		// Woken, should check predicate
 
-	switch(errno) {
+	switch (errno) {
 		case EINTR:
 			return Futex::INVALID_INDEX;
 			// Interrupted, should check predicate
@@ -136,7 +136,7 @@ u64 Futex::wait_any(const Pair *pairs, u64 size, time::duration timeout) {
 	struct timespec now;
 	clock_gettime(CLOCK_MONOTONIC, &now);
 
-	const i64 start = intern::time::ns_from_timespec(now);
+	const i64 start    = intern::time::ns_from_timespec(now);
 	const i64 deadline = timeout.ns() > I64_MAX - start ? I64_MAX : start + timeout.ns();
 
 	struct timespec ts = intern::time::timespec_from_ns(deadline);

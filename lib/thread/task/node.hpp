@@ -28,15 +28,15 @@ namespace descent::thread::task {
 class Node {
 	friend class Task;
 
-	Node(Node &&other) = delete;
-	Node(const Node &other) = delete;
-	Node &operator=(Node &&other) = delete;
-	Node &operator=(const Node &other) = delete;
+	Node(Node &&other)                  = delete;
+	Node(const Node &other)             = delete;
+	Node &operator =(Node &&other)      = delete;
+	Node &operator =(const Node &other) = delete;
 
 protected:
 	alignas(memory::CACHE_LINE_SIZE)
 
-	Routine _routine;
+		Routine _routine;
 	void *_context;
 	Node *_parent;
 	Futex _unfinished;
@@ -84,7 +84,7 @@ public:
 
 		_routine = nullptr;
 		_context = nullptr;
-		_parent = nullptr;
+		_parent  = nullptr;
 		_unfinished.word.store(1, atomic::Order::RELEASE);
 	}
 
@@ -111,7 +111,7 @@ private:
 
 		_routine = job.routine;
 		_context = job.context;
-		_parent = &parent;
+		_parent  = &parent;
 		_unfinished.word.store(1, atomic::Order::RELEASE);
 		parent.increment();
 	}

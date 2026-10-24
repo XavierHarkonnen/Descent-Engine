@@ -22,7 +22,7 @@ namespace descent {
 
 class string {
 private:
-	const char* _data;
+	const char *_data;
 	u64 _size;
 
 	constexpr char at(u64 index) const {
@@ -34,18 +34,14 @@ public:
 
 	// Constructors
 
-	constexpr string()
-	: _data(nullptr), _size(0) {}
+	constexpr string() : _data(nullptr), _size(0) {}
 
-	constexpr string(const char *data, u64 size)
-	: _data(data), _size(data ? size : 0) {}
+	constexpr string(const char *data, u64 size) : _data(data), _size(data ? size : 0) {}
 
 	template<u64 N>
-	explicit constexpr string(const char (&data)[N])
-	: _data(data), _size(N - 1) {}
+	explicit constexpr string(const char (&data)[N]) : _data(data), _size(N - 1) {}
 
-	explicit constexpr string(const char *data)
-	: _data(data), _size(U64_MAX) {
+	explicit constexpr string(const char *data) : _data(data), _size(U64_MAX) {
 		_size = c_length();
 		if (_size == INVALID)
 			_size = 0;

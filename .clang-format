@@ -1,0 +1,144 @@
+# Descent style (STY-02), adopted 2026-10-24. Fitted to the code at c3b17e4:
+# where the code was consistent, each setting is the value that changed the
+# fewest lines ("n:m" counts the lines or files on each side); settings marked
+# DECIDED were chosen where it was not. Requires clang-format 21
+# (SpaceAfterOperatorKeyword).
+#
+# The random.hpp tables are wrapped in // clang-format off/on. Licence headers,
+# include guards and whitespace are checked separately by
+# cmake/CheckSources.cmake.
+---
+Language: Cpp
+Standard: c++17
+BasedOnStyle: LLVM
+
+# Indentation: tabs, 4 wide (3284 tab-indented lines, 11 space-indented).
+UseTab: ForContinuationAndIndentation
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 4    # DECIDED: one tab
+ConstructorInitializerIndentWidth: 0    # ": init(...)" at the constructor's own depth (5 of 5)
+AccessModifierOffset: -4      # public: in the class's column (26 files, none otherwise)
+IndentAccessModifiers: false
+IndentCaseLabels: true        # 4 files
+NamespaceIndentation: None    # namespace contents not indented (49 files)
+IndentPPDirectives: None
+IndentExternBlock: NoIndent
+IndentWrappedFunctionNames: false
+
+# Line length. DECIDED: 120, to be tried by hand before reformatting. 265
+# lines exceeded it at c3b17e4.
+ColumnLimit: 120
+
+# Braces: attached everywhere, except that else starts its own line (no
+# "} else" anywhere; 3 of 3 cases break before else).
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel: false
+  AfterClass: false
+  AfterControlStatement: Never
+  AfterEnum: false
+  AfterExternBlock: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: true
+  BeforeLambdaBody: false
+  BeforeWhile: false
+  IndentBraces: false
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+
+# One-line forms.
+# Single-statement if/for/while bodies go on the next line without braces
+# (218 braceless, 78 braced); no one-line "if (x) y;" exists. DECIDED: braces
+# are neither added nor removed.
+# DECIDED: only empty bodies stay on one line. With a column limit clang-format
+# cannot keep the author's choice; this keeps the 153 multi-line short functions
+# and splits the 202 one-liners (the math.hpp, bit.hpp and time.hpp tables).
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortLambdasOnASingleLine: All
+InsertBraces: false
+RemoveBracesLLVM: false
+
+# Pointers and references bind to the name: "T *p", "T &r" (36 files; "T* p"
+# in 8, mostly bsl/ and stack.hpp).
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+SpaceAroundPointerQualifiers: Default
+
+# Spacing.
+SpaceAfterTemplateKeyword: false     # template<...> (11 files; "template <" in 3)
+SpaceAfterOperatorKeyword: true      # DECIDED: operator ==, operator =, operator ~ (38:3; operator= was 19:10 the other way)
+SpaceAfterCStyleCast: true           # DECIDED: (void) 0
+SpaceBeforeParens: ControlStatements # if (, for ( (312:3)
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeCpp11BracedList: false
+Cpp11BracedListStyle: false          # DECIDED: { a, b } padded
+SpaceInEmptyBlock: false             # {} (21 files)
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+
+# Alignment: no automatic alignment. The hand-aligned tables (math.hpp,
+# bit.hpp, core.hpp, enumerators, operator lists in time.hpp) pad to columns
+# clang-format cannot reproduce. DECIDED: only the random.hpp tables are kept
+# unformatted; the rest take clang-format's layout.
+AlignAfterOpenBracket: BlockIndent
+# DECIDED: aligned, so enumerators keep their padding (clang-format has no
+# enum-only option). Groups end at a blank line, a comment line, or any other
+# statement.
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+  AlignCompound: false
+  PadOperators: true
+AlignConsecutiveDeclarations: None
+AlignConsecutiveMacros: Consecutive  # 1 line better than None; a near-tie
+AlignEscapedNewlines: DontAlign
+AlignOperands: Align
+AlignTrailingComments:
+  Kind: Leave
+AlignArrayOfStructures: None
+
+# Breaking.
+BreakAfterAttributes: Always         # DECIDED: [[...]] on its own line; __attribute__ is not used (checked)
+BreakAfterReturnType: Automatic
+BreakTemplateDeclarations: Yes
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: BinPack
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakStringLiterals: false
+AlwaysBreakBeforeMultilineStrings: false
+BinPackArguments: true
+BinPackParameters: BinPack
+
+# Blank lines.
+MaxEmptyLinesToKeep: 3
+KeepEmptyLines:
+  AtEndOfFile: true
+  AtStartOfBlock: true
+  AtStartOfFile: true
+EmptyLineBeforeAccessModifier: Leave
+EmptyLineAfterAccessModifier: Leave
+SeparateDefinitionBlocks: Leave
+InsertNewlineAtEOF: true             # DECIDED (checked by cmake/CheckSources.cmake)
+
+# Left to the author.
+SortIncludes: Never                  # extern "C" blocks and include groups are deliberate
+IncludeBlocks: Preserve
+FixNamespaceComments: false          # closing } has no comment (49 files)
+QualifierAlignment: Leave
+ReflowComments: false
+...

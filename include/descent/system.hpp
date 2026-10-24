@@ -25,15 +25,16 @@ void sys_fatal(const char *message, const char *file, const char *line);
 #if defined(DESCENT_DEBUG)
 #define sys_trap(message) sys_fatal(message)
 #else
-#define sys_trap(message) ((void)0)
+#define sys_trap(message) ((void) 0)
 #endif
 
 #if defined(DESCENT_DEBUG)
 [[noreturn, gnu::cold]]
 void sys_assert(const char *expression, const char *message, const char *file, const char *line);
-#define sys_assert(expression, message) ((expression) ? (void)0 : sys_assert(STRINGIFY(expression), message, __FILE__, STRINGIFY(__LINE__)))
+#define sys_assert(expression, message) \
+	((expression) ? (void) 0 : sys_assert(STRINGIFY(expression), message, __FILE__, STRINGIFY(__LINE__)))
 #else
-#define sys_assert(expression, message) ((void)0)
+#define sys_assert(expression, message) ((void) 0)
 #endif
 
 #endif

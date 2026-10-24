@@ -53,11 +53,11 @@ constexpr Level operator |=(Level &rhs, const Level &lhs) {
 	return (rhs = (rhs | lhs));
 }
 
-inline bool serialize(const Level &level, u8* output, u64 size, u64 &offset) {
+inline bool serialize(const Level &level, u8 *output, u64 size, u64 &offset) {
 	return serialize(u8(level), output, size, offset);
 }
 
-inline bool deserialize(Level &level, const u8* input, u64 size, u64 &offset) {
+inline bool deserialize(Level &level, const u8 *input, u64 size, u64 &offset) {
 	u8 value;
 	if (!deserialize(value, input, size, offset))
 		return false;

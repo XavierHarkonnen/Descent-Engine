@@ -65,18 +65,16 @@ static const char *symbol_path() {
 	return path;
 }
 
-static const char *thread_path() {
-
-}
+static const char *thread_path() {}
 
 template<typename T>
 static void hexcpy(char *output, T input, u64 size) {
 	static_assert(type::traits<T>::is_integer, "hexcpy requires integer argument");
 
-	constexpr char HEX[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+	constexpr char HEX[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 	using U = typename type::traits<T>::to_unsigned;
-	U bits = U(input);
+	U bits  = U(input);
 
 	for (u64 i = 0; i < size; ++i) {
 		output[size - i - 1] = HEX[bits & 0xF];

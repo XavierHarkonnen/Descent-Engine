@@ -23,8 +23,8 @@ namespace descent {
 class Directory {
 	friend class File;
 
-	Directory(const Directory &) = delete;
-	Directory &operator=(const Directory &) = delete;
+	Directory(const Directory &)             = delete;
+	Directory &operator =(const Directory &) = delete;
 
 private:
 	int fd = -1;
@@ -56,8 +56,8 @@ public:
 };
 
 class File {
-	File(const File &) = delete;
-	File &operator=(const File &) = delete;
+	File(const File &)             = delete;
+	File &operator =(const File &) = delete;
 
 private:
 	int fd = -1;

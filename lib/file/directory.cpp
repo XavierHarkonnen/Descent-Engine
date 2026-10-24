@@ -230,7 +230,7 @@ static int generate_base_fd(void) {
 	if (slash == string::INVALID)
 		return -1;
 
-	u64 index = (slash == 0) ? 1 : slash;
+	u64 index   = (slash == 0) ? 1 : slash;
 	string base = executable.sub(0, index);
 
 	return open_dir(base);
@@ -270,7 +270,7 @@ bool set_program_name(string name) {
 		return false;
 
 	const u64 C_LENGTH = name.c_length();
-	const u64 LENGTH = (C_LENGTH == string::INVALID) ? name.size() : C_LENGTH;
+	const u64 LENGTH   = (C_LENGTH == string::INVALID) ? name.size() : C_LENGTH;
 
 	if (LENGTH >= MAX_PROGRAM_NAME_SIZE)
 		return false;
@@ -334,7 +334,7 @@ Directory &Directory::operator =(Directory &&other) {
 		if (fd >= 0)
 			close(fd);
 
-		fd = other.fd;
+		fd       = other.fd;
 		other.fd = -1;
 	}
 

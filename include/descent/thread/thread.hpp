@@ -28,18 +28,18 @@ struct RemoveReference {
 };
 
 template<class T>
-struct RemoveReference<T&> {
+struct RemoveReference<T &> {
 	using Type = T;
 };
 
 template<class T>
-struct RemoveReference<T&&> {
+struct RemoveReference<T &&> {
 	using Type = T;
 };
 
 template<class T>
-constexpr typename RemoveReference<T>::Type&& move(T&& arg) noexcept {
-	return static_cast<typename RemoveReference<T>::Type&&>(arg);
+constexpr typename RemoveReference<T>::Type &&move(T &&arg) noexcept {
+	return static_cast<typename RemoveReference<T>::Type &&>(arg);
 }
 
 using Routine = void (*)(void *);
@@ -56,8 +56,8 @@ using Routine = void (*)(void *);
 //
 // Handles may be transferred using move operations.
 class Thread {
-	Thread(const Thread &) = delete;
-	Thread &operator=(const Thread &) = delete;
+	Thread(const Thread &)             = delete;
+	Thread &operator =(const Thread &) = delete;
 
 private:
 	static constexpr u32 INVALID = ~u32(0);
@@ -91,7 +91,7 @@ public:
 
 	// Releases the current handle's ownership, if any, then transfers
 	// the handle from other, invalidating other.
-	Thread &operator=(Thread &&other);
+	Thread &operator =(Thread &&other);
 
 	// Returns whether this handle refers to a managed thread.
 	// Does not indicate whether the thread is still running.

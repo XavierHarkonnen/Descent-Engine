@@ -62,7 +62,7 @@ static void connected() {
 
 static constexpr test::Case cases[] = {
 	{ "no_display", no_display },
-	{ "connected",  connected },
+	{ "connected", connected },
 };
 
 int main(int argc, char **argv) {

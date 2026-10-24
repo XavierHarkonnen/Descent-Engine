@@ -27,12 +27,12 @@ class Allocator {
 private:
 	static constexpr u64 BLOCK_CAPACITY = 1024;
 	static constexpr u64 LOCAL_CAPACITY = BLOCK_CAPACITY - 1;
-	static constexpr u64 BLOCK_SIZE = BLOCK_CAPACITY * sizeof(Task);
+	static constexpr u64 BLOCK_SIZE     = BLOCK_CAPACITY * sizeof(Task);
 
 	static_assert(BLOCK_SIZE % memory::PAGE_SIZE == 0, "BLOCK_SIZE must be a multiple of PAGE_SIZE");
 
 	static constexpr u64 BACKUP_COUNT = 6;
-	static constexpr u32 BLOCK_PAGES = BLOCK_SIZE / memory::PAGE_SIZE;
+	static constexpr u32 BLOCK_PAGES  = BLOCK_SIZE / memory::PAGE_SIZE;
 
 	Task storage[LOCAL_CAPACITY];
 	memory::Region<Task, BLOCK_PAGES> backup[BACKUP_COUNT];
@@ -47,8 +47,8 @@ public:
 			return &storage[cursor++];
 
 		const u64 adjusted_cursor = cursor - LOCAL_CAPACITY;
-		const u64 backup_index = adjusted_cursor / BLOCK_CAPACITY;
-		const u64 backup_cursor = adjusted_cursor % BLOCK_CAPACITY;
+		const u64 backup_index    = adjusted_cursor / BLOCK_CAPACITY;
+		const u64 backup_cursor   = adjusted_cursor % BLOCK_CAPACITY;
 
 		if (backup_index >= BACKUP_COUNT)
 			return nullptr;

@@ -28,7 +28,7 @@ private:
 	static constexpr u64 CAPACITY = 1024;
 	static_assert((CAPACITY & (CAPACITY - 1)) == 0, "CAPACITY must be a power of two");
 
-	Atomic<Task *>tasks[CAPACITY];
+	Atomic<Task *> tasks[CAPACITY];
 
 	Atomic<u64> top;
 	Atomic<u64> bottom;

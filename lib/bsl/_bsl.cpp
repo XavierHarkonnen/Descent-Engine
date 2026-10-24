@@ -76,7 +76,7 @@ struct Header {
 struct Source {
 	u64 offset_format; // Offset of format string relative to start of file
 	u64 offset_schema; // Offset of schema relative to start of file
-	u64 offset_file;   // Offset of file string relative to start of file
+	u64 offset_file; // Offset of file string relative to start of file
 	u64 line;
 	u8 level;
 	u8 _pad;
@@ -116,7 +116,7 @@ struct Event {
 // An event is valid only if its complete size bytes are available within the file.
 
 class Symbol {
-	Symbol(const Symbol &) = delete;
+	Symbol(const Symbol &)             = delete;
 	Symbol &operator =(const Symbol &) = delete;
 
 private:
@@ -132,11 +132,11 @@ public:
 };
 
 class Logger {
-	Logger(const Logger &) = delete;
+	Logger(const Logger &)             = delete;
 	Logger &operator =(const Logger &) = delete;
 
 private:
-	int _fd = -1;
+	int _fd        = -1;
 	Level _enabled = Level::DEFAULT;
 
 public:

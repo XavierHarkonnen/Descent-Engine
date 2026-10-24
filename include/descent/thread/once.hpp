@@ -22,11 +22,11 @@
 
 namespace descent::thread {
 
-template<typename R, typename ...Args>
+template<typename R, typename... Args>
 class Once {
-	Once(Once &&) = delete;
-	Once(const Once &) = delete;
-	Once &operator =(Once &&) = delete;
+	Once(Once &&)                  = delete;
+	Once(const Once &)             = delete;
+	Once &operator =(Once &&)      = delete;
 	Once &operator =(const Once &) = delete;
 
 private:
@@ -45,7 +45,7 @@ private:
 public:
 	Once(R (*function)(Args...)) : futex(UNINITIALIZED), function(function) {}
 
-	const R& operator ()(Args... args) {
+	const R &operator ()(Args... args) {
 		if (futex.word.load(atomic::Order::ACQUIRE) == INITIALIZED)
 			return result;
 
@@ -59,11 +59,8 @@ public:
 					futex.word.store(INITIALIZED, atomic::Order::RELEASE);
 					futex.wake_all();
 					return result;
-				case RUNNING:
-					futex.wait(RUNNING);
-					break;
-				case INITIALIZED:
-					return result;
+				case RUNNING: futex.wait(RUNNING); break;
+				case INITIALIZED: return result;
 			}
 		}
 	}

@@ -26,13 +26,13 @@ namespace descent::random {
 
 class Detail {
 protected:
-	template <typename T>
+	template<typename T>
 	struct normal;
 
-	template <typename T>
+	template<typename T>
 	struct exponential;
 
-	template <>
+	template<>
 	struct normal<f32> {
 		// clang-format off
 		inline static constexpr u32 K[128] = {
@@ -106,7 +106,7 @@ protected:
 		}
 	};
 
-	template <>
+	template<>
 	struct normal<f64> {
 		// clang-format off
 		inline static constexpr u64 K[128] = {
@@ -180,7 +180,7 @@ protected:
 		}
 	};
 
-	template <>
+	template<>
 	struct exponential<f32> {
 		// clang-format off
 		inline static constexpr u32 K[256] = {
@@ -302,7 +302,7 @@ protected:
 		}
 	};
 
-	template <>
+	template<>
 	struct exponential<f64> {
 		// clang-format off
 		static constexpr u64 K[256] = {
@@ -433,8 +433,8 @@ private:
 	template<typename T>
 	static constexpr u64 COUNT = (type::traits<T>::bits + type::traits<G>::bits - 1) / type::traits<G>::bits;
 
-	Generator& generator() {
-		return static_cast<Generator&>(*this);
+	Generator &generator() {
+		return static_cast<Generator &>(*this);
 	}
 
 	template<typename T>
@@ -499,7 +499,7 @@ private:
 		return min + static_cast<T>(random);
 	}
 
-	template <typename T>
+	template<typename T>
 	T normal() {
 		static_assert(type::traits<T>::is_float, "Attempted to get unsupported type");
 
@@ -509,8 +509,8 @@ private:
 
 		for (;;) {
 			const u64 bits = next<u64>();
-			auto hz = D::sample(bits);
-			auto iz = D::index(bits);
+			auto hz        = D::sample(bits);
+			auto iz        = D::index(bits);
 
 			if (math::abs(hz) < D::K[iz])
 				return static_cast<T>(hz) * D::W[iz];
@@ -536,7 +536,7 @@ private:
 		}
 	}
 
-	template <typename T>
+	template<typename T>
 	T exponential() {
 		static_assert(type::traits<T>::is_float, "Attempted to get unsupported type");
 
@@ -663,8 +663,8 @@ private:
 	u64 next() {
 		_state += 0x9E3779B97F4A7C15;
 		u64 z = _state;
-		z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
-		z = (z ^ (z >> 27)) * 0x94D049BB133111EB;
+		z     = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9;
+		z     = (z ^ (z >> 27)) * 0x94D049BB133111EB;
 		return z ^ (z >> 31);
 	}
 
