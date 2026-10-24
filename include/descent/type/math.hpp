@@ -1,11 +1,11 @@
 /* Copyright 2025 XavierHarkonnen9 and Enlarium
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -208,39 +208,39 @@ static inline f32 remainder(f32 x, f32 y) { return __builtin_remainderf(x, y); }
 static inline f64 remainder(f64 x, f64 y) { return __builtin_remainder(x, y); }
 
 static inline f32 copysign(f32 x, f32 y) {
-    return __builtin_copysignf(x, y);
+	return __builtin_copysignf(x, y);
 }
 static inline f64 copysign(f64 x, f64 y) {
-    return __builtin_copysign(x, y);
+	return __builtin_copysign(x, y);
 }
 
 static inline f32 fmin(f32 x, f32 y) {
-    return __builtin_fminf(x, y);
+	return __builtin_fminf(x, y);
 }
 static inline f64 fmin(f64 x, f64 y) {
-    return __builtin_fmin(x, y);
+	return __builtin_fmin(x, y);
 }
 
 static inline f32 fmax(f32 x, f32 y) {
-    return __builtin_fmaxf(x, y);
+	return __builtin_fmaxf(x, y);
 }
 static inline f64 fmax(f64 x, f64 y) {
-    return __builtin_fmax(x, y);
+	return __builtin_fmax(x, y);
 }
 
 static inline f32 fdim(f32 x, f32 y) {
-    return __builtin_fdimf(x, y);
+	return __builtin_fdimf(x, y);
 }
 static inline f64 fdim(f64 x, f64 y) {
-    return __builtin_fdim(x, y);
+	return __builtin_fdim(x, y);
 }
 
 static inline f32 fma(f32 x, f32 y, f32 z) {
-    return __builtin_fmaf(x, y, z);
+	return __builtin_fmaf(x, y, z);
 }
 
 static inline f64 fma(f64 x, f64 y, f64 z) {
-    return __builtin_fma(x, y, z);
+	return __builtin_fma(x, y, z);
 }
 
 static inline bool isnan(f32 x) { return __builtin_isnan(x); }

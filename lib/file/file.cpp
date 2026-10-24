@@ -1,3 +1,17 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // Public API
 
@@ -18,7 +32,7 @@ File::File(const Directory &parent, const char *name) {
 
 // Implementation
 
-__attribute__((constructor))
+[[gnu::constructor]]
 static void roots_construct_elements(void) {
 	const char *home_path = getenv("HOME");
 	if (!home_path)
@@ -51,7 +65,7 @@ static void roots_construct_elements(void) {
 }
 
 
-__attribute__((destructor))
+[[gnu::destructor]]
 static void roots_destroy(void) {
 	close(roots.base);
 	close(roots.config);

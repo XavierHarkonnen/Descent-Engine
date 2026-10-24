@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // Shared test harness.
 //
 // A test is a table of cases passed to test::run(). Each case runs in its own
@@ -17,8 +32,8 @@
 //
 // Running a test executable with case names as arguments runs only those cases.
 
-#ifndef DESCENT_TEST_HARNESS_HPP
-#define DESCENT_TEST_HARNESS_HPP
+#ifndef DESCENT_TEST_HARNESS_HARNESS_HPP
+#define DESCENT_TEST_HARNESS_HARNESS_HPP
 
 extern "C" {
 #include <signal.h>
@@ -45,7 +60,7 @@ struct Case {
 // on threads the case starts.
 inline u32 failures = 0;
 
-__attribute__((format(printf, 4, 5)))
+[[gnu::format(printf, 4, 5)]]
 inline void fail(const char *expression, const char *file, u32 line, const char *format, ...) {
 	__atomic_fetch_add(&failures, 1, __ATOMIC_RELAXED);
 
@@ -62,7 +77,7 @@ inline void fail(const char *expression, const char *file, u32 line, const char 
 	fputc('\n', stderr);
 }
 
-__attribute__((noreturn))
+[[noreturn]]
 inline void end_case() {
 	fflush(stdout);
 	fflush(stderr);

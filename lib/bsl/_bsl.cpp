@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "bsl.hpp"
 
 // Binary Structured Logging
@@ -49,11 +64,11 @@ struct Header {
 // Header
 // Source Table
 // Format Blob
-// Schema Blob 
+// Schema Blob
 // File Blob
 // -------------
 
-// Header's magic number is "BSL SYM" 
+// Header's magic number is "BSL SYM"
 
 // Format strings, schemas, and file strings don't strictly have to be separate; they can be interleaved
 // Interleaving could improve locality
@@ -90,7 +105,7 @@ struct SchemaI {
 // Event List
 // -------------
 
-// Header's magic number is "BSL LOG" 
+// Header's magic number is "BSL LOG"
 
 struct Event {
 	u32 size; // Total event size, maximum U32_MAX bytes
@@ -123,7 +138,7 @@ class Logger {
 private:
 	int _fd = -1;
 	Level _enabled = Level::DEFAULT;
-	
+
 public:
 	Logger() = default;
 
