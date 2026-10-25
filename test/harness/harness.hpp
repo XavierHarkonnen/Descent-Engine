@@ -52,7 +52,7 @@ namespace descent::test {
 struct Case {
 	const char *name;
 	void (*function)();
-	u32 timeout      = 10;          // Seconds
+	u32 timeout      = 10;      // Seconds
 	const char *trap = nullptr; // If set, the case must trap with this text
 };
 
