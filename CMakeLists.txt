@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(DESCENT_BUILD_TESTS "Build Descent test programs" OFF)
+option(DESCENT_BUILD_CLIENT "Build the client and the renderer it needs (Vulkan and Wayland)" ON)
 
 # Require out-of-source builds
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
@@ -48,11 +49,6 @@ else()
 		VERBATIM
 	)
 endif()
-
-# Find required libraries
-find_package(Vulkan REQUIRED)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(WAYLAND REQUIRED IMPORTED_TARGET wayland-client)
 
 # Flags
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)

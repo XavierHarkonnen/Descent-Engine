@@ -28,6 +28,50 @@ The project prioritizes low-level systems programming, explicit control over imp
 
 The engine targets Vulkan for graphics and Wayland for window-system integration. Additional libraries may be used where appropriate, particularly for implementing complex protocols, schemas, or other specialized interfaces.
 
+## Building
+
+### Requirements
+
+| Requirement | Needed for | Ubuntu package |
+|---|---|---|
+| CMake 3.26 or later | Configuring | `cmake` |
+| Ninja | The generator the presets use | `ninja-build` |
+| clang and clang++ (21 is what CI uses) | The compiler the presets select | `clang` |
+| `lld` and `llvm` (`llvm-ar`) | Release presets, which use LTO | `lld`, `llvm` |
+| clang runtime libraries | The debug preset, which enables `-fsanitize=undefined` | `libclang-rt-21-dev` |
+| clang-format 21 | The `check-format` target and `test-descent-format`; optional, skipped when absent | `clang-format-21` |
+| pkg-config | Locating Wayland (client only) | `pkg-config` |
+| Vulkan headers | The client only | `libvulkan-dev` |
+| Wayland client library and headers | The client only | `libwayland-dev` |
+
+The client is the only part of the project that needs Vulkan and Wayland. On Ubuntu:
+
+```sh
+sudo apt-get install cmake ninja-build clang lld llvm libclang-rt-21-dev clang-format-21 pkg-config libvulkan-dev libwayland-dev
+```
+
+### Configuring and building
+
+```sh
+cmake --preset debug -B build/debug
+cmake --build build/debug
+```
+
+The presets are `debug`, `release`, `release-debug` and `release-size`. Builds must be out of source.
+
+| Option | Default | Effect |
+|---|---|---|
+| `DESCENT_BUILD_CLIENT` | `ON` | Builds the client and the renderer library it uses. Turn it off to build everything else without Vulkan, Wayland or pkg-config. |
+| `DESCENT_BUILD_TESTS` | `OFF` | Builds the tests in `test/` and registers them with CTest. |
+
+For example, to build and test everything except the client:
+
+```sh
+cmake --preset debug -B build/debug -DDESCENT_BUILD_CLIENT=OFF -DDESCENT_BUILD_TESTS=ON
+cmake --build build/debug
+ctest --test-dir build/debug --output-on-failure
+```
+
 ## Project Status
 
 Descent Engine is an experimental project focused on exploring minimal engine architecture and low-level systems programming. Its design and implementation may evolve as development progresses.
