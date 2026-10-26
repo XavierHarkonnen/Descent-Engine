@@ -20,8 +20,6 @@
 
 #include "stdio.h"
 
-#include <descent/rengine/rengine.hpp>
-
 using namespace descent;
 
 void routine(thread::task::Handle, void *) {
@@ -54,8 +52,6 @@ int main() {
 	thread::task::set(0);
 
 	printf("Worker Thread Count: %lu\n", thread::task::get());
-
-	rengine::Rengine r;
 
 	return 0;
 }
