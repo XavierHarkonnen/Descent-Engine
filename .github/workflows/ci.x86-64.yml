@@ -1,0 +1,54 @@
+
+name: CI x86-64
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: x86-64 ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    container: ubuntu:26.04
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [debug, release]
+
+    steps:
+      - name: Install tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates git cmake ninja-build pkg-config \
+            clang clang-format-21 libclang-rt-21-dev llvm lld \
+            libvulkan-dev libwayland-dev
+          clang++ --version | grep -q 'clang version 21\.' || { clang++ --version; echo "clang++ is not clang 21"; exit 1; }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Show machine
+        run: |
+          uname -srm
+          nproc
+          clang++ --version | head -n 1
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -B build/${{ matrix.preset }} -DDESCENT_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build/${{ matrix.preset }}
+
+      - name: Test
+        run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure
