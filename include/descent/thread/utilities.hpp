@@ -20,8 +20,13 @@
 
 namespace descent::thread {
 
+// A spin-wait hint.
 static inline void spin_pause(void) {
+#if defined(__x86_64__)
 	__asm__ __volatile__("pause" : : : "memory");
+#elif defined(__aarch64__)
+	__asm__ __volatile__("isb" : : : "memory");
+#endif
 }
 
 u64 id();
