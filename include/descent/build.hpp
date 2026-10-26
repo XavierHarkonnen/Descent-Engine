@@ -28,8 +28,8 @@
 #error "Descent Engine supports Linux (non-Android) only!"
 #endif
 
-#if !defined(__x86_64__) && !defined(_M_X64) && !defined(_M_AMD64)
-#error "Descent Engine only supports x86-64!"
+#if !defined(__x86_64__) && !defined(_M_X64) && !defined(_M_AMD64) && !defined(__aarch64__)
+#error "Descent Engine only supports x86-64 and AArch64!"
 #endif
 
 #if (-1 != ~0) || ((-1 & 3) != 3)
