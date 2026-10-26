@@ -1,5 +1,5 @@
 
-name: CI x86-64
+name: x86-64 Linux
 
 on:
   pull_request:
