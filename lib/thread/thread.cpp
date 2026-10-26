@@ -17,6 +17,7 @@
 
 extern "C" {
 #include <pthread.h>
+#include <limits.h>
 }
 
 #include <descent/memory/platform.hpp>
