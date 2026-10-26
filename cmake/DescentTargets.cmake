@@ -128,3 +128,24 @@ function(descent_compile_fail_test NAME)
 		RESOURCE_LOCK descent-build-tree
 	)
 endfunction()
+
+# descent_script_test(<name> SCRIPT <file> [VARIABLES <variable>=<value>...])
+#
+# Registers test-descent-<name>, which runs the CMake script <file> with
+# cmake -P and passes if it succeeds. Each VARIABLES entry is passed to the
+# script as -D<variable>=<value>; a value cannot contain a semicolon, since
+# CMake splits it into two arguments. A relative <file> is taken from the
+# current source directory.
+function(descent_script_test NAME)
+	cmake_parse_arguments(PARSE_ARGV 1 ARG "" "SCRIPT" "VARIABLES")
+	set(TEST test-descent-${NAME})
+
+	if(NOT ARG_SCRIPT)
+		message(FATAL_ERROR "descent_script_test(${NAME}): SCRIPT is required")
+	endif()
+
+	get_filename_component(SCRIPT "${ARG_SCRIPT}" ABSOLUTE BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+	list(TRANSFORM ARG_VARIABLES PREPEND -D)
+
+	add_test(NAME ${TEST} COMMAND ${CMAKE_COMMAND} ${ARG_VARIABLES} -P ${SCRIPT})
+endfunction()
