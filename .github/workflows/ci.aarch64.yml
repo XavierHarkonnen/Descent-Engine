@@ -1,5 +1,5 @@
 
-name: CI AArch64
+name: AArch64 Linux
 
 on:
   pull_request:

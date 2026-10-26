@@ -1,5 +1,8 @@
 # Descent Engine
 
+[![x86-64 Linux](https://github.com/XavierHarkonnen/Descent-Engine/actions/workflows/ci.x86-64.yml/badge.svg?branch=master)](https://github.com/XavierHarkonnen/Descent-Engine/actions/workflows/ci.x86-64.yml)
+[![AArch64 Linux](https://github.com/XavierHarkonnen/Descent-Engine/actions/workflows/ci.aarch64.yml/badge.svg?branch=master)](https://github.com/XavierHarkonnen/Descent-Engine/actions/workflows/ci.aarch64.yml)
+
 Descent Engine is an experiment in building a minimal game engine from the ground up in C++17, targeting x86-64 and AArch64 Linux exclusively.
 
 The project prioritizes low-level systems programming, explicit control over implementation details, and minimal reliance on general-purpose abstractions. Rather than serving as a general-purpose engine, it provides a focused environment for exploring the construction of engine infrastructure close to the underlying platform.
