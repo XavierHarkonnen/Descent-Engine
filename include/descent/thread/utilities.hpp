@@ -20,15 +20,12 @@
 
 namespace descent::thread {
 
-// A spin-wait hint. AArch64 uses isb rather than yield, which many cores treat
-// as a no-op.
+// A spin-wait hint.
 static inline void spin_pause(void) {
 #if defined(__x86_64__)
 	__asm__ __volatile__("pause" : : : "memory");
 #elif defined(__aarch64__)
 	__asm__ __volatile__("isb" : : : "memory");
-#else
-#error "spin_pause has no hint for this architecture"
 #endif
 }
 
