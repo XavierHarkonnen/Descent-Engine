@@ -158,16 +158,15 @@ static void one_root_frames_growing_pool() {
 // Repeated shrink and regrowth of the pool. A restarted worker must not exit
 // on the terminate state its previous thread left behind (fixed in d4a8dac).
 
-static void resize(u64 roots_per_frame) {
+static void resize(u64 roots_per_frame, u32 rounds) {
 	static constexpr u64 SEQUENCE[] = { 16, 1, 16, 2, 8, 1, 4, 16, 3, 12, 1, 16 };
 	constexpr u32 FRAMES            = 20;
-	constexpr u32 ROUNDS            = 25;
 
 	task::Job jobs[task::MAX_WORKERS];
 	for (task::Job &job : jobs)
 		job = task::Job{ noop, nullptr };
 
-	for (u32 round = 0; round < ROUNDS; ++round) {
+	for (u32 round = 0; round < rounds; ++round) {
 		for (u64 step = 0; step < sizeof(SEQUENCE) / sizeof(SEQUENCE[0]); ++step) {
 			const u64 workers = SEQUENCE[step];
 			test_require(task::set(workers) == workers, "set(%llu)", (unsigned long long) workers);
@@ -192,15 +191,18 @@ static void resize(u64 roots_per_frame) {
 	task::set(0);
 }
 
-// One root job per worker, so no worker can miss a frame start.
+// One root job per worker, so no worker can miss a frame start. Every worker
+// must run in every frame, so frames are slow when workers outnumber CPUs, and
+// one pass through the sequence is enough: a worker that exits on restart is
+// caught at the first regrowth.
 static void resize_root_per_worker() {
-	resize(0);
+	resize(0, 1);
 }
 
 // Single-job frames leave most workers idle, so restarted workers must also
 // catch frames they do not run in.
 static void resize_one_root() {
-	resize(1);
+	resize(1, 25);
 }
 
 // task::wait() sleeps until the frame's unfinished count reaches zero.
