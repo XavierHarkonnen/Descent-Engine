@@ -1,0 +1,67 @@
+# Builds every pull request into master, and every push to master, in the
+# debug and release presets on x86-64 and AArch64, and runs the tests.
+#
+# Jobs run in an Ubuntu 26.04 container, which provides clang 21: the
+# format check accepts only clang-format 21, and the compile-fail tests match
+# clang 21's diagnostics. The presets use -march=native, which is safe here
+# because each job builds and runs on the same machine.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: ${{ matrix.arch }} ${{ matrix.preset }}
+    runs-on: ${{ matrix.runner }}
+    container: ubuntu:26.04
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86-64, aarch64]
+        preset: [debug, release]
+        include:
+          - arch: x86-64
+            runner: ubuntu-24.04
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+
+    steps:
+      - name: Install tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            ca-certificates git cmake ninja-build pkg-config \
+            clang clang-format-21 libclang-rt-21-dev llvm lld \
+            libvulkan-dev libwayland-dev
+          clang++ --version | grep -q 'clang version 21\.' || { clang++ --version; echo "clang++ is not clang 21"; exit 1; }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Show machine
+        run: |
+          uname -srm
+          nproc
+          clang++ --version | head -n 1
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }} -B build/${{ matrix.preset }} -DDESCENT_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build/${{ matrix.preset }}
+
+      - name: Test
+        run: ctest --test-dir build/${{ matrix.preset }} --output-on-failure

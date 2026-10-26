@@ -20,6 +20,8 @@
 !docs/**
 !cmake/
 !cmake/**
+!.github/
+!.github/**
 
 # Files
 !.gitignore
