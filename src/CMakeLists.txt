@@ -1,3 +1,5 @@
-add_subdirectory(client)
+if(DESCENT_BUILD_CLIENT)
+	add_subdirectory(client)
+endif()
 add_subdirectory(server)
 add_subdirectory(bsl)
