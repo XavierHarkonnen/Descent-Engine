@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.26)
 
 project(descent-engine LANGUAGES CXX)
 
+# Reject unsupported compilers before anything is built
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	message(FATAL_ERROR "Descent Engine requires Clang, but the C++ compiler is ${CMAKE_CXX_COMPILER_ID} (${CMAKE_CXX_COMPILER}). Use a preset, or set CMAKE_CXX_COMPILER=clang++.")
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
