@@ -85,6 +85,20 @@
 				"release-size",
 				"tests"
 			]
+		},
+		{
+			"name": "asan-test",
+			"inherits": "debug-test",
+			"cacheVariables": {
+				"CMAKE_CXX_FLAGS_DEBUG": "-DDESCENT_DEBUG -g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fsanitize-address-use-after-return=never -fno-sanitize-recover=all"
+			}
+		},
+		{
+			"name": "tsan-test",
+			"inherits": "debug-test",
+			"cacheVariables": {
+				"CMAKE_CXX_FLAGS_DEBUG": "-DDESCENT_DEBUG -g -O1 -fno-omit-frame-pointer -fsanitize=thread"
+			}
 		}
 	],
 	"buildPresets": [
@@ -119,6 +133,14 @@
 		{
 			"name": "release-size-test",
 			"configurePreset": "release-size-test"
+		},
+		{
+			"name": "asan-test",
+			"configurePreset": "asan-test"
+		},
+		{
+			"name": "tsan-test",
+			"configurePreset": "tsan-test"
 		}
 	],
 	"testPresets": [
@@ -148,6 +170,27 @@
 			"configurePreset": "release-size-test",
 			"output": {
 				"outputOnFailure": true
+			}
+		},
+		{
+			"name": "asan-test",
+			"configurePreset": "asan-test",
+			"output": {
+				"outputOnFailure": true
+			},
+			"environment": {
+				"ASAN_OPTIONS": "detect_leaks=1",
+				"UBSAN_OPTIONS": "print_stacktrace=1"
+			}
+		},
+		{
+			"name": "tsan-test",
+			"configurePreset": "tsan-test",
+			"output": {
+				"outputOnFailure": true
+			},
+			"environment": {
+				"TSAN_OPTIONS": "halt_on_error=1:second_deadlock_stack=1"
 			}
 		}
 	]

@@ -45,6 +45,8 @@ cmake --build --preset debug-test
 ctest --preset debug-test
 ```
 
+`asan-test` and `tsan-test` build and run the tests under sanitizers, in `build/asan-test` and `build/tsan-test`: AddressSanitizer with UndefinedBehaviorSanitizer, and ThreadSanitizer. Use them in place of `debug-test` in the commands above.
+
 | Option                 | Default | Effect                                                                                                                           |
 |------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------|
 | `DESCENT_BUILD_CLIENT` | `ON`    | Builds the client and the rendering library it uses. Turn it off to build everything else without Vulkan, Wayland or pkg-config. |
