@@ -10,11 +10,13 @@
 			"name": "base",
 			"hidden": true,
 			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": {
 				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
 				"CMAKE_CXX_COMPILER": "clang++",
 				"CMAKE_CXX_FLAGS": "-march=native -mtune=native -pipe",
-				"INTERN_CXX_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnonnull -Wnull-dereference -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wswitch -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings"
+				"INTERN_CXX_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnonnull -Wnull-dereference -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wswitch -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings",
+				"DESCENT_BUILD_TESTS": "ON"
 			}
 		},
 		{
@@ -48,6 +50,54 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "MinSizeRel",
 				"CMAKE_CXX_FLAGS_MINSIZEREL": "-Os -flto"
+			}
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "debug",
+			"configurePreset": "debug"
+		},
+		{
+			"name": "release",
+			"configurePreset": "release"
+		},
+		{
+			"name": "release-debug",
+			"configurePreset": "release-debug"
+		},
+		{
+			"name": "release-size",
+			"configurePreset": "release-size"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "debug",
+			"configurePreset": "debug",
+			"output": {
+				"outputOnFailure": true
+			}
+		},
+		{
+			"name": "release",
+			"configurePreset": "release",
+			"output": {
+				"outputOnFailure": true
+			}
+		},
+		{
+			"name": "release-debug",
+			"configurePreset": "release-debug",
+			"output": {
+				"outputOnFailure": true
+			}
+		},
+		{
+			"name": "release-size",
+			"configurePreset": "release-size",
+			"output": {
+				"outputOnFailure": true
 			}
 		}
 	]
