@@ -88,37 +88,7 @@ static bool make_dir_cstr(int root, const char *path) {
 	return fstatat(root, path, &st, 0) == 0 && S_ISDIR(st.st_mode);
 }
 
-
 static bool make_dir(string path) {
-	if (!path || path[0] != '/')
-		return false;
-
-	if (path.c_safe())
-		return make_dir_cstr(path.data());
-
-	auto buffer = memory::stack::Allocator::copy(path);
-	if (!buffer)
-		return false;
-
-	return make_dir_cstr(buffer.data());
-}
-
-static bool make_dir(int root, string path) {
-	if (root < 0 || !path || !path[0] || path[0] == '/')
-		return false;
-
-	if (path.c_safe())
-		return make_dir_cstr(root, path.data());
-
-	auto buffer = memory::stack::Allocator::copy(path);
-	if (!buffer)
-		return false;
-
-	return make_dir_cstr(root, buffer.data());
-}
-
-
-static bool make_dirs(string path) {
 	if (!path || path[0] != '/')
 		return false;
 
@@ -147,7 +117,7 @@ static bool make_dirs(string path) {
 	__builtin_unreachable();
 }
 
-static bool make_dirs(int root, string path) {
+static bool make_dir(int root, string path) {
 	if (root < 0 || !path || !path[0] || path[0] == '/')
 		return false;
 
@@ -178,13 +148,13 @@ static bool make_dirs(int root, string path) {
 
 
 static int make_open_dir(string path) {
-	make_dirs(path);
+	make_dir(path);
 	// This operation is TOCTOU, so open_dir is the canonical check of existence
 	return open_dir(path);
 }
 
 static int make_open_dir(int root, string path) {
-	make_dirs(root, path);
+	make_dir(root, path);
 	// This operation is TOCTOU, so open_dir is the canonical check of existence
 	return open_dir(root, path);
 }
