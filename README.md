@@ -33,23 +33,29 @@ sudo apt-get install cmake ninja-build clang lld llvm libclang-rt-21-dev clang-f
 ### Configuring and building
 
 ```sh
-cmake --preset debug -B build/debug
-cmake --build build/debug
+cmake --preset debug
+cmake --build --preset debug
 ```
 
-The presets are `debug`, `release`, `release-debug` and `release-size`. Builds must be out of source.
+The presets are `debug`, `release`, `release-debug` and `release-size`, and each builds in `build/<preset>`. Each also has a `-test` version, such as `debug-test`, which builds the tests in `build/<preset>-test` and has a test preset of the same name that shows the output of failing tests:
+
+```sh
+cmake --preset debug-test
+cmake --build --preset debug-test
+ctest --preset debug-test
+```
 
 | Option                 | Default | Effect                                                                                                                           |
 |------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------|
 | `DESCENT_BUILD_CLIENT` | `ON`    | Builds the client and the rendering library it uses. Turn it off to build everything else without Vulkan, Wayland or pkg-config. |
 | `DESCENT_BUILD_TESTS`  | `OFF`   | Builds the tests in `test/` and registers them with CTest.                                                                       |
 
-For example, to build and test everything except the client:
+The `-test` presets turn `DESCENT_BUILD_TESTS` on. For example, to build and test everything except the client:
 
 ```sh
-cmake --preset debug -B build/debug -DDESCENT_BUILD_CLIENT=OFF -DDESCENT_BUILD_TESTS=ON
-cmake --build build/debug
-ctest --test-dir build/debug --output-on-failure
+cmake --preset debug-test -DDESCENT_BUILD_CLIENT=OFF
+cmake --build --preset debug-test
+ctest --preset debug-test
 ```
 
 ## License
