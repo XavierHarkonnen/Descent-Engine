@@ -15,7 +15,13 @@
 				"CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
 				"CMAKE_CXX_COMPILER": "clang++",
 				"CMAKE_CXX_FLAGS": "-march=native -mtune=native -pipe",
-				"INTERN_CXX_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnonnull -Wnull-dereference -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wswitch -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings",
+				"INTERN_CXX_FLAGS": "-Waddress -Wall -Walloca -Wattributes -Wbuiltin-macro-redefined -Wcast-align -Wconversion -Wdeprecated -Wdeprecated-declarations -Wdiv-by-zero -Wdouble-promotion -Wempty-body -Wendif-labels -Wextra -Wformat -Wformat-extra-args -Wformat-nonliteral -Wformat-zero-length -Wformat=2 -Wignored-qualifiers -Winit-self -Wint-to-pointer-cast -Wmissing-braces -Wmissing-declarations -Wmissing-field-initializers -Wmissing-noreturn -Wmultichar -Wnonnull -Wnull-dereference -Woverflow -Wparentheses -Wpedantic -Wpointer-arith -Wredundant-decls -Wreturn-type -Wsequence-point -Wshadow -Wsign-compare -Wsizeof-array-argument -Wstrict-aliasing -Wstrict-overflow -Wstrict-overflow=2 -Wswitch -Wtautological-compare -Wtrigraphs -Wtype-limits -Wundef -Wuninitialized -Wunknown-pragmas -Wunused -Wunused-function -Wunused-label -Wunused-parameter -Wunused-value -Wunused-variable -Wvla -Wwrite-strings"
+			}
+		},
+		{
+			"name": "tests",
+			"hidden": true,
+			"cacheVariables": {
 				"DESCENT_BUILD_TESTS": "ON"
 			}
 		},
@@ -51,6 +57,34 @@
 				"CMAKE_BUILD_TYPE": "MinSizeRel",
 				"CMAKE_CXX_FLAGS_MINSIZEREL": "-Os -flto"
 			}
+		},
+		{
+			"name": "debug-test",
+			"inherits": [
+				"debug",
+				"tests"
+			]
+		},
+		{
+			"name": "release-test",
+			"inherits": [
+				"release",
+				"tests"
+			]
+		},
+		{
+			"name": "release-debug-test",
+			"inherits": [
+				"release-debug",
+				"tests"
+			]
+		},
+		{
+			"name": "release-size-test",
+			"inherits": [
+				"release-size",
+				"tests"
+			]
 		}
 	],
 	"buildPresets": [
@@ -69,33 +103,49 @@
 		{
 			"name": "release-size",
 			"configurePreset": "release-size"
+		},
+		{
+			"name": "debug-test",
+			"configurePreset": "debug-test"
+		},
+		{
+			"name": "release-test",
+			"configurePreset": "release-test"
+		},
+		{
+			"name": "release-debug-test",
+			"configurePreset": "release-debug-test"
+		},
+		{
+			"name": "release-size-test",
+			"configurePreset": "release-size-test"
 		}
 	],
 	"testPresets": [
 		{
-			"name": "debug",
-			"configurePreset": "debug",
+			"name": "debug-test",
+			"configurePreset": "debug-test",
 			"output": {
 				"outputOnFailure": true
 			}
 		},
 		{
-			"name": "release",
-			"configurePreset": "release",
+			"name": "release-test",
+			"configurePreset": "release-test",
 			"output": {
 				"outputOnFailure": true
 			}
 		},
 		{
-			"name": "release-debug",
-			"configurePreset": "release-debug",
+			"name": "release-debug-test",
+			"configurePreset": "release-debug-test",
 			"output": {
 				"outputOnFailure": true
 			}
 		},
 		{
-			"name": "release-size",
-			"configurePreset": "release-size",
+			"name": "release-size-test",
+			"configurePreset": "release-size-test",
 			"output": {
 				"outputOnFailure": true
 			}
