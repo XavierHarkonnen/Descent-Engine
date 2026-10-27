@@ -14,8 +14,6 @@
 !include/**
 !intern/
 !intern/**
-!extern/
-!extern/**
 !docs/
 !docs/**
 !cmake/

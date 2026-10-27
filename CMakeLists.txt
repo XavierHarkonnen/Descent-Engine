@@ -20,13 +20,13 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(DescentTargets)
 
-# Source hygiene (licence, include guards, whitespace): cmake --build <dir> --target check-sources
+# Source hygiene
 add_custom_target(check-sources
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/CheckSources.cmake
 	VERBATIM
 )
 
-# Formatting against .clang-format, which needs clang-format 21: cmake --build <dir> --target check-format
+# Formatting against .clang-format
 find_program(DESCENT_CLANG_FORMAT NAMES clang-format-21 clang-format DOC "clang-format 21, for check-format")
 set(DESCENT_CLANG_FORMAT_FOUND FALSE)
 if(DESCENT_CLANG_FORMAT)
@@ -42,7 +42,7 @@ if(DESCENT_CLANG_FORMAT_FOUND)
 		VERBATIM
 	)
 else()
-	message(STATUS "clang-format 21 not found: check-format and test-descent-format are unavailable")
+	message(STATUS "clang-format 21 not found: check-format is unavailable")
 	add_custom_target(check-format
 		COMMAND ${CMAKE_COMMAND} -E echo "check-format: clang-format 21 not found; set DESCENT_CLANG_FORMAT"
 		COMMAND ${CMAKE_COMMAND} -E false
@@ -60,17 +60,17 @@ add_compile_options(
 	-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=
 )
 
-# Program Subdirectories
+# Program subdirectories
 add_subdirectory(lib)
 add_subdirectory(src)
 
-# Test Subdirectory
+# Test subdirectory
 if(DESCENT_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory(test)
 endif()
 
-# Scratch Subdirectory
+# Scratch subdirectory
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/scratch/CMakeLists.txt")
 	add_subdirectory(scratch)
 endif()
