@@ -63,7 +63,7 @@ public:
 
 	Region(Region &&other) : _data(other._data) {
 		other._data = nullptr;
-	};
+	}
 
 	~Region() {
 		Region::release();
@@ -150,7 +150,7 @@ public:
 	Region(Region &&other) : _data(other._data), _size(other._size) {
 		other._data = nullptr;
 		other._size = 0;
-	};
+	}
 
 	~Region() {
 		release();
@@ -229,7 +229,7 @@ public:
 	}
 
 	u32 pages() const {
-		return _size / PAGE_SIZE;
+		return static_cast<u32>(_size / PAGE_SIZE);
 	}
 };
 

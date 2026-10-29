@@ -26,6 +26,6 @@ Worker *self();
 
 void self(Worker *);
 
-};
+}
 
 #endif

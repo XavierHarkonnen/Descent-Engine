@@ -92,8 +92,7 @@ void test_lifo_reclamation() {
 	auto a      = stack::Allocator::create<u64>(8);
 	auto *a_ptr = a.data();
 
-	auto b      = stack::Allocator::create<u64>(8);
-	auto *b_ptr = b.data();
+	auto b = stack::Allocator::create<u64>(8);
 
 	auto c      = stack::Allocator::create<u64>(8);
 	auto *c_ptr = c.data();
@@ -184,7 +183,7 @@ void test_object_lifetime() {
 	Tracker::destroyed   = 0;
 
 	{
-		auto box = stack::Allocator::create<Tracker>(100, 42);
+		auto box = stack::Allocator::create<Tracker>(100, u64(42));
 
 		test_check(Tracker::constructed == 100, "Incorrect number of constructions");
 

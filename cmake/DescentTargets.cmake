@@ -74,6 +74,10 @@ function(descent_executable NAME)
 	target_link_libraries(${NAME} PRIVATE
 		${ARG_LINK}
 	)
+
+	target_compile_options(${NAME} PRIVATE
+		${INTERN_CXX_FLAGS}
+	)
 endfunction()
 
 # descent_test(<name> SOURCES <file>... [LINK <target>...])
@@ -115,6 +119,10 @@ function(descent_compile_fail_test NAME)
 
 	target_compile_definitions(${TARGET} PRIVATE
 		${ARG_DEFINES}
+	)
+
+	target_compile_options(${TARGET} PRIVATE
+		${INTERN_CXX_FLAGS}
 	)
 
 	target_link_libraries(${TARGET} PRIVATE
