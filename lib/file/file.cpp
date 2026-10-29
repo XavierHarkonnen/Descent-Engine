@@ -13,63 +13,118 @@
  * limitations under the License.
  */
 
-// Public API
+extern "C" {
+#include <errno.h>
+#include <fcntl.h>
+#include <linux/limits.h>
+#include <linux/openat2.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+}
 
-// Implementation
+#include <descent/memory/stack.hpp>
+
+#include "file.hpp"
+#include "utils.hpp"
+
+#if defined(SYS_openat2) && defined(OPENAT2_REGULAR) && defined(EFTYPE)
+#define DESCENT_FILE_COMPILE_OPENAT2
+#endif
 
 namespace descent {
 
+static constexpr int FILE_FLAGS = O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW;
+static constexpr int FILE_MODE = 0600;
 
+static int wrap_file_openat2(int root, const char *name, int flags, int mode) {
+#if defined(DESCENT_FILE_COMPILE_OPENAT2)
+	struct open_how how = {};
+	how.flags = static_cast<u64>(flags) | OPENAT2_REGULAR;
+	how.mode = static_cast<u64>(mode);
 
-File::File(const Directory &parent, const char *name) {
-	if (!parent || !validate_name(name))
+	long fd;
+	do {
+		fd = syscall(SYS_openat2, root, name, &how, sizeof(how));
+	} while (fd < 0 && errno == EINTR);
+
+	return static_cast<int>(fd);
+#else
+	(void) root;
+	(void) name;
+	(void) flags;
+	(void) mode;
+
+	return -1;
+#endif
+}
+
+static int wrap_file_openat(int root, const char *name, int flags, int mode) {
+	int fd;
+	do {
+		fd = openat(root, name, flags | O_NONBLOCK | O_NOCTTY, mode);
+	} while (fd < 0 && errno == EINTR);
+
+	return fd;
+}
+
+static bool use_openat2_regular() {
+#if defined(DESCENT_FILE_COMPILE_OPENAT2)
+	int fd = wrap_file_openat2(AT_FDCWD, "/", O_RDONLY | O_CLOEXEC | O_NOFOLLOW, 0);
+	if (fd >= 0) {
+		close(fd);
+		return false;
+	}
+	return errno == EFTYPE;
+#else
+	return false;
+#endif
+}
+
+int open_file(int root, const char *name) {
+	static const bool USE_OPENAT2_REGULAR = use_openat2_regular();
+
+	// Kernel 7.2
+	// Attempt to use OPENAT2_REGULAR to open and check the file
+	if (USE_OPENAT2_REGULAR)
+		return wrap_file_openat2(root, name, FILE_FLAGS, FILE_MODE);
+
+	// Open, then verify the resulting descriptor.
+	int fd = wrap_file_openat(root, name, FILE_FLAGS, FILE_MODE);
+	if (fd < 0)
+		return -1;
+
+	struct stat st;
+	if (fstat(fd, &st) < 0 || !S_ISREG(st.st_mode)) {
+		close(fd);
+		return -1;
+	}
+
+	if (fcntl(fd, F_SETFL, 0) < 0) {
+		close(fd);
+		return -1;
+	}
+
+	return fd;
+}
+
+File::File(const Directory &parent, string name) {
+	if (!validate_path(parent, name))
 		return;
 
-	fd = openat(parent.fd, name, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW);
+	int parent_fd = 
+
+	if (name.c_safe()) {
+		fd = open_file(parent.ha, name.data());
+		return;
+	}
+
+	auto buffer = memory::stack::Allocator::copy(name);
+	if (!buffer)
+		return;
+
+	fd = open_file(parent.fd, buffer.data());
 }
 
-}
-
-// Implementation
-
-[[gnu::constructor]]
-static void roots_construct_elements(void) {
-	const char *home_path = getenv("HOME");
-	if (!home_path)
-		sys_fatal("Could not discover home path");
-
-	if (home_path[0] != '/')
-		sys_fatal("Home path cannot be relative path");
-
-	i32 home = open(home_path, O_PATH | O_DIRECTORY | O_CLOEXEC);
-	if (home < 0)
-		sys_fatal("Could not open home directory");
-
-	roots.config = roots_get_element("granbarrow", "XDG_CONFIG_HOME", home, ".config");
-	if (roots.config < 0)
-		sys_fatal("Could not open config directory");
-
-	roots.data = roots_get_element("granbarrow", "XDG_DATA_HOME", home, ".local/share");
-	if (roots.data < 0)
-		sys_fatal("Could not open data directory");
-
-	roots.state = roots_get_element("granbarrow", "XDG_STATE_HOME", home, ".local/state");
-	if (roots.state < 0)
-		sys_fatal("Could not open state directory");
-
-	roots.cache = roots_get_element("granbarrow", "XDG_CACHE_HOME", home, ".cache");
-	if (roots.cache < 0)
-		sys_fatal("Could not open cache directory");
-
-	close(home);
-}
-
-
-[[gnu::destructor]]
-static void roots_destroy(void) {
-	close(roots.base);
-	close(roots.config);
-	close(roots.data);
-	close(roots.state);
-	close(roots.cache);
 }

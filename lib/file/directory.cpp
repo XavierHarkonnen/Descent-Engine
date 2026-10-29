@@ -37,114 +37,115 @@ namespace descent {
 
 static constexpr int DIR_MODE = 0700;
 
-static int open_dir(string path) {
-	if (!path || path[0] != '/')
-		return -1;
+// make_dir functions are all best-effort, not promises of existence
+// open_dir is the only canonical proof of existence and type
+// TODO: Minimize the number of system calls in the happy path and overall as possible
+// Maybe we can assume that the directory probably exists
 
+static int wrap_dir_open(const char *name) {
+	static constexpr int DIR_FLAGS_REL = O_PATH | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
+
+	int fd;
+	do {
+		fd = open(name, DIR_FLAGS_REL, DIR_MODE);
+	} while (fd < 0 && errno == EINTR);
+
+	return fd;
+}
+
+static int wrap_dir_openat(int root, const char *name) {
+	static constexpr int DIR_FLAGS_ABS = O_PATH | O_DIRECTORY | O_CLOEXEC;
+
+	int fd;
+	do {
+		fd = openat(root, name, DIR_FLAGS_ABS, DIR_MODE);
+	} while (fd < 0 && errno == EINTR);
+
+	return fd;
+}
+
+static void wrap_dir_make(const char *path) {
+	int r;
+	do {
+		r = mkdir(path, DIR_MODE);
+	} while (r < 0 && errno == EINTR);
+}
+
+static void wrap_dir_make(int root, const char *path) {
+	int r;
+	do {
+		r = mkdirat(root, path, DIR_MODE);
+	} while (r < 0 && errno == EINTR);
+}
+
+static void make_dir(char *path) {
+	if (path[0] != '/')
+		return;
+
+	for (u64 i = 1; ; ++i) {
+		if (path[i] == '\0') {
+			if (path[i - 1] != '/')
+				wrap_dir_make(path);
+
+			return;
+		}
+
+		if (path[i] == '/' && path[i - 1] != '/') {
+			path[i] = '\0';
+			wrap_dir_make(path);
+			path[i] = '/';
+		}
+	}
+}
+
+static void make_dir(int root, char *path) {
+	if (path[0] == '\0' || path[0] == '/')
+		return;
+
+	for (u64 i = 1; ; ++i) {
+		if (path[i] == '\0') {
+			if (path[i - 1] != '/')
+				wrap_dir_make(root, path);
+
+			return;
+		}
+
+		if (path[i] == '/' && path[i - 1] != '/') {
+			path[i] = '\0';
+			wrap_dir_make(root, path);
+			path[i] = '/';
+		}
+	}
+}
+
+static int open_dir(string path) {
 	if (path.c_safe())
-		return open(path.data(), O_PATH | O_DIRECTORY | O_CLOEXEC);
+		return open(path.data(), DIR_FLAGS_ABS);
 
 	auto buffer = memory::stack::Allocator::copy(path);
 	if (!buffer)
 		return -1;
 
-	return open(buffer.data(), O_PATH | O_DIRECTORY | O_CLOEXEC);
+	return open(buffer.data(), DIR_FLAGS_ABS);
 }
 
 static int open_dir(int root, string path) {
-	if (root < 0 || !path || !path[0] || path[0] == '/')
-		return -1;
-
 	if (path.c_safe())
-		return openat(root, path.data(), O_PATH | O_DIRECTORY | O_CLOEXEC);
+		return openat(root, path.data(), DIR_FLAGS_REL);
 
 	auto buffer = memory::stack::Allocator::copy(path);
 	if (!buffer)
 		return -1;
 
-	return openat(root, buffer.data(), O_PATH | O_DIRECTORY | O_CLOEXEC);
+	return openat(root, buffer.data(), DIR_FLAGS_REL);
 }
 
 
-static bool make_dir_cstr(const char *path) {
-	if (mkdir(path, DIR_MODE) == 0)
-		return true;
 
-	if (errno != EEXIST)
-		return false;
 
-	struct stat st;
-	return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
-}
 
-static bool make_dir_cstr(int root, const char *path) {
-	if (mkdirat(root, path, DIR_MODE) == 0)
-		return true;
 
-	if (errno != EEXIST)
-		return false;
 
-	struct stat st;
-	return fstatat(root, path, &st, 0) == 0 && S_ISDIR(st.st_mode);
-}
-
-static bool make_dir(string path) {
-	if (!path || path[0] != '/')
-		return false;
-
-	auto buffer = memory::stack::Allocator::copy(path);
-	if (!buffer)
-		return false;
-
-	for (u64 i = 1; i < buffer.capacity(); ++i) {
-		if (buffer[i] == '\0') {
-			if (buffer[i - 1] != '/')
-				return make_dir_cstr(buffer.data());
-
-			return true;
-		}
-
-		if (buffer[i] == '/' && buffer[i - 1] != '/') {
-			buffer[i] = '\0';
-
-			if (!make_dir_cstr(buffer.data()))
-				return false;
-
-			buffer[i] = '/';
-		}
-	}
-
-	__builtin_unreachable();
-}
-
-static bool make_dir(int root, string path) {
-	if (root < 0 || !path || !path[0] || path[0] == '/')
-		return false;
-
-	auto buffer = memory::stack::Allocator::copy(path);
-	if (!buffer)
-		return false;
-
-	for (u64 i = 1; i < buffer.capacity(); ++i) {
-		if (buffer[i] == '\0') {
-			if (buffer[i - 1] != '/')
-				return make_dir_cstr(root, buffer.data());
-
-			return true;
-		}
-
-		if (buffer[i] == '/' && buffer[i - 1] != '/') {
-			buffer[i] = '\0';
-
-			if (!make_dir_cstr(root, buffer.data()))
-				return false;
-
-			buffer[i] = '/';
-		}
-	}
-
-	__builtin_unreachable();
-}
 
 
 static int make_open_dir(string path) {
@@ -159,7 +160,7 @@ static int make_open_dir(int root, string path) {
 	return open_dir(root, path);
 }
 
-
+// Returns reference into released memory
 string get_env(string name) {
 	if (!name)
 		return {};
@@ -256,7 +257,7 @@ bool set_program_name(string name) {
 }
 
 Directory::Directory(const Directory &parent, string name) {
-	if (!parent || !validate_name(name))
+	if (!validate_path(parent, name))
 		return;
 
 	fd = make_open_dir(parent.fd, name);

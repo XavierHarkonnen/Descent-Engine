@@ -18,35 +18,63 @@
 
 #include <descent/type/string.hpp>
 
-namespace descent {
+#include <descent/type/traits.hpp>
 
-class Directory {
+namespace descent::fs {
+
+class Directory;
+
+class Handle {
+	friend class Directory;
 	friend class File;
 
+	Handle(const Handle &)             = delete;
+	Handle &operator =(const Handle &) = delete;
+
+private:
+	i32 h = -1;
+
+	Handle() = default;
+
+	Handle(i32 handle) : h(handle) {}
+
+	Handle(Handle &&other) : h(other.h) {
+		other.h = -1;
+	}
+
+	bool is_valid() {
+		return h >= 0;
+	}
+};
+
+class Directory {
 	Directory(const Directory &)             = delete;
 	Directory &operator =(const Directory &) = delete;
 
 private:
-	int fd = -1;
+	Handle h;
 
-	explicit Directory(int fd) : fd(fd) {}
+	explicit Directory(i32 handle) : h(handle) {}
 
 public:
 	Directory() = default;
 
 	Directory(const Directory &parent, string name);
 
-	Directory(Directory &&other) : fd(other.fd) {
-		other.fd = -1;
+	Directory(Directory &&other) : h(other.h) {
+		other.handle = INVALID_HANDLE;
 	}
+
+	~Directory();
 
 	Directory &operator =(Directory &&other);
 
 	explicit operator bool() const {
-		return fd >= 0;
+		return 
+		return handle != INVALID_HANDLE;
 	}
 
-	~Directory();
+	Handle
 
 	static const Directory &base();
 	static const Directory &config();
@@ -60,13 +88,12 @@ class File {
 	File &operator =(const File &) = delete;
 
 private:
-	int fd = -1;
-	explicit File(int fd) : fd(fd) {}
+	explicit File(u64 handle) : Handle(handle) {}
 
 public:
 	File() = default;
 
-	File(const Directory &parent, const char *name);
+	File(const Directory &parent, string name);
 };
 
 bool set_program_name(string name);

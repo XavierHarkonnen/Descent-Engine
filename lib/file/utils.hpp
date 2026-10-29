@@ -18,29 +18,48 @@
 
 #include <descent/type/core.hpp>
 #include <descent/type/string.hpp>
+#include <descent/type/math.hpp>
+
+#include "file.hpp"
 
 namespace descent {
 
+static constexpr u64 MAX_NAME_LENGTH = 128;
+
 inline bool validate_name(string name) {
-	if (!name || name.empty())
+	if (!name)
 		return false;
 
-	// Refuse if name is '.' or '..'
-	if (name == string(".") || name == string(".."))
-		return false;
+	const u64 SIZE = math::min(MAX_NAME_LENGTH + 1, name.size());
 
-	// Refuse if name contains non-printable ascii or a slash
-	for (u64 i = 0; i < name.size(); ++i) {
-		u8 c = u8(name[i]);
+	u64 length;
+	for (length = 0; length < SIZE; ++length) {
+		u8 c = u8(name[length]);
 
-		if (c == '\0')
+		if (c == 0)
 			break;
 
 		if (c <= 31 || c >= 127 || c == '/')
 			return false;
 	}
 
+	if (length > MAX_NAME_LENGTH)
+		return false;
+
+	if (length == 0)
+		return false;
+
+	if (length == 1 && name[0] == '.')
+		return false;
+
+	if (length == 2 && name[0] == '.' && name[1] == '.')
+		return false;
+
 	return true;
+}
+
+inline bool validate_path(const Directory &root, string name) {
+	return root && validate_name(name);
 }
 
 }

@@ -87,6 +87,10 @@ public:
 
 	// Utilities
 
+	bool contains(char c) const {
+		return find(c) != INVALID;
+	}
+
 	u64 find(char c, u64 pos = 0) const {
 		if (!data() || pos >= size())
 			return INVALID;
