@@ -19,7 +19,9 @@
 #include <descent/type/bit.hpp>
 #include <descent/type/core.hpp>
 #include <descent/type/math.hpp>
+#include <descent/type/meta.hpp>
 #include <descent/type/string.hpp>
 #include <descent/type/traits.hpp>
+#include <descent/type/utility.hpp>
 
 #endif

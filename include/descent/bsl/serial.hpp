@@ -24,7 +24,7 @@ namespace descent::bsl {
 
 template<typename T>
 inline bool serialize(const T &value, u8 *output, u64 size, u64 &offset) {
-	static_assert(type::traits<T>::type != type::Type::INVALID, "Attempted to serialize invalid type");
+	static_assert(type::is_supported<T>::value, "Attempted to serialize invalid type");
 	static_assert(type::traits<T>::type != type::Type::STRING, "Attempted to serialize string");
 
 	if (!output || offset >= size || size - offset < sizeof(T))
@@ -38,7 +38,7 @@ inline bool serialize(const T &value, u8 *output, u64 size, u64 &offset) {
 
 template<typename T>
 bool deserialize(T &value, const u8 *input, u64 size, u64 &offset) {
-	static_assert(type::traits<T>::type != type::Type::INVALID, "Attempted to deserialize invalid type");
+	static_assert(type::is_supported<T>::value, "Attempted to deserialize invalid type");
 	static_assert(type::traits<T>::type != type::Type::STRING, "Attempted to deserialize string");
 
 	if (!input || offset >= size || size - offset < sizeof(T))

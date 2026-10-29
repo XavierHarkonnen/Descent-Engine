@@ -61,7 +61,7 @@ class File {
 
 private:
 	int fd = -1;
-	explicit File(int fd) noexcept : fd(fd) {}
+	explicit File(int fd) : fd(fd) {}
 
 public:
 	File() = default;

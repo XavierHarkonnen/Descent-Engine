@@ -191,7 +191,7 @@ public:
 		void *data = nullptr;
 		void *meta = nullptr;
 
-		if (!create(data, meta, sizeof(T), alignof(T), capacity))
+		if (!create(data, meta, sizeof(T), alignof(T), static_cast<u32>(capacity)))
 			return {};
 
 		Box<T> result(static_cast<T *>(data), meta, capacity);

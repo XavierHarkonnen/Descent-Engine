@@ -61,8 +61,11 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libraries" FORCE)
 # Separate internal C flags
 separate_arguments(INTERN_CXX_FLAGS)
 
+# The engine does not use exceptions or RTTI
 add_compile_options(
 	-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=
+	$<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+	$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
 )
 
 # Program subdirectories

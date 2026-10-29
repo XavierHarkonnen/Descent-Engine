@@ -71,7 +71,7 @@ private:
 
 	template<typename T>
 	static void parameter(T p) {
-		static_assert(type::traits<T>::type != type::Type::INVALID, "Attempted to log unsupported type");
+		static_assert(type::is_supported<T>::value, "Attempted to log unsupported type");
 		parameter(&p, sizeof(T));
 	}
 

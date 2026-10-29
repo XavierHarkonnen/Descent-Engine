@@ -17,12 +17,12 @@
 #define DESCENT_TYPE_TRAITS_HPP
 
 #include <descent/type/core.hpp>
+#include <descent/type/meta.hpp>
 #include <descent/type/string.hpp>
 
 namespace descent::type {
 
 enum class Type : u8 {
-	INVALID,
 	BOOL,
 	U8,
 	U16,
@@ -39,16 +39,14 @@ enum class Type : u8 {
 	STRING
 };
 
+namespace detail {
+
 template<typename T>
-struct default_traits {
-	static constexpr T min;
-	static constexpr T max;
+struct traits_impl;
 
-	static constexpr Type type = Type::INVALID;
+struct unsupported {};
 
-	using to_signed   = void;
-	using to_unsigned = void;
-
+struct category_traits {
 	static constexpr bool is_numeric = false;
 	static constexpr bool is_bool    = false;
 	static constexpr bool is_integer = false;
@@ -57,256 +55,197 @@ struct default_traits {
 
 	static constexpr bool is_signed   = false;
 	static constexpr bool is_unsigned = false;
+};
 
+template<typename T>
+struct sized_traits : category_traits {
 	static constexpr u64 bits  = sizeof(T) * __CHAR_BIT__;
 	static constexpr u64 bytes = sizeof(T);
 };
 
-template<typename T>
-struct traits : default_traits<T> {};
+template<typename T, typename S>
+struct unsigned_traits : sized_traits<T> {
+	using to_signed   = S;
+	using to_unsigned = T;
+
+	static constexpr bool is_numeric  = true;
+	static constexpr bool is_integer  = true;
+	static constexpr bool is_unsigned = true;
+};
+
+template<typename T, typename U>
+struct signed_traits : sized_traits<T> {
+	using to_signed   = T;
+	using to_unsigned = U;
+
+	static constexpr bool is_numeric = true;
+	static constexpr bool is_integer = true;
+	static constexpr bool is_signed  = true;
+};
+
+template<typename T, typename B, u64 MANTISSA_DIGITS, i64 MAX_EXPONENT>
+struct float_traits : sized_traits<T> {
+	using to_bits = B;
+
+	static constexpr u64 mantissa_bits = MANTISSA_DIGITS - 1;
+	static constexpr u64 exponent_bits = sized_traits<T>::bits - mantissa_bits - 1;
+	static constexpr i64 exponent_bias = MAX_EXPONENT - 1;
+
+	static constexpr bool is_numeric = true;
+	static constexpr bool is_float   = true;
+	static constexpr bool is_signed  = true;
+};
 
 template<>
-struct traits<bool> : default_traits<bool> {
-	static constexpr bool is_bool = true;
-
+struct traits_impl<bool> : sized_traits<bool> {
 	static constexpr Type type = Type::BOOL;
 
 	static constexpr bool min = false;
 	static constexpr bool max = true;
+
+	static constexpr bool is_bool = true;
 };
 
 template<>
-struct traits<u8> : default_traits<u8> {
-	static constexpr u8 min = 0;
-	static constexpr u8 max = U8_MAX;
-
+struct traits_impl<u8> : unsigned_traits<u8, i8> {
 	static constexpr Type type = Type::U8;
 
-	using to_signed   = i8;
-	using to_unsigned = u8;
-
-	static constexpr bool is_numeric  = true;
-	static constexpr bool is_integer  = true;
-	static constexpr bool is_unsigned = true;
+	static constexpr u8 min = 0;
+	static constexpr u8 max = U8_MAX;
 };
 
 template<>
-struct traits<u16> : default_traits<u16> {
-	static constexpr u16 min = 0;
-	static constexpr u16 max = U16_MAX;
-
+struct traits_impl<u16> : unsigned_traits<u16, i16> {
 	static constexpr Type type = Type::U16;
 
-	using to_signed   = i16;
-	using to_unsigned = u16;
-
-	static constexpr bool is_numeric  = true;
-	static constexpr bool is_integer  = true;
-	static constexpr bool is_unsigned = true;
+	static constexpr u16 min = 0;
+	static constexpr u16 max = U16_MAX;
 };
 
 template<>
-struct traits<u32> : default_traits<u32> {
-	static constexpr u32 min = 0;
-	static constexpr u32 max = U32_MAX;
-
+struct traits_impl<u32> : unsigned_traits<u32, i32> {
 	static constexpr Type type = Type::U32;
 
-	using to_signed   = i32;
-	using to_unsigned = u32;
-
-	static constexpr bool is_numeric  = true;
-	static constexpr bool is_integer  = true;
-	static constexpr bool is_unsigned = true;
+	static constexpr u32 min = 0;
+	static constexpr u32 max = U32_MAX;
 };
 
 template<>
-struct traits<u64> : default_traits<u64> {
-	static constexpr u64 min = 0;
-	static constexpr u64 max = U64_MAX;
-
+struct traits_impl<u64> : unsigned_traits<u64, i64> {
 	static constexpr Type type = Type::U64;
 
-	using to_signed   = i64;
-	using to_unsigned = u64;
-
-	static constexpr bool is_numeric  = true;
-	static constexpr bool is_integer  = true;
-	static constexpr bool is_unsigned = true;
+	static constexpr u64 min = 0;
+	static constexpr u64 max = U64_MAX;
 };
 
 template<>
-struct traits<u128> : default_traits<u128> {
-	static constexpr u128 min = 0;
-	static constexpr u128 max = U128_MAX;
-
+struct traits_impl<u128> : unsigned_traits<u128, i128> {
 	static constexpr Type type = Type::U128;
 
-	using to_signed   = i128;
-	using to_unsigned = u128;
-
-	static constexpr bool is_numeric  = true;
-	static constexpr bool is_integer  = true;
-	static constexpr bool is_unsigned = true;
+	static constexpr u128 min = 0;
+	static constexpr u128 max = U128_MAX;
 };
 
 template<>
-struct traits<i8> : default_traits<i8> {
-	static constexpr i8 min = I8_MIN;
-	static constexpr i8 max = I8_MAX;
-
+struct traits_impl<i8> : signed_traits<i8, u8> {
 	static constexpr Type type = Type::I8;
 
-	using to_signed   = i8;
-	using to_unsigned = u8;
-
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_integer = true;
-	static constexpr bool is_signed  = true;
+	static constexpr i8 min = I8_MIN;
+	static constexpr i8 max = I8_MAX;
 };
 
 template<>
-struct traits<i16> : default_traits<i16> {
-	static constexpr i16 min = I16_MIN;
-	static constexpr i16 max = I16_MAX;
-
+struct traits_impl<i16> : signed_traits<i16, u16> {
 	static constexpr Type type = Type::I16;
 
-	using to_signed   = i16;
-	using to_unsigned = u16;
-
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_integer = true;
-	static constexpr bool is_signed  = true;
+	static constexpr i16 min = I16_MIN;
+	static constexpr i16 max = I16_MAX;
 };
 
 template<>
-struct traits<i32> : default_traits<i32> {
-	static constexpr i32 min = I32_MIN;
-	static constexpr i32 max = I32_MAX;
-
+struct traits_impl<i32> : signed_traits<i32, u32> {
 	static constexpr Type type = Type::I32;
 
-	using to_signed   = i32;
-	using to_unsigned = u32;
-
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_integer = true;
-	static constexpr bool is_signed  = true;
+	static constexpr i32 min = I32_MIN;
+	static constexpr i32 max = I32_MAX;
 };
 
 template<>
-struct traits<i64> : default_traits<i64> {
-	static constexpr i64 min = I64_MIN;
-	static constexpr i64 max = I64_MAX;
-
+struct traits_impl<i64> : signed_traits<i64, u64> {
 	static constexpr Type type = Type::I64;
 
-	using to_signed   = i64;
-	using to_unsigned = u64;
-
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_integer = true;
-	static constexpr bool is_signed  = true;
+	static constexpr i64 min = I64_MIN;
+	static constexpr i64 max = I64_MAX;
 };
 
 template<>
-struct traits<i128> : default_traits<i128> {
-	static constexpr i128 min = I128_MIN;
-	static constexpr i128 max = I128_MAX;
-
+struct traits_impl<i128> : signed_traits<i128, u128> {
 	static constexpr Type type = Type::I128;
 
-	using to_signed   = i128;
-	using to_unsigned = u128;
-
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_integer = true;
-	static constexpr bool is_signed  = true;
+	static constexpr i128 min = I128_MIN;
+	static constexpr i128 max = I128_MAX;
 };
 
-
 template<>
-struct traits<f32> : default_traits<f32> {
-	static constexpr f32 min = F32_MIN;
-	static constexpr f32 max = F32_MAX;
-
+struct traits_impl<f32> : float_traits<f32, u32, __FLT_MANT_DIG__, __FLT_MAX_EXP__> {
 	static constexpr Type type = Type::F32;
 
-	using to_signed = f32;
+	static constexpr f32 min = -F32_MAX;
+	static constexpr f32 max = F32_MAX;
 
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_float   = true;
-	static constexpr bool is_signed  = true;
+	static constexpr f32 min_normal    = F32_MIN;
+	static constexpr f32 min_subnormal = __FLT_DENORM_MIN__;
+	static constexpr f32 epsilon       = __FLT_EPSILON__;
+
+	static constexpr f32 infinity      = F32_INF;
+	static constexpr f32 nan           = F32_NAN;
+	static constexpr f32 signaling_nan = F32_NAN_S;
 };
 
 template<>
-struct traits<f64> : default_traits<f64> {
-	static constexpr f64 min = F64_MIN;
-	static constexpr f64 max = F64_MAX;
-
+struct traits_impl<f64> : float_traits<f64, u64, __DBL_MANT_DIG__, __DBL_MAX_EXP__> {
 	static constexpr Type type = Type::F64;
 
-	using to_signed = f64;
+	static constexpr f64 min = -F64_MAX;
+	static constexpr f64 max = F64_MAX;
 
-	static constexpr bool is_numeric = true;
-	static constexpr bool is_float   = true;
-	static constexpr bool is_signed  = true;
+	static constexpr f64 min_normal    = F64_MIN;
+	static constexpr f64 min_subnormal = __DBL_DENORM_MIN__;
+	static constexpr f64 epsilon       = __DBL_EPSILON__;
+
+	static constexpr f64 infinity      = F64_INF;
+	static constexpr f64 nan           = F64_NAN;
+	static constexpr f64 signaling_nan = F64_NAN_S;
 };
 
 template<>
-struct traits<string> : default_traits<string> {
+struct traits_impl<string> : category_traits {
 	static constexpr Type type = Type::STRING;
 
 	static constexpr bool is_string = true;
 };
 
-template<typename T>
-struct remove_reference {
-	using type = T;
+}
+
+template<typename T, typename = void>
+struct is_supported {
+	static constexpr bool value = false;
 };
 
 template<typename T>
-struct remove_reference<T &> {
-	using type = T;
+struct is_supported<T, void_t<decltype(sizeof(detail::traits_impl<typename remove_cv<T>::type>))>> {
+	static constexpr bool value = true;
 };
 
+namespace detail {
 template<typename T>
-struct remove_reference<T &&> {
-	using type = T;
-};
-
-template<typename T>
-struct remove_const {
-	using type = T;
-};
+using traits_base =
+	typename conditional<is_supported<T>::value, traits_impl<typename remove_cv<T>::type>, unsupported>::type;
+}
 
 template<typename T>
-struct remove_const<const T> {
-	using type = T;
-};
-
-template<typename T>
-struct remove_volatile {
-	using type = T;
-};
-
-template<typename T>
-struct remove_volatile<volatile T> {
-	using type = T;
-};
-
-template<typename T>
-struct decay {
-private:
-	using unr = typename remove_reference<T>::type;
-	using unc = typename remove_const<unr>::type;
-	using unv = typename remove_volatile<unc>::type;
-
-public:
-	using type = unv;
-
-	static_assert(traits<type>::type != Type::INVALID, "Attempted to decay invalid type");
+struct traits : detail::traits_base<T> {
+	static_assert(is_supported<T>::value, "Attempted to use traits on unsupported type");
 };
 
 }

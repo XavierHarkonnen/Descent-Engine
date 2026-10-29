@@ -22,26 +22,6 @@
 
 namespace descent::thread {
 
-template<class T>
-struct RemoveReference {
-	using Type = T;
-};
-
-template<class T>
-struct RemoveReference<T &> {
-	using Type = T;
-};
-
-template<class T>
-struct RemoveReference<T &&> {
-	using Type = T;
-};
-
-template<class T>
-constexpr typename RemoveReference<T>::Type &&move(T &&arg) noexcept {
-	return static_cast<typename RemoveReference<T>::Type &&>(arg);
-}
-
 using Routine = void (*)(void *);
 
 // Non-copyable handle to a managed thread.
@@ -85,7 +65,7 @@ public:
 		u32 index = other._.load(atomic::Order::RELAXED);
 		_.store(index, atomic::Order::RELAXED);
 		other._.store(INVALID, atomic::Order::RELAXED);
-	};
+	}
 
 	~Thread();
 
