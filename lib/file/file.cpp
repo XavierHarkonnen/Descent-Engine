@@ -33,7 +33,7 @@ extern "C" {
 #define DESCENT_FILE_COMPILE_OPENAT2
 #endif
 
-namespace descent {
+namespace descent::fs {
 
 static constexpr int FILE_FLAGS = O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW;
 static constexpr int FILE_MODE = 0600;
@@ -113,10 +113,8 @@ File::File(const Directory &parent, string name) {
 	if (!validate_path(parent, name))
 		return;
 
-	int parent_fd = 
-
 	if (name.c_safe()) {
-		fd = open_file(parent.ha, name.data());
+		h = Handle(open_file(parent.handle().h, name.data()));
 		return;
 	}
 
@@ -124,7 +122,7 @@ File::File(const Directory &parent, string name) {
 	if (!buffer)
 		return;
 
-	fd = open_file(parent.fd, buffer.data());
+	h = open_file(parent.handle().h, buffer.data());
 }
 
 }

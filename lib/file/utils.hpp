@@ -22,7 +22,7 @@
 
 #include "file.hpp"
 
-namespace descent {
+namespace descent::fs {
 
 static constexpr u64 MAX_NAME_LENGTH = 128;
 

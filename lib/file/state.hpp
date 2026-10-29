@@ -19,9 +19,10 @@
 #include <descent/thread/atomic.hpp>
 #include <descent/thread/mutex.hpp>
 #include <descent/type/string.hpp>
+
 #include "file.hpp"
 
-namespace descent {
+namespace descent::fs {
 
 constexpr u64 MAX_PROGRAM_NAME_SIZE = 256;
 

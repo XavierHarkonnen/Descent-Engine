@@ -17,12 +17,9 @@
 #define DESCENT_LIB_FILE_FILE_HPP
 
 #include <descent/type/string.hpp>
-
-#include <descent/type/traits.hpp>
+#include <descent/type/utility.hpp>
 
 namespace descent::fs {
-
-class Directory;
 
 class Handle {
 	friend class Directory;
@@ -42,7 +39,14 @@ private:
 		other.h = -1;
 	}
 
-	bool is_valid() {
+	Handle &operator =(Handle &&other) {
+		if (&other != this)
+			swap(h, other.h);
+
+		return *this;
+	}
+
+	bool valid() const {
 		return h >= 0;
 	}
 };
@@ -61,20 +65,19 @@ public:
 
 	Directory(const Directory &parent, string name);
 
-	Directory(Directory &&other) : h(other.h) {
-		other.handle = INVALID_HANDLE;
-	}
+	Directory(Directory &&other) : h(move(other.h)) {}
 
 	~Directory();
 
 	Directory &operator =(Directory &&other);
 
 	explicit operator bool() const {
-		return 
-		return handle != INVALID_HANDLE;
+		return h.valid();
 	}
 
-	Handle
+	const Handle &handle() const {
+		return h;
+	}
 
 	static const Directory &base();
 	static const Directory &config();
@@ -88,12 +91,22 @@ class File {
 	File &operator =(const File &) = delete;
 
 private:
-	explicit File(u64 handle) : Handle(handle) {}
+	Handle h;
+
+	explicit File(i32 handle) : h(handle) {}
 
 public:
 	File() = default;
 
 	File(const Directory &parent, string name);
+
+	explicit operator bool() const {
+		return h.valid();
+	}
+
+	const Handle &handle() const {
+		return h;
+	}
 };
 
 bool set_program_name(string name);

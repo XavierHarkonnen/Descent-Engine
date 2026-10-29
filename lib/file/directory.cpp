@@ -40,25 +40,24 @@ static constexpr int DIR_MODE = 0700;
 // make_dir functions are all best-effort, not promises of existence
 // open_dir is the only canonical proof of existence and type
 // TODO: Minimize the number of system calls in the happy path and overall as possible
-// Maybe we can assume that the directory probably exists
 
 static int wrap_dir_open(const char *name) {
-	static constexpr int DIR_FLAGS_REL = O_PATH | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
+	static constexpr int DIR_FLAGS_ABS = O_PATH | O_DIRECTORY | O_CLOEXEC;
 
 	int fd;
 	do {
-		fd = open(name, DIR_FLAGS_REL, DIR_MODE);
+		fd = open(name, DIR_FLAGS_ABS, DIR_MODE);
 	} while (fd < 0 && errno == EINTR);
 
 	return fd;
 }
 
 static int wrap_dir_openat(int root, const char *name) {
-	static constexpr int DIR_FLAGS_ABS = O_PATH | O_DIRECTORY | O_CLOEXEC;
+	static constexpr int DIR_FLAGS_REL = O_PATH | O_DIRECTORY | O_CLOEXEC | O_NOFOLLOW;
 
 	int fd;
 	do {
-		fd = openat(root, name, DIR_FLAGS_ABS, DIR_MODE);
+		fd = openat(root, name, DIR_FLAGS_REL, DIR_MODE);
 	} while (fd < 0 && errno == EINTR);
 
 	return fd;
@@ -120,13 +119,13 @@ static void make_dir(int root, char *path) {
 
 static int open_dir(string path) {
 	if (path.c_safe())
-		return open(path.data(), DIR_FLAGS_ABS);
+		return wrap_dir_open(path.data());
 
 	auto buffer = memory::stack::Allocator::copy(path);
 	if (!buffer)
 		return -1;
 
-	return open(buffer.data(), DIR_FLAGS_ABS);
+	return open(buffer.data());
 }
 
 static int open_dir(int root, string path) {
