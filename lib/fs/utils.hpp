@@ -16,11 +16,10 @@
 #ifndef DESCENT_LIB_FS_UTILS_HPP
 #define DESCENT_LIB_FS_UTILS_HPP
 
+#include <descent/fs.hpp>
 #include <descent/type/core.hpp>
-#include <descent/type/string.hpp>
 #include <descent/type/math.hpp>
-
-#include "fs.hpp"
+#include <descent/type/string.hpp>
 
 namespace descent::fs {
 

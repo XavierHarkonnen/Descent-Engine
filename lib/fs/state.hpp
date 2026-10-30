@@ -16,11 +16,10 @@
 #ifndef DESCENT_LIB_FS_STATE_HPP
 #define DESCENT_LIB_FS_STATE_HPP
 
+#include <descent/fs.hpp>
 #include <descent/thread/atomic.hpp>
 #include <descent/thread/mutex.hpp>
 #include <descent/type/string.hpp>
-
-#include "fs.hpp"
 
 namespace descent::fs {
 
