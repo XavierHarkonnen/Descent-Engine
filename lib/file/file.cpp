@@ -35,14 +35,22 @@ extern "C" {
 
 namespace descent::fs {
 
-static constexpr int FILE_FLAGS = O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW;
-static constexpr int FILE_MODE = 0600;
+constexpr int file_flags(Access a) {
+	if (a == Access::EDIT)
+		return O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
 
-static int wrap_file_openat2(int root, const char *name, int flags, int mode) {
+	return O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW;
+}
+
+constexpr int file_mode(Access) {
+	return 0600;
+}
+
+static int wrap_file_openat2(int root, const char *name, Access a) {
 #if defined(DESCENT_FILE_COMPILE_OPENAT2)
 	struct open_how how = {};
-	how.flags = static_cast<u64>(flags) | OPENAT2_REGULAR;
-	how.mode = static_cast<u64>(mode);
+	how.flags = static_cast<u64>(file_flags(a)) | OPENAT2_REGULAR;
+	how.mode = static_cast<u64>(file_mode(a));
 
 	long fd;
 	do {
@@ -51,6 +59,8 @@ static int wrap_file_openat2(int root, const char *name, int flags, int mode) {
 
 	return static_cast<int>(fd);
 #else
+#error "wrap_file_openat cannot be used wiithout header support"
+
 	(void) root;
 	(void) name;
 	(void) flags;
@@ -60,38 +70,48 @@ static int wrap_file_openat2(int root, const char *name, int flags, int mode) {
 #endif
 }
 
-static int wrap_file_openat(int root, const char *name, int flags, int mode) {
+static int wrap_file_openat(int root, const char *name, Access a) {
 	int fd;
 	do {
-		fd = openat(root, name, flags | O_NONBLOCK | O_NOCTTY, mode);
+		fd = openat(root, name, file_flags(a) | O_NONBLOCK | O_NOCTTY, file_mode(a));
 	} while (fd < 0 && errno == EINTR);
 
 	return fd;
 }
 
+// Kernel 7.2
 static bool use_openat2_regular() {
 #if defined(DESCENT_FILE_COMPILE_OPENAT2)
-	int fd = wrap_file_openat2(AT_FDCWD, "/", O_RDONLY | O_CLOEXEC | O_NOFOLLOW, 0);
+	int fd = wrap_file_openat2(AT_FDCWD, "", Access::EDIT);
 	if (fd >= 0) {
 		close(fd);
 		return false;
 	}
+
+	if (errno != ENOENT)
+		return false;
+
+	fd = wrap_file_openat2(AT_FDCWD, "/", Access::READ);
+	if (fd >= 0) {
+		close(fd);
+		return false;
+	}
+
 	return errno == EFTYPE;
 #else
 	return false;
 #endif
 }
 
-int open_file(int root, const char *name) {
+static int open_file(int root, const char *name, Access a) {
 	static const bool USE_OPENAT2_REGULAR = use_openat2_regular();
 
-	// Kernel 7.2
-	// Attempt to use OPENAT2_REGULAR to open and check the file
+	// Open and verify descriptor in one syscall
 	if (USE_OPENAT2_REGULAR)
-		return wrap_file_openat2(root, name, FILE_FLAGS, FILE_MODE);
+		return wrap_file_openat2(root, name, a);
 
 	// Open, then verify the resulting descriptor.
-	int fd = wrap_file_openat(root, name, FILE_FLAGS, FILE_MODE);
+	int fd = wrap_file_openat(root, name, a);
 	if (fd < 0)
 		return -1;
 
@@ -109,12 +129,12 @@ int open_file(int root, const char *name) {
 	return fd;
 }
 
-File::File(const Directory &parent, string name) {
+File::File(const Directory &parent, string name, Access a) {
 	if (!validate_path(parent, name))
 		return;
 
 	if (name.c_safe()) {
-		h = Handle(open_file(parent.handle().h, name.data()));
+		h = Handle(open_file(parent.handle().h, name.data(), a));
 		return;
 	}
 
@@ -122,7 +142,7 @@ File::File(const Directory &parent, string name) {
 	if (!buffer)
 		return;
 
-	h = open_file(parent.handle().h, buffer.data());
+	h = open_file(parent.handle().h, buffer.data(), a);
 }
 
 }

@@ -13,13 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FILE_FILE_HPP
-#define DESCENT_LIB_FILE_FILE_HPP
+#ifndef DESCENT_FS_HPP
+#define DESCENT_FS_HPP
 
 #include <descent/type/string.hpp>
 #include <descent/type/utility.hpp>
 
 namespace descent::fs {
+
+enum class Access {
+	READ = 0,
+	EDIT,
+};
 
 class Handle {
 	friend class Directory;
@@ -49,6 +54,8 @@ private:
 	bool valid() const {
 		return h >= 0;
 	}
+
+	~Handle();
 };
 
 class Directory {
@@ -66,8 +73,6 @@ public:
 	Directory(const Directory &parent, string name);
 
 	Directory(Directory &&other) : h(move(other.h)) {}
-
-	~Directory();
 
 	Directory &operator =(Directory &&other);
 
@@ -98,7 +103,7 @@ private:
 public:
 	File() = default;
 
-	File(const Directory &parent, string name);
+	File(const Directory &parent, string name, Access a);
 
 	explicit operator bool() const {
 		return h.valid();
