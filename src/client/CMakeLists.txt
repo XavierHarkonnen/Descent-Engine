@@ -1,7 +1,7 @@
 descent_executable(granbarrow-client
 	SOURCES main.cpp
 	LINK
-		descent::file
+		descent::fs
 		descent::memory
 		descent::rengine
 		descent::system

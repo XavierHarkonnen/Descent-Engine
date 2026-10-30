@@ -73,7 +73,7 @@ static i32 wrap_file_openat2(i32 root, const char *name, Access a) {
 	(void) name;
 	(void) a;
 
-	errno = ENOSYS
+	errno = ENOSYS;
 
 	return -1;
 #endif
