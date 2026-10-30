@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FILE_UTILS_HPP
-#define DESCENT_LIB_FILE_UTILS_HPP
+#ifndef DESCENT_LIB_FS_UTILS_HPP
+#define DESCENT_LIB_FS_UTILS_HPP
 
 #include <descent/type/core.hpp>
 #include <descent/type/string.hpp>
 #include <descent/type/math.hpp>
 
-#include "file.hpp"
+#include "fs.hpp"
 
 namespace descent::fs {
 

@@ -38,7 +38,7 @@ private:
 
 	Handle() = default;
 
-	Handle(i32 handle) : h(handle) {}
+	explicit Handle(i32 handle) : h(handle) {}
 
 	Handle(Handle &&other) : h(other.h) {
 		other.h = -1;

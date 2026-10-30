@@ -13,20 +13,28 @@
  * limitations under the License.
  */
 
+#include "fs.hpp"
+
 extern "C" {
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/limits.h>
-#include <linux/openat2.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 }
 
+#if defined(__has_include)
+#if __has_include(<linux/openat2.h>)
+extern "C" {
+#include <linux/openat2.h>
+}
+#endif
+#endif
+
 #include <descent/memory/stack.hpp>
 
-#include "file.hpp"
 #include "utils.hpp"
 
 #if defined(SYS_openat2) && defined(OPENAT2_REGULAR) && defined(EFTYPE)
@@ -35,18 +43,20 @@ extern "C" {
 
 namespace descent::fs {
 
-constexpr int file_flags(Access a) {
+static_assert(sizeof(int) == sizeof(i32), "File descriptors are stored as i32");
+
+constexpr i32 file_flags(Access a) {
 	if (a == Access::EDIT)
-		return O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
+		return O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW;
 
-	return O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW;
+	return O_RDONLY | O_CLOEXEC | O_NOFOLLOW;
 }
 
-constexpr int file_mode(Access) {
-	return 0600;
+constexpr i32 file_mode(Access a) {
+	return a == Access::EDIT ? 0600 : 0;
 }
 
-static int wrap_file_openat2(int root, const char *name, Access a) {
+static i32 wrap_file_openat2(i32 root, const char *name, Access a) {
 #if defined(DESCENT_FILE_COMPILE_OPENAT2)
 	struct open_how how = {};
 	how.flags = static_cast<u64>(file_flags(a)) | OPENAT2_REGULAR;
@@ -57,21 +67,20 @@ static int wrap_file_openat2(int root, const char *name, Access a) {
 		fd = syscall(SYS_openat2, root, name, &how, sizeof(how));
 	} while (fd < 0 && errno == EINTR);
 
-	return static_cast<int>(fd);
+	return static_cast<i32>(fd);
 #else
-#error "wrap_file_openat cannot be used wiithout header support"
-
 	(void) root;
 	(void) name;
-	(void) flags;
-	(void) mode;
+	(void) a;
+
+	errno = ENOSYS
 
 	return -1;
 #endif
 }
 
-static int wrap_file_openat(int root, const char *name, Access a) {
-	int fd;
+static i32 wrap_file_openat(i32 root, const char *name, Access a) {
+	i32 fd;
 	do {
 		fd = openat(root, name, file_flags(a) | O_NONBLOCK | O_NOCTTY, file_mode(a));
 	} while (fd < 0 && errno == EINTR);
@@ -82,7 +91,7 @@ static int wrap_file_openat(int root, const char *name, Access a) {
 // Kernel 7.2
 static bool use_openat2_regular() {
 #if defined(DESCENT_FILE_COMPILE_OPENAT2)
-	int fd = wrap_file_openat2(AT_FDCWD, "", Access::EDIT);
+	i32 fd = wrap_file_openat2(AT_FDCWD, "", Access::EDIT);
 	if (fd >= 0) {
 		close(fd);
 		return false;
@@ -103,7 +112,7 @@ static bool use_openat2_regular() {
 #endif
 }
 
-static int open_file(int root, const char *name, Access a) {
+static i32 open_file(i32 root, const char *name, Access a) {
 	static const bool USE_OPENAT2_REGULAR = use_openat2_regular();
 
 	// Open and verify descriptor in one syscall
@@ -111,7 +120,7 @@ static int open_file(int root, const char *name, Access a) {
 		return wrap_file_openat2(root, name, a);
 
 	// Open, then verify the resulting descriptor.
-	int fd = wrap_file_openat(root, name, a);
+	i32 fd = wrap_file_openat(root, name, a);
 	if (fd < 0)
 		return -1;
 
@@ -142,7 +151,7 @@ File::File(const Directory &parent, string name, Access a) {
 	if (!buffer)
 		return;
 
-	h = open_file(parent.handle().h, buffer.data(), a);
+	h = Handle(open_file(parent.handle().h, buffer.data(), a));
 }
 
 }

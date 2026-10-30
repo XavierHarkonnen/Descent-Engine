@@ -13,25 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FILE_STATE_HPP
-#define DESCENT_LIB_FILE_STATE_HPP
+#include "fs.hpp"
 
-#include <descent/thread/atomic.hpp>
-#include <descent/thread/mutex.hpp>
-#include <descent/type/string.hpp>
-
-#include "file.hpp"
+extern "C" {
+#include <unistd.h>
+}
 
 namespace descent::fs {
 
-constexpr u64 MAX_PROGRAM_NAME_SIZE = 256;
-
-inline thread::Mutex mutex;
-inline thread::atomic::Flag initialized(false);
-inline const Directory INVALID_DIRECTORY;
-inline char program_buffer[MAX_PROGRAM_NAME_SIZE];
-inline string program_name = {};
-
+Handle::~Handle() {
+	if (valid()) {
+		close(h);
+	}
 }
 
-#endif
+}
