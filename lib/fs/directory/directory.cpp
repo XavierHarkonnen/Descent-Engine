@@ -13,24 +13,34 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FS_STATE_HPP
-#define DESCENT_LIB_FS_STATE_HPP
-
 #include <descent/fs.hpp>
-#include <descent/thread/atomic.hpp>
-#include <descent/thread/mutex.hpp>
+
 #include <descent/type/string.hpp>
+#include <descent/thread/once.hpp>
+#include <descent/thread/mutex.hpp>
+#include <descent/memory/stack.hpp>
+
+#include "../name.hpp"
+#include "system.hpp"
 
 namespace descent::fs {
 
-constexpr u64 MAX_PROGRAM_NAME_SIZE = 256;
+Directory::Directory(const Directory &parent, string name) {
+	const u64 LENGTH = name::length(name);
 
-inline thread::Mutex mutex;
-inline thread::atomic::Flag initialized(false);
-inline const Directory INVALID_DIRECTORY;
-inline char program_buffer[MAX_PROGRAM_NAME_SIZE];
-inline string program_name = {};
+	if (!parent || LENGTH == 0)
+		return;
 
+	if (LENGTH < name.size()) {
+		h = Handle(directory::open(parent.handle().h, name.data()));
+		return;
+	}
+
+	auto buffer = memory::stack::Allocator::copy(name);
+	if (!buffer)
+		return;
+
+	h = Handle(directory::open(parent.handle().h, buffer.data()));
 }
 
-#endif
+}

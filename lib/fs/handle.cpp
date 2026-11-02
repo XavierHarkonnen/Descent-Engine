@@ -21,6 +21,8 @@ extern "C" {
 
 namespace descent::fs {
 
+static_assert(sizeof(int) == sizeof(i32), "File descriptors are stored as i32");
+
 Handle::~Handle() {
 	if (valid()) {
 		close(h);

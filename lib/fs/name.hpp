@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FS_UTILS_HPP
-#define DESCENT_LIB_FS_UTILS_HPP
+#ifndef DESCENT_LIB_FS_NAME_HPP
+#define DESCENT_LIB_FS_NAME_HPP
 
 #include <descent/fs.hpp>
 #include <descent/type/core.hpp>
 #include <descent/type/math.hpp>
 #include <descent/type/string.hpp>
 
-namespace descent::fs {
+namespace descent::fs::name {
 
 static constexpr u64 MAX_NAME_LENGTH = 128;
 
-inline bool validate_name(string name) {
+inline u64 length(string name) {
 	if (!name)
-		return false;
+		return 0;
 
 	const u64 SIZE = math::min(MAX_NAME_LENGTH + 1, name.size());
 
@@ -39,26 +39,22 @@ inline bool validate_name(string name) {
 			break;
 
 		if (c <= 31 || c >= 127 || c == '/')
-			return false;
+			return 0;
 	}
 
 	if (length > MAX_NAME_LENGTH)
-		return false;
+		return 0;
 
 	if (length == 0)
-		return false;
+		return 0;
 
 	if (length == 1 && name[0] == '.')
-		return false;
+		return 0;
 
 	if (length == 2 && name[0] == '.' && name[1] == '.')
-		return false;
+		return 0;
 
-	return true;
-}
-
-inline bool validate_path(const Directory &root, string name) {
-	return root && validate_name(name);
+	return length;
 }
 
 }

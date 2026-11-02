@@ -1,4 +1,4 @@
 descent_library(fs
-	SOURCES directory.cpp file.cpp handle.cpp
+	SOURCES handle.cpp file/file.cpp directory/directory.cpp directory/roots.cpp
 	LINK descent::system
 )

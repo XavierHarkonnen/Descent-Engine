@@ -21,8 +21,8 @@
 
 namespace descent::fs {
 
-enum class Access {
-	READ = 0,
+enum class Access : bool {
+	READ = false,
 	EDIT,
 };
 
@@ -72,7 +72,7 @@ public:
 
 	Directory(const Directory &parent, string name);
 
-	Directory(Directory &&other) : h(move(other.h)) {}
+	Directory(Directory &&other) = default;
 
 	Directory &operator =(Directory &&other);
 
@@ -105,6 +105,8 @@ public:
 
 	File(const Directory &parent, string name, Access a);
 
+	File(File &&other) = default;
+
 	explicit operator bool() const {
 		return h.valid();
 	}
@@ -115,6 +117,8 @@ public:
 };
 
 bool set_program_name(string name);
+
+string get_program_name();
 
 }
 
