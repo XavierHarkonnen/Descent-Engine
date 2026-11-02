@@ -114,7 +114,7 @@ inline i32 open(i32 root, string path) {
 	if (buffer[0] == '\0' || buffer[0] == '/')
 		return -1;
 
-	for (u64 i = 1; true ; ++i) {
+	for (u64 i = 1; true; ++i) {
 		if (buffer[i] == '\0') {
 			if (buffer[i - 1] != '/')
 				wrap_mkdir(root, buffer.data());

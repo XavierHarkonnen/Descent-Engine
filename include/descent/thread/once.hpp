@@ -19,8 +19,10 @@
 #include <descent/thread/atomic.hpp>
 #include <descent/thread/futex.hpp>
 #include <descent/type/core.hpp>
+#include <descent/type/utility.hpp>
 
 namespace descent::thread {
+
 
 template<typename R, typename... Args>
 class Once {
@@ -30,8 +32,6 @@ class Once {
 	Once &operator =(const Once &) = delete;
 
 private:
-	static constexpr u64 ONCE_SPIN_COUNT = 64;
-
 	enum {
 		UNINITIALIZED = 0,
 		RUNNING       = 1,
@@ -40,10 +40,21 @@ private:
 
 	Futex futex;
 	R (*function)(Args...);
-	R result;
+	bool (*accept)(R) = nullptr;
+	R result{};
+	const R rejected{};
 
 public:
-	Once(R (*function)(Args...)) : futex(UNINITIALIZED), function(function) {}
+	constexpr Once(R (*function)(Args...)) : futex(UNINITIALIZED), function(function) {
+		if (!function)
+			__builtin_trap();
+	}
+
+	constexpr Once(R (*function)(Args...), bool (*accept)(R), R init)
+	: futex(UNINITIALIZED), function(function), accept(accept), rejected(move(init)) {
+		if (!function || !accept)
+			__builtin_trap();
+	}
 
 	const R &operator ()(Args... args) {
 		if (futex.word.load(atomic::Order::ACQUIRE) == INITIALIZED)
@@ -51,16 +62,82 @@ public:
 
 		for (;;) {
 			u32 expected = UNINITIALIZED;
+			// Must be a strong CAS: a spurious failure would leave expected == UNINITIALIZED
+			// and the switch below would run function without owning the Once.
 			futex.word.compare_exchange(expected, RUNNING, atomic::Order::ACQ_REL, atomic::Order::ACQUIRE);
 
 			switch (expected) {
-				case UNINITIALIZED:
-					result = function(static_cast<Args &&>(args)...);
+				case UNINITIALIZED: {
+					R output = function(static_cast<Args &&>(args)...);
+
+					if (!accept || accept(output)) {
+						result = static_cast<R &&>(output);
+						futex.word.store(INITIALIZED, atomic::Order::RELEASE);
+						futex.wake_all();
+						return result;
+					}
+
+					futex.word.store(UNINITIALIZED, atomic::Order::RELEASE);
+					futex.wake_all();
+					return rejected;
+				}
+				case RUNNING: {
+					futex.wait(RUNNING);
+					break;
+				}
+				case INITIALIZED: {
+					return result;
+				}
+			}
+		}
+	}
+};
+
+template<typename... Args>
+class Once<void, Args...> {
+	Once(Once &&)                  = delete;
+	Once(const Once &)             = delete;
+	Once &operator =(Once &&)      = delete;
+	Once &operator =(const Once &) = delete;
+
+private:
+	enum {
+		UNINITIALIZED = 0,
+		RUNNING       = 1,
+		INITIALIZED   = 2,
+	};
+
+	Futex futex;
+	void (*function)(Args...);
+
+public:
+	constexpr Once(void (*function)(Args...)) : futex(UNINITIALIZED), function(function) {
+		if (!function)
+			__builtin_trap();
+	}
+
+	void operator ()(Args... args) {
+		if (futex.word.load(atomic::Order::ACQUIRE) == INITIALIZED)
+			return;
+
+		for (;;) {
+			u32 expected = UNINITIALIZED;
+			futex.word.compare_exchange(expected, RUNNING, atomic::Order::ACQ_REL, atomic::Order::ACQUIRE);
+
+			switch (expected) {
+				case UNINITIALIZED: {
+					function(static_cast<Args &&>(args)...);
 					futex.word.store(INITIALIZED, atomic::Order::RELEASE);
 					futex.wake_all();
-					return result;
-				case RUNNING: futex.wait(RUNNING); break;
-				case INITIALIZED: return result;
+					return;
+				}
+				case RUNNING: {
+					futex.wait(RUNNING);
+					break;
+				}
+				case INITIALIZED: {
+					return;
+				}
 			}
 		}
 	}

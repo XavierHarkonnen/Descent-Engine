@@ -42,6 +42,10 @@ static string program_name = {};
 // - Cache only success, so a root that failed is tried again
 // - Open first, and only call mkdir on ENOENT
 
+bool accept_fd(i32 fd) {
+	return fd >= 0;
+}
+
 static string get_env(string name) {
 	if (!name)
 		return {};
@@ -61,7 +65,7 @@ static int generate_home_fd() {
 }
 
 static int home_fd() {
-	static thread::Once once(generate_home_fd);
+	static thread::Once once(generate_home_fd, accept_fd, -1);
 	return once();
 }
 
