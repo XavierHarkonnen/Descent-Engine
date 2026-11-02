@@ -16,6 +16,7 @@
 #ifndef DESCENT_TYPE_STRING_HPP
 #define DESCENT_TYPE_STRING_HPP
 
+#include "descent/type/math.hpp"
 #include <descent/type/core.hpp>
 
 namespace descent {
@@ -153,6 +154,20 @@ public:
 			return {};
 
 		return string(data(), length + 1);
+	}
+
+	bool c_equals(string other) const {
+		const u64 SIZE = math::min(size(), other.size());
+
+		for (u64 i = 0; i < SIZE; ++i) {
+			if (at(i) != other[i])
+				return false;
+
+			if (at(i) == '\0')
+				return true;
+		}
+
+		return size() == other.size();
 	}
 };
 

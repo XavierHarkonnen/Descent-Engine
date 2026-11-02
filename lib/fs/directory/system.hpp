@@ -1,3 +1,18 @@
+/* Copyright 2025 XavierHarkonnen9 and Enlarium
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef DESCENT_LIB_FS_DIRECTORY_SYSTEM_HPP
 #define DESCENT_LIB_FS_DIRECTORY_SYSTEM_HPP
 
@@ -60,7 +75,7 @@ inline i32 open(i32 root, const char *name) {
 	i32 fd = wrap_open(root, name, Links::REFUSE);
 	if (fd >= 0)
 		return fd;
-	
+
 	wrap_mkdir(root, name);
 	return wrap_open(root, name, Links::REFUSE);
 }
@@ -73,7 +88,7 @@ inline i32 open(string path) {
 	if (buffer[0] != '/')
 		return -1;
 
-	for (u64 i = 1; ; ++i) {
+	for (u64 i = 1; true; ++i) {
 		if (buffer[i] == '\0') {
 			if (buffer[i - 1] != '/')
 				wrap_mkdir(buffer.data());
@@ -99,7 +114,7 @@ inline i32 open(i32 root, string path) {
 	if (buffer[0] == '\0' || buffer[0] == '/')
 		return -1;
 
-	for (u64 i = 1; ; ++i) {
+	for (u64 i = 1; true ; ++i) {
 		if (buffer[i] == '\0') {
 			if (buffer[i - 1] != '/')
 				wrap_mkdir(root, buffer.data());

@@ -74,7 +74,7 @@ public:
 
 	Directory(Directory &&other) = default;
 
-	Directory &operator =(Directory &&other);
+	Directory &operator =(Directory &&) = default;
 
 	explicit operator bool() const {
 		return h.valid();
@@ -106,6 +106,8 @@ public:
 	File(const Directory &parent, string name, Access a);
 
 	File(File &&other) = default;
+
+	File &operator =(File &&) = default;
 
 	explicit operator bool() const {
 		return h.valid();

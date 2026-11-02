@@ -16,8 +16,6 @@
 #include <descent/fs.hpp>
 
 #include <descent/type/string.hpp>
-#include <descent/thread/once.hpp>
-#include <descent/thread/mutex.hpp>
 #include <descent/memory/stack.hpp>
 
 #include "../name.hpp"
