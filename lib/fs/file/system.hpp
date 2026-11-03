@@ -59,6 +59,7 @@ constexpr i32 mode(Access a) {
 inline i32 wrap_openat2(i32 root, const char *name, Access a) {
 #if defined(DESCENT_FS_FILE_COMPILE_OPENAT2)
 	struct open_how how = {};
+	
 	how.flags = static_cast<u64>(flags(a)) | OPENAT2_REGULAR;
 	how.mode  = static_cast<u64>(mode(a));
 

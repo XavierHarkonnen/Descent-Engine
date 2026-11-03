@@ -81,9 +81,26 @@ inline i32 open(i32 root, const char *name) {
 }
 
 inline i32 open(string path) {
+	if (!path || path[0] != '/')
+		return -1;
+
+	bool c_safe = path.c_safe();
+
+	if (c_safe) {
+		i32 fd = wrap_open(path.data(), Links::FOLLOW);
+		if (fd >= 0 || errno != ENOENT)
+			return fd;
+	}
+
 	auto buffer = memory::stack::Allocator::copy(path);
 	if (!buffer)
 		return -1;
+
+	if (!c_safe) {
+		i32 fd = wrap_open(buffer.data(), Links::FOLLOW);
+		if (fd >= 0 || errno != ENOENT)
+			return fd;
+	}
 
 	if (buffer[0] != '/')
 		return -1;
@@ -107,12 +124,26 @@ inline i32 open(string path) {
 }
 
 inline i32 open(i32 root, string path) {
+	if (!path || path[0] == '\0' || path[0] == '/')
+		return -1;
+
+	bool c_safe = path.c_safe();
+
+	if (c_safe) {
+		i32 fd = wrap_open(root, path.data(), Links::FOLLOW);
+		if (fd >= 0 || errno != ENOENT)
+			return fd;
+	}
+
 	auto buffer = memory::stack::Allocator::copy(path);
 	if (!buffer)
 		return -1;
 
-	if (buffer[0] == '\0' || buffer[0] == '/')
-		return -1;
+	if (!c_safe) {
+		i32 fd = wrap_open(root, buffer.data(), Links::FOLLOW);
+		if (fd >= 0 || errno != ENOENT)
+			return fd;
+	}
 
 	for (u64 i = 1; true; ++i) {
 		if (buffer[i] == '\0') {

@@ -63,16 +63,16 @@ static string get_env(string name) {
 	return string(getenv(buffer.data()));
 }
 
-static int generate_home_fd() {
-	return directory::open(get_env(string("HOME")));
-}
-
 static int home_fd() {
-	static thread::Once<i32> once(generate_home_fd, acceptor, -1);
+	static thread::Once<i32> once(
+		[]() -> i32 {
+			return directory::open(get_env(string("HOME")));
+		}, acceptor, -1
+	);
 	return once();
 }
 
-Directory Directory::generate_base() {
+static i32 generate_base_fd() {
 	char buffer[PATH_MAX];
 	i64 size = readlink("/proc/self/exe", buffer, sizeof(buffer));
 
@@ -90,10 +90,10 @@ Directory Directory::generate_base() {
 	u64 index   = (slash == 0) ? 1 : slash;
 	string base = executable.sub(0, index);
 
-	return Directory(directory::open(base));
+	return directory::open(base);
 }
 
-Directory Directory::generate_root(string name, string env_name, string fallback) {
+static i32 generate_root_fd(string name, string env_name, string fallback) {
 	i32 env_fd = -1;
 
 	string env_path = get_env(env_name);
@@ -108,12 +108,12 @@ Directory Directory::generate_root(string name, string env_name, string fallback
 		env_fd = directory::open(home_fd(), fallback);
 
 	if (env_fd < 0)
-		return {};
+		return -1;
 
 	i32 root = directory::open(env_fd, name);
 	close(env_fd);
 
-	return Directory(root);
+	return root;
 }
 
 bool set_program_name(string name) {
@@ -143,7 +143,11 @@ string get_program_name() {
 }
 
 const Directory &Directory::base() {
-	static thread::Once<Directory> once(generate_base, acceptor, {});
+	static thread::Once<Directory> once(
+		[]() -> Directory {
+			return Directory(generate_base_fd());
+		}, acceptor, {}
+	);
 	return once();
 }
 
@@ -151,32 +155,48 @@ const Directory &Directory::config() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
-	return once(program_name, string("XDG_CONFIG_HOME"), string(".config"));
+	static thread::Once<Directory> once(
+		[]() -> Directory {
+			return Directory(generate_root_fd(program_name, string("XDG_CONFIG_HOME"), string(".config")));
+		}, acceptor, {}
+	);
+	return once();
 }
 
 const Directory &Directory::data() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
-	return once(program_name, string("XDG_DATA_HOME"), string(".local/share"));
+	static thread::Once<Directory> once(
+		[]() -> Directory {
+			return Directory(generate_root_fd(program_name, string("XDG_DATA_HOME"), string(".local/share")));
+		}, acceptor, {}
+	);
+	return once();
 }
 
 const Directory &Directory::state() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
-	return once(program_name, string("XDG_STATE_HOME"), string(".local/state"));
+	static thread::Once<Directory> once(
+		[]() -> Directory {
+			return Directory(generate_root_fd(program_name, string("XDG_STATE_HOME"), string(".local/state")));
+		}, acceptor, {}
+	);
+	return once();
 }
 
 const Directory &Directory::cache() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
-	return once(program_name, string("XDG_CACHE_HOME"), string(".cache"));
+	static thread::Once<Directory> once(
+		[]() -> Directory {
+			return Directory(generate_root_fd(program_name, string("XDG_CACHE_HOME"), string(".cache")));
+		}, acceptor, {}
+	);
+	return once();
 }
 
 }
