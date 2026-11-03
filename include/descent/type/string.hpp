@@ -29,9 +29,12 @@ namespace contiguous {
 
 template<typename T, typename Derived>
 class interface {
+	template<typename, typename>
+	friend class interface;
+
 private:
 	constexpr Derived &self() {
-		return *static_cast<const Derived *>(this);
+		return *static_cast<Derived *>(this);
 	}
 
 	constexpr const Derived &self() const {
@@ -77,7 +80,7 @@ public:
 	// Operators
 
 	template<typename U, typename Other>
-	bool operator ==(const interface<U, Other> &other) const {
+	constexpr bool operator ==(const interface<U, Other> &other) const {
 		static_assert(
 			type::is_same<typename type::remove_cv<T>::type, typename type::remove_cv<U>::type>::value,
 			"comparing views of different element types"
@@ -86,7 +89,7 @@ public:
 		if (s_size() != other.s_size())
 			return false;
 
-		if (s_data() == other.s_data())
+		if (!__builtin_is_constant_evaluated() && s_data() == other.s_data())
 			return true;
 
 		for (u64 i = 0; i < s_size(); ++i)
@@ -116,7 +119,7 @@ public:
 		return find(value) != INVALID_INDEX;
 	}
 
-	constexpr u64 find(T value, u64 position = 0) const {
+	constexpr u64 find(const T &value, u64 position = 0) const {
 		if (!s_data() || position >= s_size())
 			return INVALID_INDEX;
 
@@ -127,7 +130,7 @@ public:
 		return INVALID_INDEX;
 	}
 
-	constexpr u64 rfind(T value, u64 position = U64_MAX) const {
+	constexpr u64 rfind(const T &value, u64 position = U64_MAX) const {
 		if (!s_data() || s_size() == 0)
 			return INVALID_INDEX;
 
@@ -141,12 +144,12 @@ public:
 		return INVALID_INDEX;
 	}
 
-	constexpr view<T> sub(u64 pos, u64 count = U64_MAX) {
-		return sub_view<T>(self(), pos, count);
+	constexpr view<T> sub(u64 position, u64 count = U64_MAX) {
+		return sub_view<T>(s_data(), s_size(), position, count);
 	}
  
-	constexpr view<const T> sub(u64 pos, u64 count = U64_MAX) const {
-		return sub_view<const T>(self(), pos, count);
+	constexpr view<const T> sub(u64 position, u64 count = U64_MAX) const {
+		return sub_view<const T>(s_data(), s_size(), position, count);
 	}
 };
 

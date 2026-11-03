@@ -16,7 +16,7 @@
 #ifndef DESCENT_SYSTEM_HPP
 #define DESCENT_SYSTEM_HPP
 
-#include <descent/utility.hpp>
+#include <descent/macros.hpp>
 
 [[noreturn, gnu::cold]]
 void sys_fatal(const char *message, const char *file, const char *line);
