@@ -40,11 +40,11 @@ private:
 	constexpr const Derived &self() const {
 		return *static_cast<const Derived *>(this);
 	}
-	constexpr T *s_data() {
+	constexpr  auto s_data() {
 		return self().data();
 	}
 
-	constexpr const T *s_data() const {
+	constexpr const auto s_data() const {
 		return self().data();
 	}
 
@@ -52,11 +52,11 @@ private:
 		return self().size();
 	}
 
-	constexpr T &at(u64 index) {
+	constexpr decltype(auto) at(u64 index) {
 		return s_data()[index];
 	}
 
-	constexpr const T &at(u64 index) const {
+	constexpr decltype(auto) at(u64 index) const {
 		return s_data()[index];
 	}
 
@@ -99,11 +99,11 @@ public:
 		return true;
 	}
 
-	constexpr T &operator[](u64 index) {
+	constexpr decltype(auto) operator[](u64 index) {
 		return at(index);
 	}
 
-	constexpr const T &operator[](u64 index) const {
+	constexpr decltype(auto) operator[](u64 index) const {
 		return at(index);
 	}
 
@@ -144,12 +144,12 @@ public:
 		return INVALID_INDEX;
 	}
 
-	constexpr view<T> sub(u64 position, u64 count = U64_MAX) {
-		return sub_view<T>(s_data(), s_size(), position, count);
+	constexpr auto sub(u64 position, u64 count = U64_MAX) {
+		return sub_view(s_data(), s_size(), position, count);
 	}
  
-	constexpr view<const T> sub(u64 position, u64 count = U64_MAX) const {
-		return sub_view<const T>(s_data(), s_size(), position, count);
+	constexpr auto sub(u64 position, u64 count = U64_MAX) const {
+		return sub_view(s_data(), s_size(), position, count);
 	}
 };
 
@@ -166,11 +166,10 @@ public:
 
 	constexpr view(T *data, u64 size) : _data(data), _size(data ? size : 0) {}
 
-	constexpr T *data() {
-		return _data;
-	}
+	constexpr view(const view<typename type::remove_const<T>::type> &other)
+	: _data(other.data()), _size(other.size()) {}
 
-	constexpr const T *data() const {
+	constexpr T *data() const {
 		return _data;
 	}
 
@@ -198,6 +197,14 @@ public:
 
 	constexpr u64 size() const {
 		return SIZE;
+	}
+	
+	constexpr operator view<T>() {
+		return view<T>(_data, SIZE);
+	}
+
+	constexpr operator view<const T>() const {
+		return view<const T>(_data, SIZE);
 	}
 };
 
