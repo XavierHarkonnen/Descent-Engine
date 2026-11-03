@@ -18,7 +18,7 @@
 
 #include <descent/type/core.hpp>
 #include <descent/type/math.hpp>
-#include <descent/type/utility.hpp>
+#include <descent/type/meta.hpp>
 
 namespace descent {
 
