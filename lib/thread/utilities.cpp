@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include <descent/utils.hpp>
+#include <descent/utility.hpp>
 
 #include <descent/system.hpp>
 #include <descent/thread/atomic.hpp>

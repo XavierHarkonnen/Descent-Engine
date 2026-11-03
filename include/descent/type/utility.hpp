@@ -40,8 +40,6 @@ constexpr T &&forward(typename type::remove_reference<T>::type &&value) {
 	return static_cast<T &&>(value);
 }
 
-// Call unqualified so a type's own swap is found by ADL; descent::swap(a, b) always uses this one.
-// Inside a class with a member swap, add `using descent::swap;` first
 template<typename T>
 constexpr void swap(T &a, T &b) {
 	T temp = move(a);
@@ -53,6 +51,20 @@ template<typename T, u64 N>
 constexpr void swap(T (&a)[N], T (&b)[N]) {
 	for (u64 i = 0; i < N; ++i)
 		swap(a[i], b[i]);
+}
+
+namespace type {
+
+template<typename T, typename U>
+struct is_same {
+	static constexpr bool value = false;
+};
+
+template<typename T>
+struct is_same<T, T> {
+	static constexpr bool value = true;
+};
+
 }
 
 }

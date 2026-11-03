@@ -64,11 +64,7 @@ static string get_env(string name) {
 }
 
 static int home_fd() {
-	static thread::Once<i32> once(
-		[]() -> i32 {
-			return directory::open(get_env(string("HOME")));
-		}, acceptor, -1
-	);
+	static thread::Once<i32> once([]() -> i32 { return directory::open(get_env(string("HOME"))); }, acceptor, -1);
 	return once();
 }
 
@@ -84,7 +80,7 @@ static i32 generate_base_fd() {
 		return {};
 
 	u64 slash = executable.rfind('/');
-	if (slash == string::INVALID)
+	if (slash == string::INVALID_INDEX)
 		return {};
 
 	u64 index   = (slash == 0) ? 1 : slash;
@@ -143,11 +139,7 @@ string get_program_name() {
 }
 
 const Directory &Directory::base() {
-	static thread::Once<Directory> once(
-		[]() -> Directory {
-			return Directory(generate_base_fd());
-		}, acceptor, {}
-	);
+	static thread::Once<Directory> once([]() -> Directory { return Directory(generate_base_fd()); }, acceptor, {});
 	return once();
 }
 
@@ -158,7 +150,8 @@ const Directory &Directory::config() {
 	static thread::Once<Directory> once(
 		[]() -> Directory {
 			return Directory(generate_root_fd(program_name, string("XDG_CONFIG_HOME"), string(".config")));
-		}, acceptor, {}
+		},
+		acceptor, {}
 	);
 	return once();
 }
@@ -170,7 +163,8 @@ const Directory &Directory::data() {
 	static thread::Once<Directory> once(
 		[]() -> Directory {
 			return Directory(generate_root_fd(program_name, string("XDG_DATA_HOME"), string(".local/share")));
-		}, acceptor, {}
+		},
+		acceptor, {}
 	);
 	return once();
 }
@@ -182,7 +176,8 @@ const Directory &Directory::state() {
 	static thread::Once<Directory> once(
 		[]() -> Directory {
 			return Directory(generate_root_fd(program_name, string("XDG_STATE_HOME"), string(".local/state")));
-		}, acceptor, {}
+		},
+		acceptor, {}
 	);
 	return once();
 }
@@ -194,7 +189,8 @@ const Directory &Directory::cache() {
 	static thread::Once<Directory> once(
 		[]() -> Directory {
 			return Directory(generate_root_fd(program_name, string("XDG_CACHE_HOME"), string(".cache")));
-		}, acceptor, {}
+		},
+		acceptor, {}
 	);
 	return once();
 }

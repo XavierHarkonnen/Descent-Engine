@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_UTILS_HPP
-#define DESCENT_UTILS_HPP
+#ifndef DESCENT_UTILITY_HPP
+#define DESCENT_UTILITY_HPP
 
 #define STRINGIFY_INTERNAL(x) #x
 #define STRINGIFY(x)          STRINGIFY_INTERNAL(x)

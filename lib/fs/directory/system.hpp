@@ -81,7 +81,7 @@ inline i32 open(i32 root, const char *name) {
 }
 
 inline i32 open(string path) {
-	if (!path || path.empty() || path[0] != '/')
+	if (path.empty() || path[0] != '/')
 		return -1;
 
 	bool c_safe = path.c_safe();
@@ -121,7 +121,7 @@ inline i32 open(string path) {
 }
 
 inline i32 open(i32 root, string path) {
-	if (!path || path.empty() || path[0] == '\0' || path[0] == '/')
+	if (path.empty() || path[0] == '\0' || path[0] == '/')
 		return -1;
 
 	bool c_safe = path.c_safe();
