@@ -29,44 +29,47 @@ namespace contiguous {
 
 template<typename T, typename Derived>
 class interface {
-	interface() = delete;
-
 private:
-	constexpr const Derived &self() const {
+	constexpr Derived &self() {
 		return *static_cast<const Derived *>(this);
 	}
 
+	constexpr const Derived &self() const {
+		return *static_cast<const Derived *>(this);
+	}
+	constexpr T *s_data() {
+		return self().data();
+	}
+
+	constexpr const T *s_data() const {
+		return self().data();
+	}
+
+	constexpr u64 s_size() const {
+		return self().size();
+	}
+
 	constexpr T &at(u64 index) {
-		return data()[index];
+		return s_data()[index];
 	}
 
 	constexpr const T &at(u64 index) const {
-		return data()[index];
+		return s_data()[index];
 	}
 
 	template<typename U>
-	constexpr view<U> sub_view(u64 position, u64 count) { 
-		if (position > size() || !data())
+	static constexpr view<U> sub_view(U *data, u64 size, u64 position, u64 count) {
+		if (!data || position > size)
 			return {};
- 
-		if (count > size() - position)
-			count = size() - position;
- 
-		return view<U>(data() + position, count);
+
+		if (count > size - position)
+			count = size - position;
+
+		return view<U>(data + position, count);
 	}
 
 protected:
-	constexpr T *data() {
-		return self()->data();
-	}
-
-	constexpr const T *data() const {
-		return self()->data();
-	}
-
-	constexpr u64 size() const {
-		return self()->size();
-	}
+	interface() = default;
 
 public:
 	static constexpr u64 INVALID_INDEX = U64_MAX;
@@ -75,16 +78,18 @@ public:
 
 	template<typename U, typename Other>
 	bool operator ==(const interface<U, Other> &other) const {
-		if constexpr (!type::is_same<T, U>::value)
+		static_assert(
+			type::is_same<typename type::remove_cv<T>::type, typename type::remove_cv<U>::type>::value,
+			"comparing views of different element types"
+		);
+
+		if (s_size() != other.s_size())
 			return false;
 
-		if (size() != other.size())
-			return false;
-
-		if (data() == other.data())
+		if (s_data() == other.s_data())
 			return true;
 
-		for (u64 i = 0; i < size(); ++i)
+		for (u64 i = 0; i < s_size(); ++i)
 			if (at(i) != other[i])
 				return false;
 
@@ -102,7 +107,7 @@ public:
 	// Accessors
 
 	constexpr bool empty() const {
-		return size() == 0;
+		return s_size() == 0;
 	}
 
 	// Utilities
@@ -112,22 +117,22 @@ public:
 	}
 
 	constexpr u64 find(T value, u64 position = 0) const {
-		if (!data() || position >= size())
+		if (!s_data() || position >= s_size())
 			return INVALID_INDEX;
 
-		for (u64 i = position; i < size(); ++i)
+		for (u64 i = position; i < s_size(); ++i)
 			if (at(i) == value)
 				return i;
  
 		return INVALID_INDEX;
 	}
 
-	constexpr u64 rfind(char value, u64 position = U64_MAX) const {
-		if (!data() || size() == 0)
+	constexpr u64 rfind(T value, u64 position = U64_MAX) const {
+		if (!s_data() || s_size() == 0)
 			return INVALID_INDEX;
 
-		if (position >= size())
-			position = size() - 1;
+		if (position >= s_size())
+			position = s_size() - 1;
 
 		for (u64 i = position + 1; i > 0; --i)
 			if (at(i - 1) == value)
@@ -136,28 +141,28 @@ public:
 		return INVALID_INDEX;
 	}
 
-	constexpr view<T> sub(u64 pos, u64 count = U64_MAX) const {
-		u64 n = size();
-
-		if (pos > n || !data())
-			return {};
-
-		if (count > n - pos)
-			count = n - pos;
-
-		return string(data() + pos, count);
+	constexpr view<T> sub(u64 pos, u64 count = U64_MAX) {
+		return sub_view<T>(self(), pos, count);
+	}
+ 
+	constexpr view<const T> sub(u64 pos, u64 count = U64_MAX) const {
+		return sub_view<const T>(self(), pos, count);
 	}
 };
 
 }
 
 template<typename T>
-class view : public contiguous::interface<view<T>, T> {
+class view : public contiguous::interface<T, view<T>> {
 private:
-	T *_data;
-	u64 _size;
+	T *_data = nullptr;
+	u64 _size = 0;
 
 public:
+	constexpr view() = default;
+
+	constexpr view(T *data, u64 size) : _data(data), _size(data ? size : 0) {}
+
 	constexpr T *data() {
 		return _data;
 	}
@@ -172,11 +177,14 @@ public:
 };
 
 template<typename T, u64 SIZE>
-class buffer : public contiguous::interface<buffer<T, SIZE>, T> {
+class buffer : public contiguous::interface<T, buffer<T, SIZE>> {
+	static_assert(SIZE > 0, "Cannot construct buffer with zero size");
 private:
-	T _data[SIZE];
+	T _data[SIZE] = {};
 
 public:
+	constexpr buffer() = default;
+
 	constexpr T *data() {
 		return _data;
 	}
