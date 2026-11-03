@@ -23,13 +23,17 @@
 
 namespace descent::thread {
 
-
 template<typename R, typename... Args>
 class Once {
 	Once(Once &&)                  = delete;
 	Once(const Once &)             = delete;
 	Once &operator =(Once &&)      = delete;
 	Once &operator =(const Once &) = delete;
+
+public:
+	using Function = R (*)(Args...);
+	using Acceptor = bool (*)(const R &);
+
 
 private:
 	enum {
@@ -39,20 +43,20 @@ private:
 	};
 
 	Futex futex;
-	R (*function)(Args...);
-	bool (*accept)(R) = nullptr;
+	Function function;
+	Acceptor acceptor = nullptr;
 	R result{};
 	const R rejected{};
 
 public:
-	constexpr Once(R (*function)(Args...)) : futex(UNINITIALIZED), function(function) {
+	constexpr Once(Function f) : futex(UNINITIALIZED), function(f) {
 		if (!function)
 			__builtin_trap();
 	}
 
-	constexpr Once(R (*function)(Args...), bool (*accept)(R), R init)
-	: futex(UNINITIALIZED), function(function), accept(accept), rejected(move(init)) {
-		if (!function || !accept)
+	constexpr Once(Function f, Acceptor a, R init)
+	: futex(UNINITIALIZED), function(f), acceptor(a), rejected(move(init)) {
+		if (!function || !acceptor)
 			__builtin_trap();
 	}
 
@@ -70,7 +74,7 @@ public:
 				case UNINITIALIZED: {
 					R output = function(static_cast<Args &&>(args)...);
 
-					if (!accept || accept(output)) {
+					if (!acceptor || acceptor(output)) {
 						result = static_cast<R &&>(output);
 						futex.word.store(INITIALIZED, atomic::Order::RELEASE);
 						futex.wake_all();

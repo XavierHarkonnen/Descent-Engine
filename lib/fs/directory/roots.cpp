@@ -33,17 +33,20 @@ namespace descent::fs {
 
 static thread::Mutex mutex;
 static thread::atomic::Flag initialized(false);
-static const Directory INVALID_DIRECTORY;
+static const Directory INVALID_DIRECTORY = {};
 static char program_buffer[name::MAX_NAME_LENGTH + 1];
 static string program_name = {};
 
 // TODO:
 // - Should not create home or base directories
-// - Cache only success, so a root that failed is tried again
 // - Open first, and only call mkdir on ENOENT
 
-bool accept_fd(i32 fd) {
-	return fd >= 0;
+static bool acceptor(const i32 &d) {
+	return d >= 0;
+}
+
+static bool acceptor(const Directory &d) {
+	return static_cast<bool>(d);
 }
 
 static string get_env(string name) {
@@ -65,33 +68,33 @@ static int generate_home_fd() {
 }
 
 static int home_fd() {
-	static thread::Once once(generate_home_fd, accept_fd, -1);
+	static thread::Once<i32> once(generate_home_fd, acceptor, -1);
 	return once();
 }
 
-static int generate_base_fd(void) {
+Directory Directory::generate_base() {
 	char buffer[PATH_MAX];
 	i64 size = readlink("/proc/self/exe", buffer, sizeof(buffer));
 
 	if (size <= 0 || u64(size) >= sizeof(buffer))
-		return -1;
+		return {};
 
 	string executable(buffer, static_cast<u64>(size));
 	if (executable[0] != '/')
-		return -1;
+		return {};
 
 	u64 slash = executable.rfind('/');
 	if (slash == string::INVALID)
-		return -1;
+		return {};
 
 	u64 index   = (slash == 0) ? 1 : slash;
 	string base = executable.sub(0, index);
 
-	return directory::open(base);
+	return Directory(directory::open(base));
 }
 
-static int generate_root_fd(string name, string env_name, string fallback) {
-	int env_fd = -1;
+Directory Directory::generate_root(string name, string env_name, string fallback) {
+	i32 env_fd = -1;
 
 	string env_path = get_env(env_name);
 
@@ -105,12 +108,12 @@ static int generate_root_fd(string name, string env_name, string fallback) {
 		env_fd = directory::open(home_fd(), fallback);
 
 	if (env_fd < 0)
-		return -1;
+		return {};
 
-	int element = directory::open(env_fd, name);
+	i32 root = directory::open(env_fd, name);
 	close(env_fd);
 
-	return element;
+	return Directory(root);
 }
 
 bool set_program_name(string name) {
@@ -140,40 +143,40 @@ string get_program_name() {
 }
 
 const Directory &Directory::base() {
-	static const Directory result(generate_base_fd());
-	return result;
+	static thread::Once<Directory> once(generate_base, acceptor, {});
+	return once();
 }
 
 const Directory &Directory::config() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static const Directory result(generate_root_fd(program_name, string("XDG_CONFIG_HOME"), string(".config")));
-	return result;
+	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
+	return once(program_name, string("XDG_CONFIG_HOME"), string(".config"));
 }
 
 const Directory &Directory::data() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static const Directory result(generate_root_fd(program_name, string("XDG_DATA_HOME"), string(".local/share")));
-	return result;
+	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
+	return once(program_name, string("XDG_DATA_HOME"), string(".local/share"));
 }
 
 const Directory &Directory::state() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static const Directory result(generate_root_fd(program_name, string("XDG_STATE_HOME"), string(".local/state")));
-	return result;
+	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
+	return once(program_name, string("XDG_STATE_HOME"), string(".local/state"));
 }
 
 const Directory &Directory::cache() {
 	if (!initialized.load(thread::atomic::Order::ACQUIRE))
 		return INVALID_DIRECTORY;
 
-	static const Directory result(generate_root_fd(program_name, string("XDG_CACHE_HOME"), string(".cache")));
-	return result;
+	static thread::Once<Directory, string, string, string> once(generate_root, acceptor, {});
+	return once(program_name, string("XDG_CACHE_HOME"), string(".cache"));
 }
 
 }

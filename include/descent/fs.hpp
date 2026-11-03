@@ -67,6 +67,9 @@ private:
 
 	explicit Directory(i32 handle) : h(handle) {}
 
+	static Directory generate_base();
+	static Directory generate_root(string name, string env_name, string fallback);
+
 public:
 	Directory() = default;
 
