@@ -101,7 +101,7 @@ static i32 generate_root_fd(string name, string env_name, string fallback) {
 	// "All paths set in these environment variables must be absolute.
 	// If an implementation encounters a relative path in any of these
 	// variables it should consider the path invalid and ignore it."
-	if (env_path && env_path[0] == '/')
+	if (env_path && !env_path.empty() && env_path[0] == '/')
 		env_fd = directory::open(env_path);
 
 	if (env_fd < 0)

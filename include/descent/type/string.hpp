@@ -39,13 +39,19 @@ public:
 
 	constexpr string(const char *data, u64 size) : _data(data), _size(data ? size : 0) {}
 
-	template<u64 N>
-	explicit constexpr string(const char (&data)[N]) : _data(data), _size(N - 1) {}
+	explicit constexpr string(const char *data) : _data(data), _size(0) {
+		if (!_data)
+			return;
 
-	explicit constexpr string(const char *data) : _data(data), _size(U64_MAX) {
-		_size = c_length();
-		if (_size == INVALID)
+		_size = U64_MAX;
+		const u64 LENGTH = c_length();
+		if (LENGTH == INVALID || LENGTH + 1 == INVALID) {
+			_data = nullptr;
 			_size = 0;
+			return;
+		}
+
+		_size = LENGTH + 1;
 	}
 
 	// Operators
@@ -88,11 +94,11 @@ public:
 
 	// Utilities
 
-	bool contains(char c) const {
+	constexpr bool contains(char c) const {
 		return find(c) != INVALID;
 	}
 
-	u64 find(char c, u64 pos = 0) const {
+	constexpr u64 find(char c, u64 pos = 0) const {
 		if (!data() || pos >= size())
 			return INVALID;
 
@@ -102,7 +108,7 @@ public:
 		return INVALID;
 	}
 
-	u64 rfind(char c, u64 pos = U64_MAX) const {
+	constexpr u64 rfind(char c, u64 pos = U64_MAX) const {
 		if (!data() || size() == 0)
 			return INVALID;
 
@@ -116,7 +122,7 @@ public:
 		return INVALID;
 	}
 
-	string sub(u64 pos, u64 count = U64_MAX) const {
+	constexpr string sub(u64 pos, u64 count = U64_MAX) const {
 		u64 n = size();
 
 		if (pos > n || !data())
@@ -131,12 +137,12 @@ public:
 	// C-String Methods
 
 	// Checks if the string contains a valid c-string
-	bool c_safe() const {
+	constexpr bool c_safe() const {
 		return rfind('\0') != INVALID;
 	}
 
 	// Returns the length of the first contained c-string
-	u64 c_length() const {
+	constexpr u64 c_length() const {
 		if (!data())
 			return INVALID;
 
@@ -148,7 +154,7 @@ public:
 	}
 
 	// Return a string containing only the first contained c-string
-	string c_string() const {
+	constexpr string c_string() const {
 		u64 length = c_length();
 		if (length == INVALID)
 			return {};
@@ -156,7 +162,7 @@ public:
 		return string(data(), length + 1);
 	}
 
-	bool c_equals(string other) const {
+	constexpr bool c_equals(string other) const {
 		const u64 SIZE = math::min(size(), other.size());
 
 		for (u64 i = 0; i < SIZE; ++i) {

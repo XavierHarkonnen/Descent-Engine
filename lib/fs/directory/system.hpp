@@ -73,7 +73,7 @@ inline void wrap_mkdir(i32 root, const char *path) {
 
 inline i32 open(i32 root, const char *name) {
 	i32 fd = wrap_open(root, name, Links::REFUSE);
-	if (fd >= 0)
+	if (fd >= 0 || errno != ENOENT)
 		return fd;
 
 	wrap_mkdir(root, name);
@@ -81,7 +81,7 @@ inline i32 open(i32 root, const char *name) {
 }
 
 inline i32 open(string path) {
-	if (!path || path[0] != '/')
+	if (!path || path.empty() || path[0] != '/')
 		return -1;
 
 	bool c_safe = path.c_safe();
@@ -102,9 +102,6 @@ inline i32 open(string path) {
 			return fd;
 	}
 
-	if (buffer[0] != '/')
-		return -1;
-
 	for (u64 i = 1; true; ++i) {
 		if (buffer[i] == '\0') {
 			if (buffer[i - 1] != '/')
@@ -124,7 +121,7 @@ inline i32 open(string path) {
 }
 
 inline i32 open(i32 root, string path) {
-	if (!path || path[0] == '\0' || path[0] == '/')
+	if (!path || path.empty() || path[0] == '\0' || path[0] == '/')
 		return -1;
 
 	bool c_safe = path.c_safe();
