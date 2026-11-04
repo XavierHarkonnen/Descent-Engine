@@ -218,8 +218,8 @@ struct traits_impl<f64> : float_traits<f64, u64, __DBL_MANT_DIG__, __DBL_MAX_EXP
 	static constexpr f64 signaling_nan = F64_NAN_S;
 };
 
-template<>
-struct traits_impl<string> : category_traits {
+template<u64 SIZE>
+struct traits_impl<string<SIZE>> : category_traits {
 	static constexpr Type type = Type::STRING;
 
 	static constexpr bool is_string = true;

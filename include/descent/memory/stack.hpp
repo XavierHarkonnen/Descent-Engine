@@ -218,7 +218,8 @@ public:
 		return result;
 	}
 
-	static Box<char> copy(string s) {
+	template<u64 S>
+	static Box<char> copy(string<S> s) {
 		if (!s)
 			return {};
 
