@@ -80,7 +80,7 @@ inline i32 open(i32 root, const char *name) {
 	return wrap_open(root, name, Links::REFUSE);
 }
 
-inline i32 open(string path) {
+inline i32 open(string<> path) {
 	if (path.empty() || path[0] != '/')
 		return -1;
 
@@ -120,7 +120,7 @@ inline i32 open(string path) {
 	return wrap_open(buffer.data(), Links::FOLLOW);
 }
 
-inline i32 open(i32 root, string path) {
+inline i32 open(i32 root, string<> path) {
 	if (path.empty() || path[0] == '\0' || path[0] == '/')
 		return -1;
 

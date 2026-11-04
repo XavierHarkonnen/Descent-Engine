@@ -23,7 +23,7 @@
 
 namespace descent::fs {
 
-Directory::Directory(const Directory &parent, string name) {
+Directory::Directory(const Directory &parent, string<> name) {
 	const u64 LENGTH = name::length(name);
 
 	if (!parent || LENGTH == 0)

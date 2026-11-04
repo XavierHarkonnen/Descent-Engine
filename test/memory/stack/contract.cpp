@@ -57,7 +57,7 @@ static bool scoped() {
 		auto a = stack::Allocator::create<u64>(i + 1, i);
 		auto b = make(2 * i + 1, i + 1);
 		{
-			auto c = stack::Allocator::copy(string("scope"));
+			auto c = stack::Allocator::copy(string<>("scope"));
 			if (!a || !b || !c || a[i] != i || b[0] != i + 1 || c[5] != '\0')
 				return false;
 		}

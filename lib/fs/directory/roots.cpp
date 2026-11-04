@@ -35,7 +35,7 @@ static thread::Mutex mutex;
 static thread::atomic::Flag initialized(false);
 static const Directory INVALID_DIRECTORY = {};
 static char program_buffer[name::MAX_NAME_LENGTH + 1];
-static string program_name = {};
+static string<> program_name = {};
 
 // TODO:
 // - Should not create home or base directories
@@ -49,22 +49,22 @@ static bool acceptor(const Directory &d) {
 	return static_cast<bool>(d);
 }
 
-static string get_env(string name) {
-	if (!name)
+static string<> get_env(string<> name) {
+	if (name.empty())
 		return {};
 
 	if (name.c_safe())
-		return string(getenv(name.data()));
+		return string<>(getenv(name.data()));
 
 	auto buffer = memory::stack::Allocator::copy(name);
 	if (!buffer)
 		return {};
 
-	return string(getenv(buffer.data()));
+	return string<>(getenv(buffer.data()));
 }
 
 static int home_fd() {
-	static thread::Once<i32> once([]() -> i32 { return directory::open(get_env(string("HOME"))); }, acceptor, -1);
+	static thread::Once<i32> once([]() -> i32 { return directory::open(get_env(string<>("HOME"))); }, acceptor, -1);
 	return once();
 }
 
@@ -75,29 +75,29 @@ static i32 generate_base_fd() {
 	if (size <= 0 || u64(size) >= sizeof(buffer))
 		return {};
 
-	string executable(buffer, static_cast<u64>(size));
+	string<> executable(buffer, static_cast<u64>(size));
 	if (executable[0] != '/')
 		return {};
 
 	u64 slash = executable.rfind('/');
-	if (slash == string::INVALID_INDEX)
+	if (slash == string<>::INVALID_INDEX)
 		return {};
 
-	u64 index   = (slash == 0) ? 1 : slash;
-	string base = executable.sub(0, index);
+	u64 index = (slash == 0) ? 1 : slash;
+	string<> base(executable.data(), index);
 
 	return directory::open(base);
 }
 
-static i32 generate_root_fd(string name, string env_name, string fallback) {
+static i32 generate_root_fd(string<> name, string<> env_name, string<> fallback) {
 	i32 env_fd = -1;
 
-	string env_path = get_env(env_name);
+	string<> env_path = get_env(env_name);
 
 	// "All paths set in these environment variables must be absolute.
 	// If an implementation encounters a relative path in any of these
 	// variables it should consider the path invalid and ignore it."
-	if (env_path && !env_path.empty() && env_path[0] == '/')
+	if (!env_path.empty() && env_path[0] == '/')
 		env_fd = directory::open(env_path);
 
 	if (env_fd < 0)
@@ -112,7 +112,7 @@ static i32 generate_root_fd(string name, string env_name, string fallback) {
 	return root;
 }
 
-bool set_program_name(string name) {
+bool set_program_name(string<> name) {
 	thread::mutex::Scope scope(mutex);
 
 	if (initialized.load(thread::atomic::Order::ACQUIRE))
@@ -125,14 +125,14 @@ bool set_program_name(string name) {
 	memcpy(program_buffer, name.data(), LENGTH);
 	program_buffer[LENGTH] = '\0';
 
-	program_name = string(program_buffer, LENGTH + 1);
+	program_name = string<>(program_buffer, LENGTH + 1);
 
 	initialized.set(thread::atomic::Order::RELEASE);
 
 	return true;
 }
 
-string get_program_name() {
+string<> get_program_name() {
 	thread::mutex::Scope scope(mutex);
 
 	return program_name;
@@ -149,7 +149,7 @@ const Directory &Directory::config() {
 
 	static thread::Once<Directory> once(
 		[]() -> Directory {
-			return Directory(generate_root_fd(program_name, string("XDG_CONFIG_HOME"), string(".config")));
+			return Directory(generate_root_fd(program_name, string<>("XDG_CONFIG_HOME"), string<>(".config")));
 		},
 		acceptor, {}
 	);
@@ -162,7 +162,7 @@ const Directory &Directory::data() {
 
 	static thread::Once<Directory> once(
 		[]() -> Directory {
-			return Directory(generate_root_fd(program_name, string("XDG_DATA_HOME"), string(".local/share")));
+			return Directory(generate_root_fd(program_name, string<>("XDG_DATA_HOME"), string<>(".local/share")));
 		},
 		acceptor, {}
 	);
@@ -175,7 +175,7 @@ const Directory &Directory::state() {
 
 	static thread::Once<Directory> once(
 		[]() -> Directory {
-			return Directory(generate_root_fd(program_name, string("XDG_STATE_HOME"), string(".local/state")));
+			return Directory(generate_root_fd(program_name, string<>("XDG_STATE_HOME"), string<>(".local/state")));
 		},
 		acceptor, {}
 	);
@@ -188,7 +188,7 @@ const Directory &Directory::cache() {
 
 	static thread::Once<Directory> once(
 		[]() -> Directory {
-			return Directory(generate_root_fd(program_name, string("XDG_CACHE_HOME"), string(".cache")));
+			return Directory(generate_root_fd(program_name, string<>("XDG_CACHE_HOME"), string<>(".cache")));
 		},
 		acceptor, {}
 	);

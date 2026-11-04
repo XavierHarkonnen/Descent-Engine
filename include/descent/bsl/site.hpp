@@ -30,22 +30,22 @@ class SiteData {
 	friend bool deserialize(SiteData &schema, const u8 *input, u64 size, u64 &offset);
 
 protected:
-	string _message;
-	string _file;
+	string<> _message;
+	string<> _file;
 	u32 _line;
 	u32 _index;
 	SchemaData _schema;
 	Level _level;
 
-	SiteData() : _message(nullptr), _file(nullptr), _line(0), _index(0), _level(Level::NONE) {}
+	SiteData() : _message(), _file(), _line(0), _index(0), _level(Level::NONE) {}
 
 public:
-	string message() const {
-		return string(_message);
+	string<> message() const {
+		return _message;
 	}
 
-	string file() const {
-		return string(_file);
+	string<> file() const {
+		return _file;
 	}
 
 	u32 line() const {
@@ -76,7 +76,7 @@ private:
 	}
 
 public:
-	Site(Level level, string message, string file = string(__builtin_FILE()), u32 line = __builtin_LINE()) {
+	Site(Level level, string<> message, string<> file = string<>(__builtin_FILE()), u32 line = __builtin_LINE()) {
 		extern const SiteData __start_bsl_sites[];
 		extern const SiteData __stop_bsl_sites[];
 

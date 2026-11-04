@@ -64,7 +64,7 @@ inline bool deserialize(type::Type &type, const u8 *input, u64 size, u64 &offset
 	return true;
 }
 
-inline bool serialize(const string &value, u8 *output, u64 size, u64 &offset) {
+inline bool serialize(const string<> &value, u8 *output, u64 size, u64 &offset) {
 	u64 cursor       = offset;
 	const u64 length = value.size();
 
@@ -83,7 +83,7 @@ inline bool serialize(const string &value, u8 *output, u64 size, u64 &offset) {
 	return true;
 }
 
-inline bool deserialize(string &value, const u8 *input, u64 size, u64 &offset) {
+inline bool deserialize(string<> &value, const u8 *input, u64 size, u64 &offset) {
 	u64 cursor = offset;
 	u64 length;
 
@@ -95,7 +95,7 @@ inline bool deserialize(string &value, const u8 *input, u64 size, u64 &offset) {
 
 	const char *data = reinterpret_cast<const char *>(input + cursor);
 
-	value = string(data, length);
+	value = string<>(data, length);
 
 	cursor += length;
 	offset = cursor;

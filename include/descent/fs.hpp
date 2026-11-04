@@ -70,7 +70,7 @@ private:
 public:
 	Directory() = default;
 
-	Directory(const Directory &parent, string name);
+	Directory(const Directory &parent, string<> name);
 
 	Directory(Directory &&other) = default;
 
@@ -103,7 +103,7 @@ private:
 public:
 	File() = default;
 
-	File(const Directory &parent, string name, Access a);
+	File(const Directory &parent, string<> name, Access a);
 
 	File(File &&other) = default;
 
@@ -118,9 +118,9 @@ public:
 	}
 };
 
-bool set_program_name(string name);
+bool set_program_name(string<> name);
 
-string get_program_name();
+string<> get_program_name();
 
 }
 

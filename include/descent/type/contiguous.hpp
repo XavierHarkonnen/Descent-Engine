@@ -43,7 +43,7 @@ private:
 		return self().data();
 	}
 
-	constexpr const auto s_data() const {
+	constexpr auto s_data() const {
 		return self().data();
 	}
 
@@ -155,7 +155,7 @@ public:
 template<typename T>
 class view : public contiguous_interface<T, view<T>> {
 private:
-	T *_data = nullptr;
+	T *_data  = nullptr;
 	u64 _size = 0;
 
 public:

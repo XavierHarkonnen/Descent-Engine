@@ -22,7 +22,7 @@
 
 namespace descent::fs {
 
-File::File(const Directory &parent, string name, Access a) {
+File::File(const Directory &parent, string<> name, Access a) {
 	const u64 LENGTH = name::length(name);
 
 	if (!parent || LENGTH == 0)

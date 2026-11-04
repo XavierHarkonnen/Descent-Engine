@@ -25,8 +25,8 @@ namespace descent::fs::name {
 
 static constexpr u64 MAX_NAME_LENGTH = 128;
 
-inline u64 length(string name) {
-	if (!name)
+inline u64 length(string<> name) {
+	if (name.empty())
 		return 0;
 
 	const u64 SIZE = math::min(MAX_NAME_LENGTH + 1, name.size());

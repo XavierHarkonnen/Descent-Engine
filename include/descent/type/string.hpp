@@ -29,31 +29,41 @@ class string;
 template<>
 class string<0>;
 
+// Mixin adding c-string utilities to a contiguous char type. Derived must
+// provide find/rfind (via contiguous_interface) and data().
 template<typename T, typename Derived>
-class string_interface : public contiguous_interface<T, Derived> {
+class string_interface {
+private:
+	constexpr const Derived &self() const {
+		return *static_cast<const Derived *>(this);
+	}
+
 protected:
 	string_interface() = default;
 
 public:
+	// Checks if the string contains a valid c-string
 	constexpr bool c_safe() const {
-		return this->rfind('\0');
+		return self().rfind('\0') != Derived::INVALID_INDEX;
 	}
 
+	// Returns the length of the first contained c-string
 	constexpr u64 c_length() const {
-		return this->find('\0');
+		return self().find('\0');
 	}
 
+	// Return a string containing only the first contained c-string
 	constexpr string<> c_string() const;
 };
 
 template<>
-class string<0> : public view<const char> {
+class string<0> : public view<const char>, public string_interface<const char, string<0>> {
 public:
 	constexpr string() = default;
 
 	constexpr string(const char *data, u64 size) : view(data, size) {}
 
-	explicit constexpr string(const char *data);
+	explicit constexpr string(const char *data) : view(data, data ? __builtin_strlen(data) + 1 : 0) {}
 };
 
 template<u64 SIZE>
@@ -69,10 +79,10 @@ public:
 template<typename T, typename Derived>
 constexpr string<> string_interface<T, Derived>::c_string() const {
 	const u64 length = c_length();
-	if (length == this->INVALID_INDEX)
+	if (length == Derived::INVALID_INDEX)
 		return {};
 
-	return string<>(this->s_data(), length + 1);
+	return string<>(self().data(), length + 1);
 }
 
 }

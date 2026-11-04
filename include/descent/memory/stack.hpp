@@ -220,7 +220,7 @@ public:
 
 	template<u64 S>
 	static Box<char> copy(string<S> s) {
-		if (!s)
+		if (s.empty())
 			return {};
 
 		const u64 SIZE   = s.size();
