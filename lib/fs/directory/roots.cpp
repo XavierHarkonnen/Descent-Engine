@@ -37,15 +37,6 @@ static const Directory INVALID_DIRECTORY = {};
 static char program_buffer[name::MAX_NAME_LENGTH + 1];
 static string<> program_name = {};
 
-// TODO:
-// - Should not create home or base directories
-// - string<N>'s (const char *, u64) constructor is declared but not defined. Nothing uses it yet, but the first caller will fail to link.
-// - Allocator::copy still adds a second NUL to strings that already end in one.
-// - bsl serialization still writes the NUL.
-// - There are no tests yet for string or the contiguous types.
-// - string<N> for N > 0 is unfinished.
-// - stack::Allocator::copy(string<S>) and traits_impl<string<SIZE>> are written for any size, but in practice only work for string<0>.
-
 static bool acceptor(const i32 &d) {
 	return d >= 0;
 }
@@ -69,22 +60,27 @@ static string<> get_env(string<> name) {
 }
 
 static int home_fd() {
-	static thread::Once<i32> once([]() -> i32 { return directory::wrap_open(getenv("HOME"), directory::Links::FOLLOW); }, acceptor, -1);
+	static thread::Once<i32> once([]() -> i32 {
+		const char *home = getenv("HOME");
+		if (!home || home[0] != '/')
+				return -1;
+		return directory::wrap_open(home, directory::Links::FOLLOW);
+	}, acceptor, -1);
 	return once();
 }
 
 static i32 generate_base_fd() {
 	buffer<char, PATH_MAX> buffer;
-	i64 size = readlink("/proc/self/exe", buffer.data(), sizeof(buffer));
+	i64 size = readlink("/proc/self/exe", buffer.data(), buffer.size());
 
-	if (size <= 0 || u64(size) >= sizeof(buffer))
+	if (size <= 0 || u64(size) >= buffer.size())
 		return -1;
 
-	u64 slash = buffer.rfind('/', u64(size));
+	u64 slash = buffer.rfind('/', u64(size - 1));
 	if (slash == string<>::INVALID_INDEX)
 		return -1;
 
-	buffer[slash] = '\0';
+	buffer[slash == 0 ? 1 : slash] = '\0';
 
 	return directory::wrap_open(buffer.data(), directory::Links::FOLLOW);
 }
