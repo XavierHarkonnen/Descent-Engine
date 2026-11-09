@@ -40,7 +40,7 @@ private:
 	bool _active;
 
 	void set_up(u64 count) {
-		sys_assert(
+		sysd_assert(
 			count > get(), "Attempted to call set_up with desired workers less than or equal to current workers"
 		);
 
@@ -54,7 +54,7 @@ private:
 	}
 
 	void set_down(u64 count) {
-		sys_assert(
+		sysd_assert(
 			count < get(), "Attempted to call set_down with desired workers greater than or equal to current workers"
 		);
 

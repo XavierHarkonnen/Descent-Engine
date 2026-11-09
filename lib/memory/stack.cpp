@@ -49,8 +49,8 @@ public:
 	static constexpr u32 SIZE_MAX = SIZE_MASK;
 
 	void init(u32 size) {
-		sys_assert(size != 0, "Footer size must not be zero");
-		sys_assert(size <= SIZE_MAX, "Size must not exceed SIZE_MAX");
+		sysd_assert(size != 0, "Footer size must not be zero");
+		sysd_assert(size <= SIZE_MAX, "Size must not exceed SIZE_MAX");
 		word(size);
 	}
 
@@ -90,7 +90,7 @@ public:
 	~Bump() {
 		// The main thread is exempt, since exit() destroys its thread_local
 		// storage while Boxes may still be alive in its frames
-		sys_assert(_cursor == 0 || gettid() == getpid(), "Thread exited while a Box it allocated was alive");
+		sysd_assert(_cursor == 0 || gettid() == getpid(), "Thread exited while a Box it allocated was alive");
 
 		if (_map) {
 			munmap(_map, _size);
@@ -101,10 +101,10 @@ public:
 	}
 
 	bool alloc(void *&data, void *&meta, u32 size, u32 align, u32 count) {
-		sys_assert(size != 0, "Attempted to allocate box with zero size");
-		sys_assert(align != 0, "Attempted to allocate box with zero alignment");
-		sys_assert(count != 0, "Attempted to allocate box with zero count");
-		sys_assert((align & (align - 1)) == 0, "Alignment must be a power of two");
+		sysd_assert(size != 0, "Attempted to allocate box with zero size");
+		sysd_assert(align != 0, "Attempted to allocate box with zero alignment");
+		sysd_assert(count != 0, "Attempted to allocate box with zero count");
+		sysd_assert((align & (align - 1)) == 0, "Alignment must be a power of two");
 
 		u64 payload = u64(size) * u64(count);
 		u64 aligned = (u64(_cursor) + (u64(align) - 1)) & ~(u64(align) - 1);
@@ -127,8 +127,8 @@ public:
 
 		footer->init(u32(total));
 
-		sys_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
-		sys_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
+		sysd_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
+		sysd_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
 
 		return true;
 	}
@@ -139,20 +139,20 @@ public:
 	}
 
 	void free(Footer *footer) {
-		sys_assert(footer, "Attempted to free null footer");
-		sys_assert(owns(footer), "Box was freed on a thread other than the one that allocated it");
-		sys_assert(!footer->dead(), "Attempted to free dead footer");
-		sys_assert(_cursor > 0, "Attempted to free footer from empty allocator");
-		sys_assert(footer->size() > sizeof(Footer), "Attempted to free invalid footer");
+		sysd_assert(footer, "Attempted to free null footer");
+		sysd_assert(owns(footer), "Box was freed on a thread other than the one that allocated it");
+		sysd_assert(!footer->dead(), "Attempted to free dead footer");
+		sysd_assert(_cursor > 0, "Attempted to free footer from empty allocator");
+		sysd_assert(footer->size() > sizeof(Footer), "Attempted to free invalid footer");
 
-		sys_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
-		sys_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
+		sysd_assert(_cursor <= _size, "Allocator cursor is outside of allocation range");
+		sysd_assert(_cursor > sizeof(Footer), "Allocator cursor is misaligned");
 
 		u8 *ptr = reinterpret_cast<u8 *>(footer);
 
-		sys_assert(ptr >= _map, "Footer is outside allocated range");
-		sys_assert(ptr >= _map + 1, "Footer is not attached to allocation (minimum size 1 byte)");
-		sys_assert(ptr + sizeof(Footer) <= _map + _cursor, "Footer is outside allocated range");
+		sysd_assert(ptr >= _map, "Footer is outside allocated range");
+		sysd_assert(ptr >= _map + 1, "Footer is not attached to allocation (minimum size 1 byte)");
+		sysd_assert(ptr + sizeof(Footer) <= _map + _cursor, "Footer is outside allocated range");
 
 		// This allocation isn't the top allocation
 		if (ptr + sizeof(Footer) != _map + _cursor) {
@@ -164,8 +164,8 @@ public:
 		// Reclaim it and all connected dead allocations
 		for (;;) {
 			u32 total = footer->size();
-			sys_assert(total >= sizeof(Footer), "Invalid footer size");
-			sys_assert(total <= _cursor, "Dead footer extends outside allocator");
+			sysd_assert(total >= sizeof(Footer), "Invalid footer size");
+			sysd_assert(total <= _cursor, "Dead footer extends outside allocator");
 
 			_cursor -= total;
 
@@ -220,7 +220,7 @@ bool Allocator::create(void *&data, void *&meta, u32 size, u32 align, u32 capaci
 
 #if defined(DESCENT_DEBUG)
 void Allocator::local(const void *box) {
-	sys_assert(
+	sysd_assert(
 		range.contains(box), "Box is not a local variable of the calling thread "
 							 "(it is static, thread_local, on the heap or on another thread's stack)"
 	);
@@ -228,8 +228,8 @@ void Allocator::local(const void *box) {
 #endif
 
 void Allocator::clear([[maybe_unused]] void *data, void *meta) {
-	sys_assert(data, "Attempted to call clear on null data");
-	sys_assert(meta, "Attempted to call clear on null meta");
+	sysd_assert(data, "Attempted to call clear on null data");
+	sysd_assert(meta, "Attempted to call clear on null meta");
 
 	bump.free(reinterpret_cast<Footer *>(meta));
 }

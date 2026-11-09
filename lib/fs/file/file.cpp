@@ -40,4 +40,20 @@ File::File(const Directory &parent, string<> name, Access a) {
 	h = Handle(file::open(parent.handle().h, buffer.data(), a));
 }
 
+u64 File::read(u64 offset, view<u8> out) const {
+	u64 read_count = 0;
+
+	
+
+	do {
+		ssize_t result = ::pread(handle().h, out.data(), out.size(), offset);
+		if (result < 0)
+			return 0;
+
+		read_count += u64(result);
+	} while (true);
+
+	return read_count;
+}
+
 }

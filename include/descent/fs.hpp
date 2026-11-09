@@ -16,6 +16,7 @@
 #ifndef DESCENT_FS_HPP
 #define DESCENT_FS_HPP
 
+#include <descent/type/contiguous.hpp>
 #include <descent/type/string.hpp>
 #include <descent/type/utility.hpp>
 
@@ -40,8 +41,13 @@ private:
 
 	explicit Handle(i32 handle) : h(handle) {}
 
-	Handle(Handle &&other) : h(other.h) {
-		other.h = -1;
+	Handle(Handle &&other) {
+		close();
+		swap(h, other.h);
+	}
+
+	~Handle() {
+		close();
 	}
 
 	Handle &operator =(Handle &&other) {
@@ -51,11 +57,11 @@ private:
 		return *this;
 	}
 
+	void close();
+
 	bool valid() const {
 		return h >= 0;
 	}
-
-	~Handle();
 };
 
 class Directory {
@@ -100,6 +106,10 @@ private:
 
 	explicit File(i32 handle) : h(handle) {}
 
+	const Handle &handle() const {
+		return h;
+	}
+
 public:
 	File() = default;
 
@@ -113,9 +123,9 @@ public:
 		return h.valid();
 	}
 
-	const Handle &handle() const {
-		return h;
-	}
+	u64 read(u64 offset, view<u8> out) const;
+
+	u64 write(u64 offset, view<const u8> in);
 };
 
 bool set_program_name(string<> name);

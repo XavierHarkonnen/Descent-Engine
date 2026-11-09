@@ -23,9 +23,10 @@ namespace descent::fs {
 
 static_assert(sizeof(int) == sizeof(i32), "File descriptors are stored as i32");
 
-Handle::~Handle() {
+void Handle::close() {
 	if (valid()) {
-		close(h);
+		::close(h);
+		h = -1;
 	}
 }
 

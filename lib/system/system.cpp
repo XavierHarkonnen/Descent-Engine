@@ -16,41 +16,96 @@
 #include <descent/system.hpp>
 
 extern "C" {
+#include <errno.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 }
 
-static inline void sys_err_write(const char *s) {
-	(void) write(STDERR_FILENO, s, strnlen(s, 1023));
+#include <descent/type/core.hpp>
+
+using namespace descent;
+
+static constexpr int MAX_SYS_MESSAGE_SIZE = 1024;
+
+static void sys_copy(char *destination, u64 &offset, u64 capacity, const char *string) {
+	if (offset >= capacity)
+		return;
+
+	u64 i = 0;
+
+	while ((offset < capacity - 1) && string[i])
+		destination[offset++] = string[i++];
+	
+	destination[offset] = '\0';
+}
+
+static void sys_write(const char *buffer, u64 length) {
+	while (length) {
+		ssize_t written = write(STDERR_FILENO, buffer, length);
+
+		if (written > 0) {
+			buffer += written;
+			length -= u64(written);
+			continue;
+		}
+
+		if (written < 0 && errno == EINTR)
+			continue;
+
+		break;
+	}
 }
 
 #undef sys_fatal
 [[noreturn, gnu::cold]]
 void sys_fatal(const char *message, const char *file, const char *line) {
-	sys_err_write(file);
-	sys_err_write(":");
-	sys_err_write(line);
-	sys_err_write(": fatal error: ");
-	sys_err_write(message ? message : "<no message>");
-	sys_err_write("\n");
+	char buffer[MAX_SYS_MESSAGE_SIZE];
+
+	if (!message)
+		message = "?";
+	if (!file)
+		file = "?";
+	if (!line)
+		line = "?";
+
+	u64 offset = 0;
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, file);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, ":");
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, line);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, " FATAL: ");
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, message);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, "\n");
+
+	(void) sys_write(buffer, offset);
 
 	_Exit(EXIT_FAILURE);
 }
 
 #undef sys_assert
-#if defined(DESCENT_DEBUG)
 [[noreturn, gnu::cold]]
 void sys_assert(const char *expression, const char *message, const char *file, const char *line) {
-	sys_err_write(file);
-	sys_err_write(":");
-	sys_err_write(line);
-	sys_err_write(": assertion '");
-	sys_err_write(expression);
-	sys_err_write("' failed: ");
-	sys_err_write(message ? message : "<no message>");
-	sys_err_write("\n");
+	char buffer[MAX_SYS_MESSAGE_SIZE];
+
+	if (!expression)
+		expression = "?";
+	if (!message)
+		message = "?";
+	if (!file)
+		file = "?";
+	if (!line)
+		line = "?";
+
+	u64 offset = 0;
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, file);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, ":");
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, line);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, " ASSERTION '");
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, expression);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, "' FAILED: ");
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, message);
+	sys_copy(buffer, offset, MAX_SYS_MESSAGE_SIZE, "\n");
+
+	(void) sys_write(buffer, offset);
 
 	_Exit(EXIT_FAILURE);
 }
-#endif

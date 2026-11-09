@@ -32,7 +32,7 @@ public:
 	Injector() : _cursor(0) {}
 
 	void push(const Job &job, Root &root) {
-		sys_assert(_cursor < MAX_START_JOBS, "Attempted to inject more than MAX_START_JOBS");
+		sysd_assert(_cursor < MAX_START_JOBS, "Attempted to inject more than MAX_START_JOBS");
 
 		_tasks[_cursor++].init(job, root);
 	}

@@ -52,7 +52,7 @@ static bool futex_wait(const Atomic<u32> &word, u32 expected, const struct times
 			// Timeout, need not check predicate
 
 		default:
-			sys_trap("Futex wait failed");
+			sysd_fatal("Futex wait failed");
 			return true;
 			// Unhandled failure, should check predicate
 			// Failure to wait a thread is recoverable.
@@ -62,7 +62,7 @@ static bool futex_wait(const Atomic<u32> &word, u32 expected, const struct times
 }
 
 static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec *timeout) {
-	sys_assert(size <= Futex::MAX_WAIT_ANY, "Futex wait_any size exceeds maximum");
+	sysd_assert(size <= Futex::MAX_WAIT_ANY, "Futex wait_any size exceeds maximum");
 
 	u64 indices[Futex::MAX_WAIT_ANY];
 	struct futex_waitv waitv[Futex::MAX_WAIT_ANY];
@@ -101,7 +101,7 @@ static u64 futex_waitv(const Futex::Pair *pairs, u64 size, const struct timespec
 			// Timeout, need not check predicate
 
 		default:
-			sys_trap("Futex wait failed");
+			sysd_fatal("Futex wait failed");
 			return Futex::INVALID_INDEX;
 			// Unhandled failure, should check predicate
 			// Failure to wait a thread is recoverable.

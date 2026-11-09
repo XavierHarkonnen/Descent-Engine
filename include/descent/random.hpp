@@ -461,7 +461,7 @@ private:
 	T urange(T min, T max) {
 		static_assert(type::traits<T>::is_unsigned, "urange type must be unsigned");
 
-		sys_assert(min < max, "Minimum must be less than maximum");
+		sysd_assert(min < max, "Minimum must be less than maximum");
 
 		T range = max - min - 1;
 		if (range == 0)
@@ -481,7 +481,7 @@ private:
 	T irange(T min, T max) {
 		static_assert(type::traits<T>::is_signed, "irange type must be signed");
 
-		sys_assert(min < max, "Minimum must be less than maximum");
+		sysd_assert(min < max, "Minimum must be less than maximum");
 
 		using U = typename type::traits<T>::to_unsigned;
 

@@ -80,7 +80,7 @@ public:
 	Root() : Node(nullptr, nullptr, nullptr, 0) {}
 
 	void init() {
-		sys_assert(poll() == 0, "Attempted to initialize existing root");
+		sysd_assert(poll() == 0, "Attempted to initialize existing root");
 
 		_routine = nullptr;
 		_context = nullptr;
@@ -91,7 +91,7 @@ public:
 	void release() {
 		u32 unfinished = decrement();
 
-		sys_assert(unfinished + 1 != 0, "Attempted to release an uninitialized root");
+		sysd_assert(unfinished + 1 != 0, "Attempted to release an uninitialized root");
 
 		if (unfinished == 0)
 			_unfinished.wake_all();
@@ -106,8 +106,8 @@ public:
 class Task : public Node {
 private:
 	void create(const Job &job, Node &parent) {
-		sys_assert(poll() == 0, "Attempted to initialize existing task");
-		sys_assert(job.routine, "Attempted to initialize task with null routine");
+		sysd_assert(poll() == 0, "Attempted to initialize existing task");
+		sysd_assert(job.routine, "Attempted to initialize task with null routine");
 
 		_routine = job.routine;
 		_context = job.context;
@@ -124,7 +124,7 @@ public:
 	}
 
 	void operator ()() {
-		sys_assert(_routine, "Attempted to execute uninitialized task");
+		sysd_assert(_routine, "Attempted to execute uninitialized task");
 
 		_routine(Handle(this), _context);
 

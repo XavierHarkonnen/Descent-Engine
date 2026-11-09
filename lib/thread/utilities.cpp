@@ -30,7 +30,7 @@ static thread_local u64 id_thread = ID_INVALID;
 u64 id() {
 	if (id_thread == ID_INVALID) {
 		id_thread = id_next.fetch_add(1, thread::atomic::Order::RELAXED);
-		sys_assert(id_thread != ID_INVALID, "Encountered thread ID wraparound");
+		sysd_assert(id_thread != ID_INVALID, "Encountered thread ID wraparound");
 	}
 
 	return id_thread;

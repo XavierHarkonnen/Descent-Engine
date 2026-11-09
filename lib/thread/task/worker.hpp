@@ -67,7 +67,7 @@ private:
 	u64 _index;
 
 	Worker &victim() {
-		sys_assert(_workers, "Called victim before initializing worker threads");
+		sysd_assert(_workers, "Called victim before initializing worker threads");
 
 		if (_count <= 1)
 			return *this;
@@ -123,7 +123,7 @@ private:
 
 	static void *routine(void *argument) {
 		Worker *worker = static_cast<Worker *>(argument);
-		sys_assert(worker, "Routine called with null worker");
+		sysd_assert(worker, "Routine called with null worker");
 
 		self(worker);
 		Worker &self = *worker;

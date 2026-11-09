@@ -69,7 +69,7 @@ bool Task::spawn(const Job &job, u64 size) {
 	if (!job.routine)
 		return false;
 
-	sys_assert(size <= INLINE_DATA_SIZE, "Attempted to set task with oversized data");
+	sysd_assert(size <= INLINE_DATA_SIZE, "Attempted to set task with oversized data");
 
 	Worker *host = self();
 	if (!host)
@@ -111,7 +111,7 @@ u32 poll() {
 
 void wait() {
 	// A task waiting on its own frame can never finish.
-	sys_assert(!self(), "Attempted to wait on the task frame from a task");
+	sysd_assert(!self(), "Attempted to wait on the task frame from a task");
 	if (self())
 		return;
 

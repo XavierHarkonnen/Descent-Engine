@@ -71,7 +71,7 @@ void sleep(monotonic deadline) {
 
 		// Busy-wait on failure in production - undesirable but better than terminating.
 		thread::spin_pause();
-		sys_trap("clock_nanosleep failed");
+		sysd_fatal("clock_nanosleep failed");
 	}
 }
 

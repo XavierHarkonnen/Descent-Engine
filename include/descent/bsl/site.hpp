@@ -89,10 +89,10 @@ public:
 
 		const u64 index = (self - start) / sizeof(Site);
 
-		sys_assert(index <= U32_MAX, "Site index exceeds the supported u32 range");
-		sys_assert(bit::popcnt(u8(level)) == 1, "Logging can only be performed at a single level");
-		sys_assert(message.data() != nullptr, "Logging cannot be performed with a null message");
-		sys_assert(file.data() != nullptr, "Logging cannot be performed with a null file");
+		sysd_assert(index <= U32_MAX, "Site index exceeds the supported u32 range");
+		sysd_assert(bit::popcnt(u8(level)) == 1, "Logging can only be performed at a single level");
+		sysd_assert(message.data() != nullptr, "Logging cannot be performed with a null message");
+		sysd_assert(file.data() != nullptr, "Logging cannot be performed with a null file");
 
 		_message = message;
 		_file    = file;
