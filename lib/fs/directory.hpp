@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FS_DIRECTORY_SYSTEM_HPP
-#define DESCENT_LIB_FS_DIRECTORY_SYSTEM_HPP
+#ifndef DESCENT_LIB_FS_DIRECTORY_HPP
+#define DESCENT_LIB_FS_DIRECTORY_HPP
 
 extern "C" {
 #include <errno.h>
@@ -25,6 +25,8 @@ extern "C" {
 
 #include <descent/type/core.hpp>
 #include <descent/memory/stack.hpp>
+
+#include "data.hpp"
 
 namespace descent::fs::directory {
 
@@ -39,22 +41,46 @@ constexpr i32 flags(Links l) {
 	return O_PATH | O_DIRECTORY | O_CLOEXEC | (l == Links::REFUSE ? O_NOFOLLOW : 0);
 }
 
-inline i32 wrap_open(const char *name, Links l) {
+inline void wrap_close(i32 fd) {
+	const int error = errno;
+	::close(fd);
+	errno = error;
+}
+
+inline Data wrap_open(const char *name, Links l) {
 	i32 fd;
 	do {
 		fd = ::open(name, flags(l), MODE);
 	} while (fd < 0 && errno == EINTR);
 
-	return fd;
+	if (fd < 0)
+		return {};
+
+	struct stat st;
+	if (::fstat(fd, &st) < 0) {
+		wrap_close(fd);
+		return {};
+	}
+
+	return Data(fd, u64(st.st_dev), u64(st.st_ino), u64(st.st_size));
 }
 
-inline i32 wrap_open(i32 root, const char *name, Links l) {
+inline Data wrap_open(i32 root, const char *name, Links l) {
 	i32 fd;
 	do {
 		fd = ::openat(root, name, flags(l), MODE);
 	} while (fd < 0 && errno == EINTR);
 
-	return fd;
+	if (fd < 0)
+		return {};
+
+	struct stat st;
+	if (::fstat(fd, &st) < 0) {
+		wrap_close(fd);
+		return {};
+	}
+
+	return Data(fd, u64(st.st_dev), u64(st.st_ino), u64(st.st_size));
 }
 
 inline void wrap_mkdir(const char *path) {
@@ -71,10 +97,10 @@ inline void wrap_mkdir(i32 root, const char *path) {
 	} while (r < 0 && errno == EINTR);
 }
 
-inline i32 open(i32 root, const char *name) {
-	i32 fd = wrap_open(root, name, Links::REFUSE);
-	if (fd >= 0 || errno != ENOENT)
-		return fd;
+inline Data open(i32 root, const char *name) {
+	Data result = wrap_open(root, name, Links::REFUSE);
+	if (result.fd >= 0 || errno != ENOENT)
+		return result;
 
 	wrap_mkdir(root, name);
 	return wrap_open(root, name, Links::REFUSE);

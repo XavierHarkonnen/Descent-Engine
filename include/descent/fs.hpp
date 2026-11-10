@@ -22,11 +22,6 @@
 
 namespace descent::fs {
 
-enum class Access : bool {
-	READ = false,
-	EDIT,
-};
-
 class Handle {
 	friend class Directory;
 	friend class File;

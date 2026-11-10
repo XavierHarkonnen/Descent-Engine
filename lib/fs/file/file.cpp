@@ -43,8 +43,6 @@ File::File(const Directory &parent, string<> name, Access a) {
 u64 File::read(u64 offset, view<u8> out) const {
 	u64 read_count = 0;
 
-	
-
 	do {
 		ssize_t result = ::pread(handle().h, out.data(), out.size(), offset);
 		if (result < 0)

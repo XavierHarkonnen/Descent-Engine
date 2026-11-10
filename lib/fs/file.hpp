@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DESCENT_LIB_FS_FILE_SYSTEM_HPP
-#define DESCENT_LIB_FS_FILE_SYSTEM_HPP
+#ifndef DESCENT_LIB_FS_FILE_HPP
+#define DESCENT_LIB_FS_FILE_HPP
 
 extern "C" {
 #include <errno.h>
@@ -34,9 +34,11 @@ extern "C" {
 #endif
 #endif
 
-#include <descent/fs.hpp>
-#include <descent/type/core.hpp>
+#include <descent/access.hpp>
 #include <descent/memory/stack.hpp>
+#include <descent/type/core.hpp>
+
+#include "data.hpp"
 
 #if defined(SYS_openat2) && defined(OPENAT2_REGULAR) && defined(EFTYPE)
 #define DESCENT_FS_FILE_COMPILE_OPENAT2
@@ -55,20 +57,37 @@ constexpr i32 mode(Access a) {
 	return a == Access::EDIT ? 0600 : 0;
 }
 
+inline void wrap_close(i32 fd) {
+	const int error = errno;
+	::close(fd);
+	errno = error;
+}
+
 // Kernel 7.2
-inline i32 wrap_openat2(i32 root, const char *name, Access a) {
+inline Data wrap_openat2(i32 root, const char *name, Access a) {
 #if defined(DESCENT_FS_FILE_COMPILE_OPENAT2)
 	struct open_how how = {};
 
 	how.flags = static_cast<u64>(flags(a)) | OPENAT2_REGULAR;
 	how.mode  = static_cast<u64>(mode(a));
 
-	long fd;
+	long result;
 	do {
-		fd = ::syscall(SYS_openat2, root, name, &how, sizeof(how));
-	} while (fd < 0 && errno == EINTR);
+		result = ::syscall(SYS_openat2, root, name, &how, sizeof(how));
+	} while (result < 0 && errno == EINTR);
 
-	return static_cast<i32>(fd);
+	i32 fd = static_cast<i32>(result);
+	if (fd < 0)
+		return {};
+
+	struct stat st;
+	if (::fstat(fd, &st) < 0) {
+		wrap_close(fd);
+		return {};
+	}
+
+	return Data(fd, u64(st.st_dev), u64(st.st_ino), u64(st.st_size));
+
 #else
 	(void) root;
 	(void) name;
@@ -76,33 +95,48 @@ inline i32 wrap_openat2(i32 root, const char *name, Access a) {
 
 	errno = ENOSYS;
 
-	return -1;
+	return {};
 #endif
 }
 
-inline i32 wrap_openat(i32 root, const char *name, Access a) {
+inline Data wrap_openat(i32 root, const char *name, Access a) {
 	i32 fd;
 	do {
 		fd = ::openat(root, name, flags(a) | O_NONBLOCK | O_NOCTTY, mode(a));
 	} while (fd < 0 && errno == EINTR);
 
-	return fd;
+	if (fd < 0)
+		return {};
+
+	struct stat st;
+	if (::fstat(fd, &st) < 0) {
+		wrap_close(fd);
+		return {};
+	}
+
+	if (!S_ISREG(st.st_mode)) {
+		wrap_close(fd);
+		errno = EFTYPE;
+		return {};
+	}
+
+	return Data(fd, u64(st.st_dev), u64(st.st_ino), u64(st.st_size));
 }
 
 inline bool use_openat2() {
 #if defined(DESCENT_FS_FILE_COMPILE_OPENAT2)
-	i32 fd = wrap_openat2(AT_FDCWD, "", Access::EDIT);
-	if (fd >= 0) {
-		close(fd);
+	Data data = wrap_openat2(AT_FDCWD, "", Access::EDIT);
+	if (data.fd >= 0) {
+		wrap_close(data.fd);
 		return false;
 	}
 
 	if (errno != ENOENT)
 		return false;
 
-	fd = wrap_openat2(AT_FDCWD, "/", Access::READ);
-	if (fd >= 0) {
-		close(fd);
+	data = wrap_openat2(AT_FDCWD, "/", Access::READ);
+	if (data.fd >= 0) {
+		wrap_close(data.fd);
 		return false;
 	}
 
@@ -112,30 +146,9 @@ inline bool use_openat2() {
 #endif
 }
 
-inline i32 open(i32 root, const char *name, Access a) {
+inline Data open(i32 root, const char *name, Access a) {
 	static const bool USE_OPENAT2 = use_openat2();
-
-	// Open and verify descriptor in one syscall
-	if (USE_OPENAT2)
-		return wrap_openat2(root, name, a);
-
-	// Open, then verify the resulting descriptor.
-	i32 fd = wrap_openat(root, name, a);
-	if (fd < 0)
-		return -1;
-
-	struct stat st;
-	if (fstat(fd, &st) < 0 || !S_ISREG(st.st_mode)) {
-		close(fd);
-		return -1;
-	}
-
-	if (fcntl(fd, F_SETFL, 0) < 0) {
-		close(fd);
-		return -1;
-	}
-
-	return fd;
+	return (USE_OPENAT2) ? wrap_openat2(root, name, a) : wrap_openat(root, name, a);
 }
 
 }
